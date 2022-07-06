@@ -1,5 +1,6 @@
-import pygame
 import os
+
+import pygame
 
 
 class Player(pygame.sprite.Sprite):
@@ -25,10 +26,22 @@ class Player(pygame.sprite.Sprite):
 
         animation_types = ["idle", "run", "jump"]
         for animation in animation_types:
+            # Get number of frames for this animation
             temp_list = []
-            num_of_frames = len(os.listdir(f'{self.char_type}/animations/{animation}'))
+            try:
+                num_of_frames = len(os.listdir(f'{self.char_type}/animations/{animation}'))
+            except FileNotFoundError:
+                print(f"Warning: {f'{self.char_type}/animations/{animation}'} does not exist. Defaulting to 1 frame.")
+                num_of_frames = 1
+
+            # Load animation images
             for i in range(num_of_frames):
-                img = pygame.image.load(f'{self.char_type}/animations/{animation}/{i}.png')
+                filename = f'{self.char_type}/animations/{animation}/{i}.png'
+                try:
+                    img = pygame.image.load(filename)
+                except FileNotFoundError:
+                    print(f"Warning: Unable to load file {filename}. Defaulting to black square.")
+                    img = pygame.Surface((128, 128))
                 img = pygame.transform.scale(img, (int(img.get_width() * scale), int(img.get_height() * scale)))
                 temp_list.append(img)
             self.animation_list.append(temp_list)
@@ -50,8 +63,7 @@ class Player(pygame.sprite.Sprite):
             self.flip = False
             self.direction = 1
 
-        self.rect.x += dx
-        self.rect.y += dy
+        self.rect.move_ip(dx, dy)
 
     def update_animation(self):
         ANIMATION_COOLDOWN = 100
