@@ -16,6 +16,7 @@ class Player(pygame.sprite.Sprite):
         self.direction = 1
         self.vel_y = 0
         self.jump = False
+        self.in_air = True
         self.flip = False
         self.animation_list = []
         self.frame_index = 0
@@ -28,7 +29,7 @@ class Player(pygame.sprite.Sprite):
 
         self.gravity = 0.75
 
-        animation_types = ["idle", "run"]
+        animation_types = ["idle", "run", "jump"]
         for animation in animation_types:
             # Get number of frames for this animation
             temp_list = []
@@ -40,11 +41,12 @@ class Player(pygame.sprite.Sprite):
                 num_of_frames = 1
 
             # Load animation images TODO: scale sprites to specific image size, so the source image doesn't matter
+            # P.S. I am done with animations f*ck this but yeah
             for i in range(num_of_frames):
                 try:
                     img = pygame.image.load(f'{folder_path}/{animation} ({i}).png')
                 except FileNotFoundError:
-                    print(f"Warning: Unable to load file {folder_path}/{i}.png. Defaulting to black square.")
+                    print(f"Warning: Unable to load file {folder_path}/{animation} ({i}).png. Defaulting to black square.")
                     img = pygame.Surface((100, 100))
                 img = pygame.transform.scale(img, (int(img.get_width() * scale), int(img.get_height() * scale)))
                 temp_list.append(img)
@@ -66,9 +68,10 @@ class Player(pygame.sprite.Sprite):
             dx = self.speed
             self.flip = False
             self.direction = 1
-        if self.jump:
+        if self.jump and not self.in_air:
             self.vel_y = -11
             self.jump = False
+            self.in_air = True
 
         # Apply gravity
         self.vel_y += self.gravity
@@ -80,6 +83,7 @@ class Player(pygame.sprite.Sprite):
         # Rough ground collision check
         if self.rect.bottom + dy > 800:
             dy = 800 - self.rect.bottom
+            self.in_air = False
 
         dy += self.vel_y
 

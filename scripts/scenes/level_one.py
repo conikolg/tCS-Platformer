@@ -46,10 +46,12 @@ class LevelOneScene(BaseScene):
 
         # Move player
         if self.player.alive:
-            if self.player.moving_left or self.player.moving_right:
-                self.player.update_action(1)  # 1: run
+            if self.player.in_air:
+                self.player.update_action(2)    # 2: jump
+            elif self.player.moving_left or self.player.moving_right:
+                self.player.update_action(1)    # 1: run
             else:
-                self.player.update_action(0)  # 0: idle
+                self.player.update_action(0)    # 0: idle
             self.player.move(self.player.moving_left, self.player.moving_right)
 
     def render(self, screen: pygame.Surface):
