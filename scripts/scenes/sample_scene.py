@@ -1,7 +1,7 @@
 import pygame
 
-from player.sample_player import Player
-from scenes.base_scene import BaseScene
+from scripts.player.sample_player import Player
+from scripts.scenes.base_scene import BaseScene
 
 
 class SampleScene(BaseScene):

@@ -28,19 +28,19 @@ class Player(pygame.sprite.Sprite):
         for animation in animation_types:
             # Get number of frames for this animation
             temp_list = []
+            folder_path = f'assets/{self.char_type}/animations/{animation}'
             try:
-                num_of_frames = len(os.listdir(f'{self.char_type}/animations/{animation}'))
+                num_of_frames = len(os.listdir(folder_path))
             except FileNotFoundError:
-                print(f"Warning: {f'{self.char_type}/animations/{animation}'} does not exist. Defaulting to 1 frame.")
+                print(f"Warning: {folder_path} does not exist. Defaulting to 1 frame.")
                 num_of_frames = 1
 
             # Load animation images
             for i in range(num_of_frames):
-                filename = f'{self.char_type}/animations/{animation}/{i}.png'
                 try:
-                    img = pygame.image.load(filename)
+                    img = pygame.image.load(f'{folder_path}/{i}.png')
                 except FileNotFoundError:
-                    print(f"Warning: Unable to load file {filename}. Defaulting to black square.")
+                    print(f"Warning: Unable to load file {folder_path}/{i}.png. Defaulting to black square.")
                     img = pygame.Surface((128, 128))
                 img = pygame.transform.scale(img, (int(img.get_width() * scale), int(img.get_height() * scale)))
                 temp_list.append(img)

@@ -1,8 +1,8 @@
 import pygame
 
-from scenes.base_scene import BaseScene
-from scenes.sample_scene import SampleScene
-from util.button import Button
+from scripts.scenes.base_scene import BaseScene
+from scripts.scenes.sample_scene import SampleScene
+from scripts.util.button import Button
 
 
 class TitleScene(BaseScene):

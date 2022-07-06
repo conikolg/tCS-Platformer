@@ -1,4 +1,4 @@
-from scenes.sample_scene import SampleScene
+from scripts.scenes.sample_scene import SampleScene
 
 
 class SceneManager:
