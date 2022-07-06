@@ -1,6 +1,6 @@
 import pygame
 
-from scenes.sample_scene import SampleScene
+from scenes.title_scene import TitleScene
 from scenes.scene_manager import SceneManager
 
 
@@ -13,7 +13,7 @@ def main():
     running = True
 
     # Control for this game
-    scene_manager = SceneManager(initial_scene=SampleScene())
+    scene_manager = SceneManager(initial_scene=TitleScene())
 
     # Main game loop
     while running:
