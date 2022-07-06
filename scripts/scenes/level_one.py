@@ -9,7 +9,7 @@ class LevelOneScene(BaseScene):
     def __init__(self):
         super().__init__()
 
-        self.player = Player("player", 50, 650, 1, 6)
+        self.player = Player("player", 50, 650, 1, 10)
         self.platform = pygame.rect.Rect(-300, 200, 600, 50)
         self.ground = pygame.rect.Rect(-1000, 700, 2000, 50)
 

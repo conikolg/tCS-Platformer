@@ -23,7 +23,7 @@ class Button:
         self.hover_color = (150, 150, 150) if hover_color is None else hover_color
         self.shape = "rect" if shape is None else shape
         self.outline_width = 2 if outline_width is None else outline_width
-        self.text_font = pygame.font.Font(None, 24) if text_font is None else text_font
+        self.text_font = pygame.font.Font("assets/dogicapixelbold.ttf", 24) if text_font is None else text_font
         self.on_click_fn = None if on_click_fn is None else on_click_fn
 
         self._is_hovered = False

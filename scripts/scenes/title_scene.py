@@ -32,7 +32,7 @@ class TitleScene(BaseScene):
         screen.fill((255, 255, 255))
 
         # Title
-        title_font = pygame.font.Font(None, 48)
+        title_font = pygame.font.Font("assets/dogicapixelbold.ttf", 48)
         title_text = title_font.render("Platformer", True, (0, 0, 0))
         screen.blit(title_text, dest=(
             screen.get_width() / 2 - title_text.get_width() / 2,
