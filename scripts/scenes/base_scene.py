@@ -1,13 +1,16 @@
+import abc
+
 import pygame
 
 
-class BaseScene:
+class BaseScene(abc.ABC):
     def __init__(self):
         """
         Executes when the Scene object is instantiated for the first time.
         """
         self.scene_manager = None
 
+    @abc.abstractmethod
     def handle_events(self, events: list[pygame.event.Event]):
         """
         Allow the scene to process any or all of the events given.
@@ -17,8 +20,9 @@ class BaseScene:
         :return: None
         """
 
-        raise NotImplementedError
+        pass
 
+    @abc.abstractmethod
     def update(self):
         """
         Allow the scene to do typical frame-by-frame computation and logic as needed.
@@ -27,8 +31,9 @@ class BaseScene:
         :return: None
         """
 
-        raise NotImplementedError
+        pass
 
+    @abc.abstractmethod
     def render(self, screen: pygame.Surface):
         """
         Allow the scene to display what it needs to on the screen.
@@ -39,4 +44,4 @@ class BaseScene:
         :return: None
         """
 
-        raise NotImplementedError
+        pass
