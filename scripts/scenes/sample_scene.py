@@ -24,6 +24,7 @@ class SampleScene(BaseScene):
         # Set player movement boolean to key conditional
         self.player.moving_right = keys[pygame.K_RIGHT] or keys[pygame.K_d]
         self.player.moving_left = keys[pygame.K_LEFT] or keys[pygame.K_a]
+        self.player.jump = keys[pygame.K_w] or keys[pygame.K_SPACE] and self.player.alive
 
         # Move player
         if self.player.alive:

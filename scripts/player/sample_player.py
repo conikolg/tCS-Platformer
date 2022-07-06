@@ -14,6 +14,8 @@ class Player(pygame.sprite.Sprite):
         self.char_type = char_type
         self.speed = speed
         self.direction = 1
+        self.vel_y = 0
+        self.jump = False
         self.flip = False
         self.animation_list = []
         self.frame_index = 0
@@ -23,6 +25,8 @@ class Player(pygame.sprite.Sprite):
         # Player movement
         self.moving_left = False
         self.moving_right = False
+
+        self.gravity = 0.75
 
         animation_types = ["idle", "run"]
         for animation in animation_types:
@@ -62,6 +66,22 @@ class Player(pygame.sprite.Sprite):
             dx = self.speed
             self.flip = False
             self.direction = 1
+        if self.jump:
+            self.vel_y = -11
+            self.jump = False
+
+        # Apply gravity
+        self.vel_y += self.gravity
+
+        # Terminal velocity check
+        if self.vel_y > 20:
+            self.vel_y = 20
+
+        # Rough ground collision check
+        if self.rect.bottom + dy > 800:
+            dy = 800 - self.rect.bottom
+
+        dy += self.vel_y
 
         self.rect.move_ip(dx, dy)
 
