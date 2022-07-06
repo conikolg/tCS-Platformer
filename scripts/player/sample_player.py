@@ -35,13 +35,13 @@ class Player(pygame.sprite.Sprite):
                 print(f"Warning: {folder_path} does not exist. Defaulting to 1 frame.")
                 num_of_frames = 1
 
-            # Load animation images
+            # Load animation images TODO: scale sprites to specific image size, so the source image doesn't matter
             for i in range(num_of_frames):
                 try:
                     img = pygame.image.load(f'{folder_path}/{animation} ({i}).png')
                 except FileNotFoundError:
                     print(f"Warning: Unable to load file {folder_path}/{i}.png. Defaulting to black square.")
-                    img = pygame.Surface((128, 128))
+                    img = pygame.Surface((100, 100))
                 img = pygame.transform.scale(img, (int(img.get_width() * scale), int(img.get_height() * scale)))
                 temp_list.append(img)
             self.animation_list.append(temp_list)
@@ -81,5 +81,10 @@ class Player(pygame.sprite.Sprite):
             self.frame_index = 0
             self.update_time = pygame.time.get_ticks()
 
-    def draw(self, screen):
-        screen.blit(pygame.transform.flip(self.image, self.flip, False), self.rect)
+    def draw(self, screen: pygame.Surface, camera_offset: pygame.math.Vector2 = None, show_bounding_box: bool = False):
+        if camera_offset is None:
+            camera_offset = pygame.math.Vector2(0, 0)
+
+        screen.blit(source=pygame.transform.flip(self.image, self.flip, False), dest=self.rect.move(camera_offset))
+        if show_bounding_box:
+            pygame.draw.rect(surface=screen, color=(255, 0, 0), rect=self.rect.move(camera_offset), width=1)

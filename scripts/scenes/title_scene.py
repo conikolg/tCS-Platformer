@@ -1,7 +1,7 @@
 import pygame
 
 from scripts.scenes.base_scene import BaseScene
-from scripts.scenes.sample_scene import SampleScene
+from scripts.scenes.level_one import LevelOneScene
 from scripts.util.button import Button
 
 
@@ -12,7 +12,7 @@ class TitleScene(BaseScene):
         self.play_button = Button(
             text="Play",
             rect=(580, 400, 120, 40),
-            on_click_fn=lambda: self.scene_manager.go_to(SampleScene())
+            on_click_fn=lambda: self.scene_manager.go_to(LevelOneScene())
         )
         self.quit_button = Button(
             text="Quit",
