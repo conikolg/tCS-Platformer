@@ -24,7 +24,7 @@ class Player(pygame.sprite.Sprite):
         self.moving_left = False
         self.moving_right = False
 
-        animation_types = ["idle", "run", "jump"]
+        animation_types = ["idle", "run"]
         for animation in animation_types:
             # Get number of frames for this animation
             temp_list = []
@@ -38,7 +38,7 @@ class Player(pygame.sprite.Sprite):
             # Load animation images
             for i in range(num_of_frames):
                 try:
-                    img = pygame.image.load(f'{folder_path}/{i}.png')
+                    img = pygame.image.load(f'{folder_path}/{animation} ({i}).png')
                 except FileNotFoundError:
                     print(f"Warning: Unable to load file {folder_path}/{i}.png. Defaulting to black square.")
                     img = pygame.Surface((128, 128))

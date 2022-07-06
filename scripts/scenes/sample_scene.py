@@ -8,7 +8,7 @@ class SampleScene(BaseScene):
     def __init__(self):
         super().__init__()
 
-        self.player = Player("player", 100, 100, 1, 5)
+        self.player = Player("player", 100, 100, 1, 6)
 
     def handle_events(self, events: list[pygame.event.Event]):
         pass
