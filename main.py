@@ -1,7 +1,7 @@
 import pygame
 
-from scenes.title_scene import TitleScene
-from scenes.scene_manager import SceneManager
+from scripts.scenes.title_scene import TitleScene
+from scripts.scenes.scene_manager import SceneManager
 
 
 def main():
