@@ -3,11 +3,14 @@ import pygame
 from scripts.scenes.title_scene import TitleScene
 from scripts.scenes.scene_manager import SceneManager
 
+SCREEN_WIDTH = 1280
+SCREEN_HEIGHT = 720
+
 
 def main():
     # Control for pygame itself
     pygame.init()
-    screen = pygame.display.set_mode((1280, 720))
+    screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     pygame.display.set_caption("theCoderSchool Frisco Coaches' Platformer Game")
     clock = pygame.time.Clock()
     running = True

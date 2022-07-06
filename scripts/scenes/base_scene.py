@@ -45,3 +45,4 @@ class BaseScene(abc.ABC):
         """
 
         pass
+

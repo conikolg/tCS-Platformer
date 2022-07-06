@@ -16,6 +16,16 @@ class LevelOneScene(BaseScene):
         self.camera = Camera(behavior=FollowTarget(target=self.player),
                              constant=pygame.math.Vector2(-640 + self.player.rect.w / 2, -self.player.rect.top))
 
+        self.bg_scroll = 0
+        self.sky_img = pygame.image.load("assets/scenery/5.png").convert_alpha()
+        self.sky_img = pygame.transform.scale(self.sky_img, (1280, 720))
+        self.planets_img = pygame.image.load("assets/scenery/4.png").convert_alpha()
+        self.planets_img = pygame.transform.scale(self.planets_img, (1280, 720))
+        self.mountain_img = pygame.image.load("assets/scenery/3.png").convert_alpha()
+        self.mountain_img = pygame.transform.scale(self.mountain_img, (1280, 720))
+        self.hills_img = pygame.image.load("assets/scenery/2.png").convert_alpha()
+        self.hills_img = pygame.transform.scale(self.hills_img, (1280, 720))
+
     def handle_events(self, events: list[pygame.event.Event]):
         """
         Allows the player to move up and down, to help test the camera system.
@@ -47,11 +57,11 @@ class LevelOneScene(BaseScene):
         # Move player
         if self.player.alive:
             if self.player.in_air:
-                self.player.update_action(2)    # 2: jump
+                self.player.update_action(2)  # 2: jump
             elif self.player.moving_left or self.player.moving_right:
-                self.player.update_action(1)    # 1: run
+                self.player.update_action(1)  # 1: run
             else:
-                self.player.update_action(0)    # 0: idle
+                self.player.update_action(0)  # 0: idle
             self.player.move(self.player.moving_left, self.player.moving_right)
 
     def render(self, screen: pygame.Surface):
@@ -67,6 +77,14 @@ class LevelOneScene(BaseScene):
 
         # White background
         screen.fill((255, 255, 255))
+
+        width = self.sky_img.get_width()
+        w, h = screen.get_size()
+        for x in range(5):
+            screen.blit(self.sky_img, ((x * width) - self.bg_scroll * 0.5, 0))
+            screen.blit(self.planets_img, ((x * width) - self.bg_scroll * 0.6, 0))
+            screen.blit(self.mountain_img, ((x * width) - self.bg_scroll * 0.7, 0))
+            screen.blit(self.hills_img, ((x * width) - self.bg_scroll * 0.8, 0))
 
         # Move the camera
         self.camera.scroll()
