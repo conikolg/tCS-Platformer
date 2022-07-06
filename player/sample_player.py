@@ -36,11 +36,11 @@ class Player(pygame.sprite.Sprite):
 
             # Load animation images
             for i in range(num_of_frames):
-                filename = f'{self.char_type}/animations/{animation}/{i}.png'
+                filename = f'{self.char_type}/animations/{animation}/{i}.gif'
                 try:
                     img = pygame.image.load(filename)
                 except FileNotFoundError:
-                    print(f"Warning: Unable to load file {filename}. Defaulting to black square.")
+                    print(f"Warn![](../../../Downloads/robot/0.gif)![](../../../Downloads/robot/1.gif)![](../../../Downloads/robot/2.gif)![](../../../Downloads/robot/3.gif)![](../../../Downloads/robot/4.gif)![](../../../Downloads/robot/5.gif)![](../../../Downloads/robot/6.gif)![](../../../Downloads/robot/7.gif)![](../../../Downloads/robot/8.gif)![](../../../Downloads/robot/9.gif)![](../../../Downloads/robot/10.gif)![](../../../Downloads/robot/11.gif)![](../../../Downloads/robot/12.gif)![](../../../Downloads/robot/13.gif)![](../../../Downloads/robot/14.gif)![](../../../Downloads/robot/15.gif)![](../../../Downloads/robot/16.gif)![](../../../Downloads/robot/17.gif)![](../../../Downloads/robot/18.gif)![](../../../Downloads/robot/19.gif)![](../../../Downloads/robot/20.gif)![](../../../Downloads/robot/21.gif)![](../../../Downloads/robot/22.gif)![](../../../Downloads/robot/23.gif)![](../../../Downloads/robot/24.gif)![](../../../Downloads/robot/25.gif)![](../../../Downloads/robot/26.gif)![](../../../Downloads/robot/27.gif)![](../../../Downloads/robot/28.gif)![](../../../Downloads/robot/29.gif)![](../../../Downloads/robot/30.gif)![](../../../Downloads/robot/31.gif)![](../../../Downloads/robot/32.gif)![](../../../Downloads/robot/33.gif)![](../../../Downloads/robot/34.gif)![](../../../Downloads/robot/35.gif)![](../../../Downloads/robot/36.gif)![](../../../Downloads/robot/37.gif)![](../../../Downloads/robot/38.gif)![](../../../Downloads/robot/39.gif)![](../../../Downloads/robot/40.gif)![](../../../Downloads/robot/41.gif)![](../../../Downloads/robot/42.gif)![](../../../Downloads/robot/43.gif)![](../../../Downloads/robot/44.gif)![](../../../Downloads/robot/45.gif)![](../../../Downloads/robot/46.gif)![](../../../Downloads/robot/47.gif)![](../../../Downloads/robot/48.gif)ing: Unable to load file {filename}. Defaulting to black square.")
                     img = pygame.Surface((128, 128))
                 img = pygame.transform.scale(img, (int(img.get_width() * scale), int(img.get_height() * scale)))
                 temp_list.append(img)
