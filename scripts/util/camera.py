@@ -25,7 +25,7 @@ class FollowTarget(CameraBehavior):
 
     def scroll(self):
         self.camera.offset.x = self.target.rect.x + self.camera.constant.x
-        self.camera.offset.y = self.target.rect.y + self.camera.constant.y
+        # self.camera.offset.y = self.target.rect.y + self.camera.constant.y
 
 
 class BoundedFollowTarget(CameraBehavior):

@@ -1,4 +1,6 @@
 import pygame
+from collections import defaultdict
+from pathlib import Path
 
 # from scripts.player.sample_player import Player
 from scripts.player.player import Player
@@ -20,6 +22,7 @@ class LevelOneScene(BaseScene):
                              constant=pygame.math.Vector2(-640 + self.player.rect.w / 2, -self.player.rect.top))
 
         self.bg_scroll = 0
+        # self.scenery: list[pygame.type.Surface] = self.load_scenery(size=(1280, 720))
         self.sky_img = pygame.image.load("assets/scenery/5.png").convert_alpha()
         self.sky_img = pygame.transform.scale(self.sky_img, (1280, 720))
         self.planets_img = pygame.image.load("assets/scenery/4.png").convert_alpha()
@@ -28,6 +31,10 @@ class LevelOneScene(BaseScene):
         self.mountain_img = pygame.transform.scale(self.mountain_img, (1280, 720))
         self.hills_img = pygame.image.load("assets/scenery/2.png").convert_alpha()
         self.hills_img = pygame.transform.scale(self.hills_img, (1280, 720))
+        self.water_img = pygame.image.load("assets/scenery/1.png").convert_alpha()
+        self.water_img = pygame.transform.scale(self.water_img, (1280, 720))
+        self.ground_img = pygame.image.load("assets/scenery/0.png").convert_alpha()
+        self.ground_img = pygame.transform.scale(self.ground_img, (1280, 720))
 
     def handle_events(self, events: list[pygame.event.Event]):
         """
@@ -46,6 +53,22 @@ class LevelOneScene(BaseScene):
 
         self.player.update()
 
+    def load_scenery(self, size: tuple) -> list[str]:
+        # Create container for scenery
+        scenery: list[pygame.type.Surface] = list()
+        # Start at content root
+        root_scenery_dir = Path("assets/scenery")
+
+        for layer in root_scenery_dir.iterdir():
+            # Load the image
+            img: pygame.Surface = pygame.image.load(layer).convert_alpha()
+            # Scale it
+            img = pygame.transform.scale(surface=img, size=size)
+            # Add to scenery list
+            scenery.append(img)
+
+        return scenery
+
     def render(self, screen: pygame.Surface):
         """
         Clears the screen, then draws a floating platform, the ground, and the player.
@@ -60,13 +83,18 @@ class LevelOneScene(BaseScene):
         # White background
         screen.fill((255, 255, 255))
 
-        width = self.sky_img.get_width()
         w, h = screen.get_size()
+        width = 1280
+        ds = 0.5
         for x in range(5):
-            screen.blit(self.sky_img, ((x * width) - self.bg_scroll * 0.5, 0))
-            screen.blit(self.planets_img, ((x * width) - self.bg_scroll * 0.6, 0))
-            screen.blit(self.mountain_img, ((x * width) - self.bg_scroll * 0.7, 0))
-            screen.blit(self.hills_img, ((x * width) - self.bg_scroll * 0.8, 0))
+            # for layer in range(len(self.scenery), 0, -1):
+            #     screen.blit(self.scenery[layer-1], ((x * 1280) - self.camera.offset.x * x * 0.1, 0))
+            screen.blit(self.sky_img, ((x * width) - self.camera.offset.x * 0.5, 0))
+            screen.blit(self.planets_img, ((x * width) - self.camera.offset.x * 0.6, 0))
+            screen.blit(self.mountain_img, ((x * width) - self.camera.offset.x * 0.7, 0))
+            screen.blit(self.hills_img, ((x * width) - self.camera.offset.x * 0.8, 0))
+            screen.blit(self.water_img, ((x * width) - self.camera.offset.x * 0.9, 0))
+            screen.blit(self.ground_img, ((x * width) - self.camera.offset.x * 1.0, 0))
 
         # Move the camera
         self.camera.scroll()

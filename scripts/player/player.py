@@ -57,8 +57,8 @@ class Player(pygame.sprite.Sprite):
         self.y_speed -= self.gravity
         self.rect.move_ip(0, -self.y_speed)
         # Collided with "ground"?
-        if self.rect.bottom >= 720:
-            self.rect.bottom = 720
+        if self.rect.bottom >= 650:
+            self.rect.bottom = 650
             self._is_grounded = True
 
         # Update animation state
@@ -98,13 +98,14 @@ class Player(pygame.sprite.Sprite):
                 # Load the frame
                 img: pygame.Surface = pygame.image.load(frame)
                 # Scale it
-                img = pygame.transform.smoothscale(surface=img, size=size)
+                # smoothscale or scale? scale makes the picture look better imo
+                img = pygame.transform.scale(surface=img, size=size)
                 # Add it to big animation dictionary
                 animations[animation_type_dir.name].append(img)
 
         return animations
 
-    def draw(self, screen: pygame.Surface, camera_offset: pygame.math.Vector2 = None, show_bounding_box: bool = False):
+    def draw(self, screen: pygame.Surface, camera_offset: pygame.math.Vector2 = None, show_bounding_box: bool = True):
         if camera_offset is None:
             camera_offset = pygame.math.Vector2(0, 0)
 
