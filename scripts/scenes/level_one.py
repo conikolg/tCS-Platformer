@@ -13,7 +13,7 @@ class LevelOneScene(BaseScene):
         super().__init__()
 
         # self.player = Player("player", 50, 650, 1, 10)
-        self.player = Player("player", rect=pygame.rect.Rect(50, 650, 100, 100))
+        self.player = Player("player", rect=pygame.rect.Rect(50, 550, 100, 100))
         self.platform = pygame.rect.Rect(-300, 200, 600, 50)
         self.ground = pygame.rect.Rect(-1000, 700, 2000, 50)
 
@@ -80,9 +80,15 @@ class LevelOneScene(BaseScene):
         # White background
         screen.fill((255, 255, 255))
 
+        # Iterate through scenery dict and display
         for x in range(self.length):
             for layer, ds in self.scenery.items():
-                screen.blit(layer, ((x * self.camera.DISPLAY_W) - self.camera.offset.x * ds, 0))
+                # In order to account for vertical parallax, the layers have to be displayed at a negative offset
+                # Calculate this offset by multiplying the delta scroll by the player height and subtract the
+                # difference between the camera offset y times the delta scroll and the player height
+                # TODO: start each layer in the negative x direction and bound camera from moving outside of level limit
+                screen.blit(layer, ((x * self.camera.DISPLAY_W) - self.camera.offset.x * ds,
+                                    (self.player.rect.h * ds) - self.camera.offset.y * ds - self.player.rect.h))
 
         # Move the camera
         self.camera.scroll()
