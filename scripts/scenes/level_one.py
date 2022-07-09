@@ -1,5 +1,4 @@
 import pygame
-from collections import defaultdict
 from pathlib import Path
 
 # from scripts.player.sample_player import Player
@@ -100,3 +99,5 @@ class LevelOneScene(BaseScene):
         # Draw player and update sprite animation
         self.player.update_animation()
         self.player.draw(screen=screen, camera_offset=-self.camera.offset)
+
+        self.player.bullet_group.draw(screen)
