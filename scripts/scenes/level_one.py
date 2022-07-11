@@ -45,8 +45,9 @@ class LevelOneScene(BaseScene):
         # Update player
         self.player.update()
 
-        # Update bullet group
-        self.player.bullet_group.update()
+        # Update bullets
+        self.player.bullet_group.update(self.player.rect.x + self.camera.DISPLAY_W / 2,
+                                        self.player.rect.x - self.camera.DISPLAY_W / 2)
 
     def load_scenery(self, size: tuple) -> dict[pygame.Surface, float]:
         # Create container for scenery

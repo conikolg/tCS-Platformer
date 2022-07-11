@@ -11,10 +11,9 @@ class Bullet(pygame.sprite.Sprite):
         self.rect.center = (x, y)
         self.direction = direction
 
-    def update(self):
+    def update(self, right_bound, left_bound):
         self.rect.x += self.speed * self.direction
-        # TODO: replace right and left bounds for camera
-        if self.rect.right < 0 or self.rect.left > 640:
+        if self.rect.right < left_bound or self.rect.left > right_bound:
             self.kill()
 
     def draw(self, screen: pygame.Surface, camera_offset: pygame.math.Vector2 = None, show_bounding_box: bool = True):

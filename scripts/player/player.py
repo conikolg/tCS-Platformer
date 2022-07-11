@@ -8,6 +8,9 @@ import pygame
 class Player(pygame.sprite.Sprite):
     """
     Class for initializing a player and controller.
+
+    :param char_type: A str to indicate which type of character is to be displayed
+    :param rect: A rect to display the player image
     """
 
     def __init__(self, char_type: str, rect: pygame.rect.Rect):
@@ -39,7 +42,7 @@ class Player(pygame.sprite.Sprite):
                 if event.key in [pygame.K_w, pygame.K_UP, pygame.K_SPACE]:
                     if self._is_grounded:
                         self._jump()
-                if event.key in [pygame.K_f]:
+                if event.key in [pygame.K_v]:
                     self._shoot()
 
     def _jump(self):
@@ -85,8 +88,6 @@ class Player(pygame.sprite.Sprite):
             self.set_animation("run")
         else:
             self.set_animation("idle")
-
-
 
     def set_animation(self, animation: str):
         if self.current_animation_frame[0] == animation:
