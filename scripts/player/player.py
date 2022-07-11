@@ -51,7 +51,8 @@ class Player(pygame.sprite.Sprite):
         # why bullet no start at player x, y?
         # bullets should not move relative to scene
         # plz help nikhil :(
-        bullet = Bullet(*self.center, self.horizontal_direction)
+        # UPDATE: I DID IT SORTA YAY
+        bullet = Bullet(self.rect.centerx, self.rect.centery, self.horizontal_direction)
         self.bullet_group.add(bullet)
 
     def update(self) -> None:
@@ -85,8 +86,7 @@ class Player(pygame.sprite.Sprite):
         else:
             self.set_animation("idle")
 
-        # Update bullet group
-        self.bullet_group.update()
+
 
     def set_animation(self, animation: str):
         if self.current_animation_frame[0] == animation:
@@ -131,10 +131,6 @@ class Player(pygame.sprite.Sprite):
         self.update_animation()
         screen.blit(source=pygame.transform.flip(self.image, self.horizontal_direction == - 1, False),
                     dest=self.rect.move(camera_offset))
-
-
-        # Draw bullet group
-        self.bullet_group.draw(screen)
 
         if show_bounding_box:
             pygame.draw.rect(surface=screen, color=(255, 0, 0), rect=self.rect.move(camera_offset), width=1)

@@ -42,7 +42,11 @@ class LevelOneScene(BaseScene):
         Moves the player based on arrow keys or WASD keys pressed.
         """
 
+        # Update player
         self.player.update()
+
+        # Update bullet group
+        self.player.bullet_group.update()
 
     def load_scenery(self, size: tuple) -> dict[pygame.Surface, float]:
         # Create container for scenery
@@ -100,4 +104,6 @@ class LevelOneScene(BaseScene):
         self.player.update_animation()
         self.player.draw(screen=screen, camera_offset=-self.camera.offset)
 
-        self.player.bullet_group.draw(screen)
+        if self.player.bullet_group:
+            for bullet in self.player.bullet_group:
+                bullet.draw(screen, camera_offset=-self.camera.offset)

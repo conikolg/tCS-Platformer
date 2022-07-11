@@ -12,7 +12,17 @@ class Bullet(pygame.sprite.Sprite):
         self.direction = direction
 
     def update(self):
-        self.rect.x += (self.direction * self.speed)
+        self.rect.x += self.speed * self.direction
         # TODO: replace right and left bounds for camera
         if self.rect.right < 0 or self.rect.left > 640:
             self.kill()
+
+    def draw(self, screen: pygame.Surface, camera_offset: pygame.math.Vector2 = None, show_bounding_box: bool = True):
+        if camera_offset is None:
+            camera_offset = pygame.math.Vector2(*self.rect.center)
+
+        screen.blit(source=pygame.transform.flip(self.image, self.direction == -1, False),
+                    dest=self.rect.move(camera_offset))
+
+        if show_bounding_box:
+            pygame.draw.rect(surface=screen, color=(255, 0, 0), rect=self.rect.move(camera_offset), width=1)
