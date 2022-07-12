@@ -29,7 +29,7 @@ class FollowTarget(CameraBehavior):
 
 
 class BoundedFollowTarget(CameraBehavior):
-    def __init__(self, target, limits: tuple):
+    def __init__(self, target, horizontal_limits: tuple, vertical_limits: tuple):
         """
         Scroll behavior ensures that the offsets are calculated relative to the target's position, but
         horizontal scrolling cannot move past a lower and/or upper limit.
@@ -39,14 +39,19 @@ class BoundedFollowTarget(CameraBehavior):
         """
 
         CameraBehavior.__init__(self, target)
-        self.limits = limits
+        self.horizontal_limits = horizontal_limits
+        self.vertical_limits = vertical_limits
 
+    # Add dead zone for player x and y?
     def scroll(self):
         self.camera.offset.x = self.target.rect.x + self.camera.constant.x
         self.camera.offset.y = self.target.rect.y + self.camera.constant.y
 
-        self.camera.offset.x = max(self.limits[0], self.camera.offset.x)
-        self.camera.offset.x = min(self.camera.offset.x, self.limits[1] - self.camera.DISPLAY_W)
+        self.camera.offset.x = max(self.horizontal_limits[0], self.camera.offset.x)
+        self.camera.offset.x = min(self.camera.offset.x, self.horizontal_limits[1] - self.camera.DISPLAY_W)
+
+        self.camera.offset.y = max(self.vertical_limits[0], self.camera.offset.y)
+        self.camera.offset.y = min(self.camera.offset.y, self.horizontal_limits[1] - self.camera.DISPLAY_H)
 
 
 class AutoScroll(CameraBehavior):

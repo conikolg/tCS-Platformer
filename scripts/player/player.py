@@ -42,7 +42,7 @@ class Player(pygame.sprite.Sprite):
                 if event.key in [pygame.K_w, pygame.K_UP, pygame.K_SPACE]:
                     if self._is_grounded:
                         self._jump()
-                if event.key in [pygame.K_v]:
+                if event.key in [pygame.K_f]:
                     self._shoot()
 
     def _jump(self):

@@ -4,7 +4,7 @@ from pathlib import Path
 # from scripts.player.sample_player import Player
 from scripts.player.player import Player
 from scripts.scenes.base_scene import BaseScene
-from scripts.util.camera import Camera, FollowTarget
+from scripts.util.camera import Camera, BoundedFollowTarget
 
 
 class LevelOneScene(BaseScene):
@@ -12,14 +12,16 @@ class LevelOneScene(BaseScene):
         super().__init__()
 
         # self.player = Player("player", 50, 650, 1, 10)
-        self.player = Player("player", rect=pygame.rect.Rect(50, 550, 100, 100))
+        self.player = Player("player", rect=pygame.rect.Rect(600, 550, 100, 100))
         self.platform = pygame.rect.Rect(-300, 200, 600, 50)
         self.ground = pygame.rect.Rect(-1000, 700, 2000, 50)
 
         # Length of level used in render method
         self.length = 5
 
-        self.camera = Camera(behavior=FollowTarget(target=self.player),
+        self.camera = Camera(behavior=BoundedFollowTarget(target=self.player,
+                                                          horizontal_limits=(0, 6000),
+                                                          vertical_limits=(-100, 0)),
                              # TODO: compensate for weirdness with bottom being cut-off on Macs
                              constant=pygame.math.Vector2(-640 + self.player.rect.w / 2, -self.player.rect.top))
 
@@ -98,8 +100,8 @@ class LevelOneScene(BaseScene):
         self.camera.scroll()
 
         # Draw static objects
-        pygame.draw.rect(screen, (0, 0, 0), self.platform.move(*-self.camera.offset))
-        pygame.draw.rect(screen, (0, 0, 0), self.ground.move(*-self.camera.offset))
+        # pygame.draw.rect(screen, (0, 0, 0), self.platform.move(*-self.camera.offset))
+        # pygame.draw.rect(screen, (0, 0, 0), self.ground.move(*-self.camera.offset))
 
         # Draw player and update sprite animation
         self.player.update_animation()
