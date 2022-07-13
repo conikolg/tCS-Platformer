@@ -37,6 +37,23 @@ class Player(pygame.sprite.Sprite):
         self.bullet_group = pygame.sprite.Group()
 
     @property
+    def is_grounded(self) -> bool:
+        """ Returns True if the player is grounded (not falling), False otherwise. """
+        return self._is_grounded
+
+    @is_grounded.setter
+    def is_grounded(self, grounded: bool):
+        """
+        Makes the player grounded (no longer falling) and sets y_speed to zero.
+
+        :param grounded: A bool - True if the player is grounded on something, False otherwise.
+        :return: None
+        """
+        self._is_grounded = grounded
+        if self._is_grounded:
+            self.y_speed = 0
+
+    @property
     def center(self) -> tuple:
         """ Returns the center of the player's hitbox. """
         return self.rect.center
@@ -90,7 +107,7 @@ class Player(pygame.sprite.Sprite):
         # Collided with "ground"?
         if self.rect.bottom >= 650:
             self.rect.bottom = 650
-            self._is_grounded = True
+            self.is_grounded = True
 
         # Update animation state
         if not self._is_grounded:
