@@ -1,8 +1,9 @@
 from collections import defaultdict
 from pathlib import Path
-from scripts.bullet.bullet import Bullet
 
 import pygame
+
+from scripts.bullet.bullet import Bullet
 
 
 class Player(pygame.sprite.Sprite):
@@ -18,7 +19,6 @@ class Player(pygame.sprite.Sprite):
 
         self.char_type: str = char_type
         self.rect: pygame.rect.Rect = rect
-        self.center = (self.rect.centerx, self.rect.centery)
 
         self.animations: dict[str, list] = self.load_animations(size=(self.rect.w, self.rect.h))
         self.health: float = 100.0
@@ -36,6 +36,21 @@ class Player(pygame.sprite.Sprite):
 
         self.bullet_group = pygame.sprite.Group()
 
+    @property
+    def center(self) -> tuple:
+        """ Returns the center of the player's hitbox. """
+        return self.rect.center
+
+    @center.setter
+    def center(self, location: tuple):
+        """
+        Sets the center of the player's hitbox to the given location.
+
+        :param location: A tuple representing the new location of the player's hitbox's center.
+        :return: None
+        """
+        self.rect.center = location
+
     def handle_events(self, events: list[pygame.event.Event]):
         for event in events:
             if event.type == pygame.KEYDOWN:
@@ -51,12 +66,8 @@ class Player(pygame.sprite.Sprite):
         self.set_animation("jump")
 
     def _shoot(self):
-        # why bullet no start at player x, y?
-        # bullets should not move relative to scene
-        # plz help nikhil :(
-        # UPDATE: I DID IT SORTA YAY
-        bullet = Bullet(self.rect.centerx, self.rect.centery, self.horizontal_direction)
-        self.bullet_group.add(bullet)
+        self.bullet_group.add(Bullet(location=(self.rect.centerx, self.rect.centery),
+                                     direction=pygame.math.Vector2(1, 0) * self.horizontal_direction))
 
     def update(self) -> None:
         keys = pygame.key.get_pressed()
@@ -96,9 +107,9 @@ class Player(pygame.sprite.Sprite):
         self.current_animation_frame = [animation, 0]
 
     def update_animation(self):
-        ANIMATION_COOLDOWN = 100
+        animation_cooldown = 100
         self.image = self.animations[self.current_animation_frame[0]][self.current_animation_frame[1]]
-        if pygame.time.get_ticks() - self.update_time > ANIMATION_COOLDOWN:
+        if pygame.time.get_ticks() - self.update_time > animation_cooldown:
             self.update_time = pygame.time.get_ticks()
             self.current_animation_frame[1] += 1
 
@@ -118,7 +129,7 @@ class Player(pygame.sprite.Sprite):
                 # Load the frame
                 img: pygame.Surface = pygame.image.load(frame).convert_alpha()
                 # Scale it
-                # smoothscale or scale? scale makes the picture look better imo
+                # TODO: smoothscale or scale? scale makes the picture look better imo
                 img = pygame.transform.scale(surface=img, size=size)
                 # Add it to big animation dictionary
                 animations[animation_type_dir.name].append(img)
@@ -130,7 +141,7 @@ class Player(pygame.sprite.Sprite):
             camera_offset = pygame.math.Vector2(0, 0)
 
         self.update_animation()
-        screen.blit(source=pygame.transform.flip(self.image, self.horizontal_direction == - 1, False),
+        screen.blit(source=pygame.transform.flip(self.image, self.horizontal_direction == -1, False),
                     dest=self.rect.move(camera_offset))
 
         if show_bounding_box:

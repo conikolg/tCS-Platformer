@@ -35,7 +35,8 @@ class BoundedFollowTarget(CameraBehavior):
         horizontal scrolling cannot move past a lower and/or upper limit.
 
         :param target: a Sprite for the camera to focus on.
-        :param limits: a tuple containing the lower and upper limits x-coordinates of the camera's viewport.
+        :param horizontal_limits: a tuple containing the lower and upper limits x-coordinates of the camera's viewport.
+        :param vertical_limits: a tuple containing the lower and upper limits y-coordinates of the camera's viewport.
         """
 
         CameraBehavior.__init__(self, target)
