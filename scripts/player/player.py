@@ -153,7 +153,7 @@ class Player(pygame.sprite.Sprite):
 
         return animations
 
-    def draw(self, screen: pygame.Surface, camera_offset: pygame.math.Vector2 = None, show_bounding_box: bool = True):
+    def draw(self, screen: pygame.Surface, camera_offset: pygame.math.Vector2 = None, show_bounding_box: bool = False):
         if camera_offset is None:
             camera_offset = pygame.math.Vector2(0, 0)
 

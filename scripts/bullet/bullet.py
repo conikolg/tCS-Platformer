@@ -24,7 +24,7 @@ class Bullet(pygame.sprite.Sprite):
         if self.rect.right < left_bound or self.rect.left > right_bound:
             self.kill()
 
-    def draw(self, screen: pygame.Surface, camera_offset: pygame.math.Vector2 = None, show_bounding_box: bool = True):
+    def draw(self, screen: pygame.Surface, camera_offset: pygame.math.Vector2 = None, show_bounding_box: bool = False):
         if camera_offset is None:
             camera_offset = pygame.math.Vector2(*self.rect.center)
 

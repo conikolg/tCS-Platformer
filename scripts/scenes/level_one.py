@@ -2,11 +2,12 @@ from pathlib import Path
 
 import pygame
 
-from scripts.platform import Platform
 from scripts.player.player import Player
 from scripts.scenes.base_scene import BaseScene
+from scripts.util import physics
 from scripts.util.camera import Camera, BoundedFollowTarget
 from scripts.util.custom_group import CustomGroup
+from scripts.util.platform import Platform
 
 
 class LevelOneScene(BaseScene):
@@ -36,6 +37,9 @@ class LevelOneScene(BaseScene):
             Platform(rect=pygame.rect.Rect(900, 550, 100, 10)),
             Platform(rect=pygame.rect.Rect(1000, 500, 100, 10)),
             Platform(rect=pygame.rect.Rect(1100, 450, 100, 10)),
+            Platform(rect=pygame.rect.Rect(1175, 500, 100, 10)),
+            Platform(rect=pygame.rect.Rect(1400, 575, 100, 10)),
+            Platform(rect=pygame.rect.Rect(1525, 575, 100, 10)),
         )
 
     def handle_events(self, events: list[pygame.event.Event]):
@@ -55,6 +59,24 @@ class LevelOneScene(BaseScene):
 
         # Update player
         self.player.update()
+
+        # Process collisions
+        collisions = pygame.sprite.spritecollide(self.player, self.platforms, dokill=False)
+        for collision in collisions:
+            collision_side = physics.get_collision_side(collision.rect, self.player.rect)
+            # Land on the platform
+            if collision_side == "bottom" and self.player.y_speed < 0:
+                self.player.is_grounded = True
+                self.player.rect.bottom = collision.rect.top
+            # Bump head on a platform
+            elif collision_side == "top" and self.player.y_speed > 0:
+                self.player.y_speed = 0
+            # Run into a platform moving left to right
+            elif collision_side == "right":
+                self.player.rect.right = collision.rect.left
+            # Run into a platform moving right to left
+            elif collision_side == "left":
+                self.player.rect.left = collision.rect.right
 
         # Update bullets
         self.player.bullet_group.update(self.player.rect.x + self.camera.DISPLAY_W / 2,
@@ -110,12 +132,12 @@ class LevelOneScene(BaseScene):
                                     (self.player.rect.h * ds) - self.camera.offset.y * ds - self.player.rect.h))
 
         # Draw game objects
-        self.platforms.draw(surface=screen, camera_offset=-self.camera.offset)
+        self.platforms.draw(surface=screen, camera_offset=-self.camera.offset, show_bounding_box=True)
 
         # Draw player and update sprite animation
         self.player.update_animation()
-        self.player.draw(screen=screen, camera_offset=-self.camera.offset)
+        self.player.draw(screen=screen, camera_offset=-self.camera.offset, show_bounding_box=True)
 
         if self.player.bullet_group:
             for bullet in self.player.bullet_group:
-                bullet.draw(screen, camera_offset=-self.camera.offset)
+                bullet.draw(screen, camera_offset=-self.camera.offset, show_bounding_box=True)
