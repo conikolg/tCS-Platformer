@@ -1,10 +1,12 @@
-import pygame
 from pathlib import Path
 
-# from scripts.player.sample_player import Player
+import pygame
+
+from scripts.platform import Platform
 from scripts.player.player import Player
 from scripts.scenes.base_scene import BaseScene
 from scripts.util.camera import Camera, BoundedFollowTarget
+from scripts.util.custom_group import CustomGroup
 
 
 class LevelOneScene(BaseScene):
@@ -13,21 +15,28 @@ class LevelOneScene(BaseScene):
 
         # self.player = Player("player", 50, 650, 1, 10)
         self.player = Player("player", rect=pygame.rect.Rect(600, 550, 100, 100))
-        self.platform = pygame.rect.Rect(-300, 200, 600, 50)
-        self.ground = pygame.rect.Rect(-1000, 700, 2000, 50)
 
         # Length of level used in render method
         self.length = 5
 
-        self.camera = Camera(behavior=BoundedFollowTarget(target=self.player,
-                                                          horizontal_limits=(0, 6000),
-                                                          vertical_limits=(-100, 0)),
-                             # TODO: compensate for weirdness with bottom being cut-off on Macs
-                             constant=pygame.math.Vector2(-640 + self.player.rect.w / 2, -self.player.rect.top))
+        # Create the camera targeting the player
+        self.camera = Camera(
+            behavior=BoundedFollowTarget(target=self.player, horizontal_limits=(0, 6000), vertical_limits=(-100, 0)),
+            # TODO: compensate for weirdness with bottom being cut-off on Macs
+            constant=pygame.math.Vector2(-640 + self.player.rect.w / 2, -self.player.rect.top))
 
         # Store all layers in a dict with the delta scroll for each layer
         self.scenery: dict[pygame.Surface, float] = self.load_scenery(size=(self.camera.DISPLAY_W,
                                                                             self.camera.DISPLAY_H))
+
+        # Create all active platforms in this level
+        self.platforms: CustomGroup = CustomGroup()
+        self.platforms.add(
+            Platform(rect=pygame.rect.Rect(800, 600, 100, 10)),
+            Platform(rect=pygame.rect.Rect(900, 550, 100, 10)),
+            Platform(rect=pygame.rect.Rect(1000, 500, 100, 10)),
+            Platform(rect=pygame.rect.Rect(1100, 450, 100, 10)),
+        )
 
     def handle_events(self, events: list[pygame.event.Event]):
         """
@@ -87,6 +96,9 @@ class LevelOneScene(BaseScene):
         # White background
         screen.fill((255, 255, 255))
 
+        # Move the camera
+        self.camera.scroll()
+
         # Iterate through scenery dict and display
         for x in range(self.length):
             for layer, ds in self.scenery.items():
@@ -97,12 +109,8 @@ class LevelOneScene(BaseScene):
                 screen.blit(layer, ((x * self.camera.DISPLAY_W) - self.camera.offset.x * ds,
                                     (self.player.rect.h * ds) - self.camera.offset.y * ds - self.player.rect.h))
 
-        # Move the camera
-        self.camera.scroll()
-
-        # Draw static objects
-        # pygame.draw.rect(screen, (0, 0, 0), self.platform.move(*-self.camera.offset))
-        # pygame.draw.rect(screen, (0, 0, 0), self.ground.move(*-self.camera.offset))
+        # Draw game objects
+        self.platforms.draw(surface=screen, camera_offset=-self.camera.offset)
 
         # Draw player and update sprite animation
         self.player.update_animation()
