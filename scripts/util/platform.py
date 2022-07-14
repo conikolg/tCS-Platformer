@@ -20,4 +20,4 @@ class Platform(CustomSprite):
         if self.image is None:
             self.image = pygame.Surface(size=(10, 10))
         if self.image.get_size() != self.rect.size:
-            self.image = pygame.transform.scale(surface=self.image, size=rect.size)
+            self.image = pygame.transform.scale(self.image, rect.size)

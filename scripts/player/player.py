@@ -71,14 +71,30 @@ class Player(pygame.sprite.Sprite):
     def handle_events(self, events: list[pygame.event.Event]):
         for event in events:
             if event.type == pygame.KEYDOWN:
-                if event.key in [pygame.K_w, pygame.K_UP, pygame.K_SPACE]:
+                if event.key in [pygame.K_w, pygame.K_UP]:
                     if self._is_grounded:
                         self._jump()
-                if event.key in [pygame.K_f]:
+                if event.key in [pygame.K_SPACE]:
                     self._shoot()
+                if event.key in [pygame.K_p]:
+                    if self._is_grounded:
+                        self._superJump()
+                if event.key in [pygame.K_LSHIFT]:
+                    self._sprint()
+                if not event.key in [pygame.K_LSHIFT]:
+                    self.x_speed = 5.0
+                    
 
     def _jump(self):
         self.y_speed = self.jump_speed
+        self._is_grounded = False
+        self.set_animation("jump")
+    
+    def _sprint(self):
+        self.x_speed *= 2
+
+    def _superJump(self):
+        self.y_speed = self.jump_speed * 2
         self._is_grounded = False
         self.set_animation("jump")
 
@@ -147,7 +163,7 @@ class Player(pygame.sprite.Sprite):
                 img: pygame.Surface = pygame.image.load(frame).convert_alpha()
                 # Scale it
                 # TODO: smoothscale or scale? scale makes the picture look better imo
-                img = pygame.transform.scale(surface=img, size=size)
+                img = pygame.transform.scale(img, size)
                 # Add it to big animation dictionary
                 animations[animation_type_dir.name].append(img)
 

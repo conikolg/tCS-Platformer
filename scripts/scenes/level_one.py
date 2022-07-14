@@ -40,6 +40,22 @@ class LevelOneScene(BaseScene):
             Platform(rect=pygame.rect.Rect(1175, 500, 100, 10)),
             Platform(rect=pygame.rect.Rect(1400, 575, 100, 10)),
             Platform(rect=pygame.rect.Rect(1525, 575, 100, 10)),
+
+            Platform(rect=pygame.rect.Rect(1650, 200, 100, 10)),
+            Platform(rect=pygame.rect.Rect(1750, 200, 100, 10)),
+            Platform(rect=pygame.rect.Rect(1850, 200, 100, 10)),
+            Platform(rect=pygame.rect.Rect(1950, 200, 100, 10)),
+            Platform(rect=pygame.rect.Rect(2050, 200, 100, 10)),
+
+
+            Platform(rect=pygame.rect.Rect(1650, 80, 100, 10)),
+            Platform(rect=pygame.rect.Rect(1750, 80, 100, 10)),  
+            Platform(rect=pygame.rect.Rect(1850, 80, 100, 10)), 
+            Platform(rect=pygame.rect.Rect(1950, 80, 100, 10)),
+            Platform(rect=pygame.rect.Rect(2050, 80, 100, 10)),
+
+            Platform()
+
         )
 
     def handle_events(self, events: list[pygame.event.Event]):
@@ -96,7 +112,7 @@ class LevelOneScene(BaseScene):
             # Load the image
             img: pygame.Surface = pygame.image.load(layer).convert_alpha()
             # Scale it
-            img = pygame.transform.scale(surface=img, size=size)
+            img = pygame.transform.scale(img, size)
             # Create img layer key and assign ds value
             scenery[img] = round(ds, 1)
             # Increment by 0.1 for each layer
