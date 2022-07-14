@@ -9,6 +9,7 @@ from scripts.scenes.base_scene import BaseScene
 from scripts.util.camera import Camera, BoundedFollowTarget
 from scripts.util.platform import Platform
 from scripts.util.custom_group import CustomGroup
+from scripts.util import physics
 
 
 class LevelOneScene(BaseScene):
@@ -77,9 +78,31 @@ class LevelOneScene(BaseScene):
         # Update player
         self.player.update()
 
+        # Process collisions
+        collisions = pygame.sprite.spritecollide(self.player, self.platforms, dokill=False)
+        for collision in collisions:
+            collision_side = physics.get_collision_side(collision.rect, self.player.rect)
+            # Land on the platform
+            if collision_side == "bottom" and self.player.y_speed < 0:
+                self.player.is_grounded = True
+                self.player.rect.bottom = collision.rect.top
+            # Bump head on a platform
+            elif collision_side == "top" and self.player.y_speed > 0:
+                self.player.y_speed = 0
+            # Run into a platform moving left to right
+            elif collision_side == "right":
+                self.player.rect.right = collision.rect.left
+            # Run into a platform moving right to left
+            elif collision_side == "left":
+                self.player.rect.left = collision.rect.right
+
         # Update bullets
         self.player.bullet_group.update(self.player.rect.x + self.camera.DISPLAY_W / 2,
                                         self.player.rect.x - self.camera.DISPLAY_W / 2)
+
+
+        #self.platforms.draw(surface=screen, camera_offset=-self.camera.offset, show_bounding_box=True)
+        #self.player.draw(screen=screen, camera_offset=-self.camera.offset, show_bounding_box=True)
 
     def load_scenery(self, size: tuple) -> dict[pygame.Surface, float]:
         # Create container for scenery
@@ -136,6 +159,7 @@ class LevelOneScene(BaseScene):
         # Draw player and update sprite animation
         self.player.update_animation()
         self.player.draw(screen=screen, camera_offset=-self.camera.offset)
+        self.platforms.draw(surface=screen, camera_offset=-self.camera.offset, show_bounding_box=True)
 
         if self.player.bullet_group:
             for bullet in self.player.bullet_group:
