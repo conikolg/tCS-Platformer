@@ -147,7 +147,7 @@ class Player(pygame.sprite.Sprite):
                 img: pygame.Surface = pygame.image.load(frame).convert_alpha()
                 # Scale it
                 # TODO: smoothscale or scale? scale makes the picture look better imo
-                img = pygame.transform.scale(surface=img, size=size)
+                img = pygame.transform.scale(img, size)
                 # Add it to big animation dictionary
                 animations[animation_type_dir.name].append(img)
 
