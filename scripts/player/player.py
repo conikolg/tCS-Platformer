@@ -94,7 +94,7 @@ class Player(pygame.sprite.Sprite):
         self.x_speed *= 2
 
     def _superJump(self):
-        self.y_speed = self.jump_speed * 2
+        self.y_speed = self.jump_speed * 3
         self._is_grounded = False
         self.set_animation("jump")
 
