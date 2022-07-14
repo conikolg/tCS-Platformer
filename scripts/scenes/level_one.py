@@ -51,12 +51,23 @@ class LevelOneScene(BaseScene):
             Platform(rect=pygame.rect.Rect(1950, 200, 100, 10)),
             Platform(rect=pygame.rect.Rect(2050, 200, 100, 10)),
 
+            Platform(rect=pygame.rect.Rect(2150, 200, 100, 10)),
+            Platform(rect=pygame.rect.Rect(2250, 200, 100, 10)),
+            Platform(rect=pygame.rect.Rect(2350, 200, 100, 10)),
+            Platform(rect=pygame.rect.Rect(2450, 200, 100, 10)),
+
+
 
             Platform(rect=pygame.rect.Rect(1650, 80, 100, 10)),
             Platform(rect=pygame.rect.Rect(1750, 80, 100, 10)),  
             Platform(rect=pygame.rect.Rect(1850, 80, 100, 10)), 
             Platform(rect=pygame.rect.Rect(1950, 80, 100, 10)),
-            Platform(rect=pygame.rect.Rect(2050, 80, 100, 10))
+            Platform(rect=pygame.rect.Rect(2050, 80, 100, 10)),
+
+            Platform(rect=pygame.rect.Rect(2150, 80, 100, 10)),
+            Platform(rect=pygame.rect.Rect(2250, 80, 100, 10)),
+            Platform(rect=pygame.rect.Rect(2350, 80, 100, 10)),
+            Platform(rect=pygame.rect.Rect(2450, 80, 100, 10)),
 
         )
 
@@ -159,8 +170,11 @@ class LevelOneScene(BaseScene):
         # Draw player and update sprite animation
         self.player.update_animation()
         self.player.draw(screen=screen, camera_offset=-self.camera.offset)
-        self.platforms.draw(surface=screen, camera_offset=-self.camera.offset, show_bounding_box=True)
+        self.player.draw(screen=screen, camera_offset=-self.camera.offset, show_bounding_box=True)
 
+        self.platforms.draw(surface=screen, camera_offset=-self.camera.offset, show_bounding_box=True)
+        
         if self.player.bullet_group:
             for bullet in self.player.bullet_group:
                 bullet.draw(screen, camera_offset=-self.camera.offset)
+                bullet.draw(screen, camera_offset=-self.camera.offset, show_bounding_box=True)
