@@ -1,4 +1,4 @@
-import os, platform
+import os
 
 import pygame
 from pathlib import Path
@@ -7,6 +7,8 @@ from pathlib import Path
 from scripts.player.player import Player
 from scripts.scenes.base_scene import BaseScene
 from scripts.util.camera import Camera, BoundedFollowTarget
+from scripts.util.platform import Platform
+from scripts.util.custom_group import CustomGroup
 
 
 class LevelOneScene(BaseScene):
@@ -53,9 +55,7 @@ class LevelOneScene(BaseScene):
             Platform(rect=pygame.rect.Rect(1750, 80, 100, 10)),  
             Platform(rect=pygame.rect.Rect(1850, 80, 100, 10)), 
             Platform(rect=pygame.rect.Rect(1950, 80, 100, 10)),
-            Platform(rect=pygame.rect.Rect(2050, 80, 100, 10)),
-
-            Platform()
+            Platform(rect=pygame.rect.Rect(2050, 80, 100, 10))
 
         )
 
