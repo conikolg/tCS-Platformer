@@ -78,22 +78,21 @@ class Player(pygame.sprite.Sprite):
                     self._shoot()
                 if event.key in [pygame.K_p]:
                     if self._is_grounded:
-                        self._superJump()
+                        self._super_jump()
                 if event.key in [pygame.K_LSHIFT]:
                     self._sprint()
-                if not event.key in [pygame.K_LSHIFT]:
+                if event.key not in [pygame.K_LSHIFT]:
                     self.x_speed = 5.0
-                    
 
     def _jump(self):
         self.y_speed = self.jump_speed
         self._is_grounded = False
         self.set_animation("jump")
-    
+
     def _sprint(self):
         self.x_speed *= 2
 
-    def _superJump(self):
+    def _super_jump(self):
         self.y_speed = self.jump_speed * 2
         self._is_grounded = False
         self.set_animation("jump")
