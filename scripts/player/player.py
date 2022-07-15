@@ -4,7 +4,7 @@ from pathlib import Path
 import pygame
 
 from scripts.bullet.bullet import Bullet
-
+from scripts.sword.sword import Sword
 
 
 class Player(pygame.sprite.Sprite):
@@ -36,7 +36,7 @@ class Player(pygame.sprite.Sprite):
         self.current_animation_frame = ["idle", 0]
 
         self.bullet_group = pygame.sprite.Group()
-        
+        self.sword_sprite = Sword(location=(self.rect.centerx + 24, self.rect.centery - 18))
 
     @property
     def is_grounded(self) -> bool:
@@ -85,6 +85,10 @@ class Player(pygame.sprite.Sprite):
                     self._sprint()
                 if event.key not in [pygame.K_LSHIFT]:
                     self.x_speed = 5.0
+                if event.key in [pygame.K_m]:
+                    self._swordSwing()
+                if event.key in [pygame.K_n]:
+                    self._swordAway()
 
     def _jump(self):
         self.y_speed = self.jump_speed
@@ -102,6 +106,20 @@ class Player(pygame.sprite.Sprite):
     def _shoot(self):
         self.bullet_group.add(Bullet(location=(self.rect.centerx, self.rect.centery),
                                      direction=pygame.math.Vector2(1, 0) * self.horizontal_direction))
+
+    def _moveSword(self):
+        if self.horizontal_direction == 1:
+            self.sword_sprite.sword_direction = 0
+            self.sword_sprite.rect.center = (self.rect.centerx + 33, self.rect.centery - 6)
+        else:
+            self.sword_sprite.sword_direction = 1
+            self.sword_sprite.rect.center = (self.rect.centerx - 33, self.rect.centery - 6)
+    
+    def _swordSwing(self):
+        self.sword_sprite.sword_swing = True
+    
+    def _swordAway(self):
+        self.sword_sprite.sword_swing = False
 
 
     def update(self) -> None:
