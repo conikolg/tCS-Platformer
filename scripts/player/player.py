@@ -147,7 +147,10 @@ class Player(pygame.sprite.Sprite):
 
         # Update animation state
         if not self._is_grounded:
-            self.set_animation("jump")
+            if self.y_speed >= 0:
+                self.set_animation("jump")
+            else:
+                self.set_animation("fall")
         elif horizontal_movement.x != 0:
             self.set_animation("run")
         else:
