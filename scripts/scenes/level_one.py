@@ -169,8 +169,10 @@ class LevelOneScene(BaseScene):
 
         # Draw player and update sprite animation
         self.player.update_animation()
-        self.player.draw(screen=screen, camera_offset=-self.camera.offset)
+        #self.player.draw(screen=screen, camera_offset=-self.camera.offset)
         self.player.draw(screen=screen, camera_offset=-self.camera.offset, show_bounding_box=True)
+        
+        self.player.sword_sprite.draw(screen, camera_offset=-self.camera.offset, show_bounding_box=True)
 
         self.platforms.draw(surface=screen, camera_offset=-self.camera.offset, show_bounding_box=True)
         
