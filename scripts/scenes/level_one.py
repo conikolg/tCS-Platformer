@@ -100,6 +100,10 @@ class LevelOneScene(BaseScene):
             elif collision_side == "left":
                 self.player.rect.left = collision.rect.right
 
+        # Did the player fall off something?
+        if self.player.is_grounded and self.player.y_speed < -0.5:
+            self.player.is_grounded = False
+
         # Update bullets
         self.player.bullet_group.update(self.player.rect.x + self.camera.DISPLAY_W / 2,
                                         self.player.rect.x - self.camera.DISPLAY_W / 2)
