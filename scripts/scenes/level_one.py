@@ -1,25 +1,20 @@
-import os
-
-import pygame
 from pathlib import Path
 
-# from scripts.player.sample_player import Player
+import pygame
+
 from scripts.player.player import Player
 from scripts.scenes.base_scene import BaseScene
-from scripts.util.camera import Camera, BoundedFollowTarget
-from scripts.util.platform import Platform
-from scripts.util.custom_group import CustomGroup
 from scripts.util import physics
+from scripts.util.camera import Camera, BoundedFollowTarget
+from scripts.util.custom_group import CustomGroup
+from scripts.util.platform import Platform
 
 
 class LevelOneScene(BaseScene):
     def __init__(self):
         super().__init__()
 
-        # self.player = Player("player", 50, 650, 1, 10)
         self.player = Player("player", rect=pygame.rect.Rect(600, 550, 100, 100))
-        self.platform = pygame.rect.Rect(-300, 200, 600, 50)
-        self.ground = pygame.rect.Rect(-1000, 700, 2000, 50)
 
         # Length of level used in render method
         self.length = 5
@@ -56,11 +51,9 @@ class LevelOneScene(BaseScene):
             Platform(rect=pygame.rect.Rect(2350, 200, 100, 10)),
             Platform(rect=pygame.rect.Rect(2450, 200, 100, 10)),
 
-
-
             Platform(rect=pygame.rect.Rect(1650, 80, 100, 10)),
-            Platform(rect=pygame.rect.Rect(1750, 80, 100, 10)),  
-            Platform(rect=pygame.rect.Rect(1850, 80, 100, 10)), 
+            Platform(rect=pygame.rect.Rect(1750, 80, 100, 10)),
+            Platform(rect=pygame.rect.Rect(1850, 80, 100, 10)),
             Platform(rect=pygame.rect.Rect(1950, 80, 100, 10)),
             Platform(rect=pygame.rect.Rect(2050, 80, 100, 10)),
 
@@ -107,19 +100,20 @@ class LevelOneScene(BaseScene):
             elif collision_side == "left":
                 self.player.rect.left = collision.rect.right
 
+        # Did the player fall off something?
+        if self.player.is_grounded and self.player.y_speed < -0.5:
+            self.player.is_grounded = False
+
         # Update bullets
         self.player.bullet_group.update(self.player.rect.x + self.camera.DISPLAY_W / 2,
                                         self.player.rect.x - self.camera.DISPLAY_W / 2)
 
-
-        #self.platforms.draw(surface=screen, camera_offset=-self.camera.offset, show_bounding_box=True)
-        #self.player.draw(screen=screen, camera_offset=-self.camera.offset, show_bounding_box=True)
-
-    def load_scenery(self, size: tuple) -> dict[pygame.Surface, float]:
+    @staticmethod
+    def load_scenery(size: tuple) -> dict[pygame.Surface, float]:
         # Create container for scenery
         scenery: dict[pygame.Surface, float] = dict()
         # Start at content root
-        # Sort path for MacOS to read clearly
+        # Sort path for macOS to read clearly
         root_scenery_dir = sorted(Path("assets/scenery").iterdir())
 
         # Delta scrolls for each layer
@@ -163,19 +157,14 @@ class LevelOneScene(BaseScene):
         # Move the camera
         self.camera.scroll()
 
-        # Draw static objects
-        # pygame.draw.rect(screen, (0, 0, 0), self.platform.move(*-self.camera.offset))
-        # pygame.draw.rect(screen, (0, 0, 0), self.ground.move(*-self.camera.offset))
-
         # Draw player and update sprite animation
         self.player.update_animation()
-        #self.player.draw(screen=screen, camera_offset=-self.camera.offset)
         self.player.draw(screen=screen, camera_offset=-self.camera.offset, show_bounding_box=True)
         
-        self.player.sword_sprite.draw(screen, camera_offset=-self.camera.offset, show_bounding_box=True)
+        
 
         self.platforms.draw(surface=screen, camera_offset=-self.camera.offset, show_bounding_box=True)
-        
+
         if self.player.bullet_group:
             for bullet in self.player.bullet_group:
                 bullet.draw(screen, camera_offset=-self.camera.offset)
