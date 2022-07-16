@@ -17,22 +17,23 @@ class UI:
         # Start at content root for this key type
         root_movekeys_dir = sorted(Path(f"assets/keys").iterdir())
 
-        for key_type in root_movekeys_dir:
-            for key in key_type.iterdir():
+        for key_type_dir in root_movekeys_dir:
+            for key_value in key_type_dir.iterdir():
                 # Load the key
-                img: pygame.Surface = pygame.image.load(key).convert_alpha()
+                img: pygame.Surface = pygame.image.load(key_value).convert_alpha()
                 # Scale it
                 img = pygame.transform.scale(img, size)
                 # Add it to big key dictionary
                 # How do I do this better than this
                 # Manually create a dictionary with surface image and desc instead?
-                if "A.png" in str(key):
+                key = key_value.name.rpartition(".")[0].upper()
+                if key == "A":
                     move_keys[img] = "Move Left"
-                elif "D.png" in str(key):
+                elif key == "D":
                     move_keys[img] = "Move Right"
-                elif "W.png" in str(key):
+                elif key == "W":
                     move_keys[img] = "Jump"
-                elif "J.png" in str(key):
+                elif key == "J":
                     move_keys[img] = "Shoot"
                 else:
                     move_keys[img] = "Desc of key"
