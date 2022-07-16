@@ -30,6 +30,25 @@ class Player(pygame.sprite.Sprite):
         self.horizontal_direction: int = 1  # Right
         self.update_time: int = 0
 
+        # Nested dict to store all player input key binds
+        # This will allow the player to easily remap keys once feature is created
+        self.input = {
+            "movement": {
+                "right": [pygame.K_RIGHT, pygame.K_d],
+                "left": [pygame.K_LEFT, pygame.K_a],
+                "jump": [pygame.K_SPACE, pygame.K_UP, pygame.K_w]
+            },
+            "action": {
+                "shoot": [pygame.K_j],
+                "other thing here": [pygame.K_k],
+                "another other thing here": [pygame.K_l]
+            },
+            "interact": {
+                "pickup": [pygame.K_e],
+                "drop": [pygame.K_q]
+            }
+        }
+
         # TODO: add shoot cooldown once the bullet is working properly
 
         self._is_grounded: bool = True
@@ -73,10 +92,10 @@ class Player(pygame.sprite.Sprite):
     def handle_events(self, events: list[pygame.event.Event]):
         for event in events:
             if event.type == pygame.KEYDOWN:
-                if event.key in [pygame.K_w, pygame.K_UP]:
+                if event.key in self.input["movement"]["jump"]:
                     if self._is_grounded:
                         self._jump()
-                if event.key in [pygame.K_SPACE]:
+                if event.key in self.input["action"]["shoot"]:
                     self._shoot()
                 if event.key in [pygame.K_p]:
                     if self._is_grounded:
@@ -114,25 +133,30 @@ class Player(pygame.sprite.Sprite):
         else:
             self.sword_sprite.sword_direction = 1
             self.sword_sprite.rect.center = (self.rect.centerx - 33, self.rect.centery - 6)
-    
+
     def _swordSwing(self):
         self.sword_sprite.sword_swing = True
-    
+
     def _swordAway(self):
         self.sword_sprite.sword_swing = False
-
 
     def update(self) -> None:
         keys = pygame.key.get_pressed()
 
         # Move left/right
         horizontal_movement = pygame.math.Vector2(0, 0)
-        if keys[pygame.K_RIGHT] or keys[pygame.K_d]:
-            horizontal_movement.x += 1
-            self.horizontal_direction = 1
-        elif keys[pygame.K_LEFT] or keys[pygame.K_a]:
-            horizontal_movement.x -= 1
-            self.horizontal_direction = -1
+
+        # If this is not necessary or can be written better feel free to change
+        # Tried creating a dict that will store all key binds with type and value
+        # To loop through for input. Didn't work too well tbh
+        for key in self.input["movement"]["right"]:
+            if keys[key]:
+                horizontal_movement.x += 1
+                self.horizontal_direction = 1
+        for key in self.input["movement"]["left"]:
+            if keys[key]:
+                horizontal_movement.x -= 1
+                self.horizontal_direction = -1
 
         # Horizontal movement
         self.rect.move_ip(horizontal_movement * self.x_speed)
@@ -204,5 +228,3 @@ class Player(pygame.sprite.Sprite):
             pygame.draw.rect(surface=screen, color=(255, 0, 0), rect=self.rect.move(camera_offset), width=1)
 
         self._moveSword()
-        
-

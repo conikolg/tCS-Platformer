@@ -8,6 +8,7 @@ from scripts.util import physics
 from scripts.util.camera import Camera, BoundedFollowTarget
 from scripts.util.custom_group import CustomGroup
 from scripts.util.platform import Platform
+from scripts.ui.ui import UI
 
 
 class LevelOneScene(BaseScene):
@@ -15,6 +16,7 @@ class LevelOneScene(BaseScene):
         super().__init__()
 
         self.player = Player("player", rect=pygame.rect.Rect(600, 550, 100, 100))
+        self.ui = UI(player=self.player)
 
         # Length of level used in render method
         self.length = 5
@@ -164,7 +166,7 @@ class LevelOneScene(BaseScene):
         self.player.sword_sprite.draw(screen, camera_offset=-self.camera.offset, show_bounding_box=True)
 
         self.platforms.draw(surface=screen, camera_offset=-self.camera.offset, show_bounding_box=True)
-
+        self.ui.draw(screen)
         if self.player.bullet_group:
             for bullet in self.player.bullet_group:
                 bullet.draw(screen, camera_offset=-self.camera.offset)

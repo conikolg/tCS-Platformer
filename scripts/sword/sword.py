@@ -12,14 +12,13 @@ class Sword(pygame.sprite.Sprite):
 
         super().__init__()
         self.image: pygame.Surface = pygame.image.load("assets/sword/cyberSword.png").convert_alpha()
-        #self.image = pygame.transform.scale(self.image, (100, 100))
-        #self.image = pygame.transform.rotate(self.image, 90)
+        # self.image = pygame.transform.scale(self.image, (100, 100))
+        # self.image = pygame.transform.rotate(self.image, 90)
         self.rect: pygame.rect.Rect = self.image.get_rect()
         self.rect.center = location
         self.sword_swing = False
         self.sword_direction = 1
-        #pygame.rect.Rect(100, 100, 10, 80)
-
+        # pygame.rect.Rect(100, 100, 10, 80)
 
     def draw(self, screen: pygame.Surface, camera_offset: pygame.math.Vector2 = None, show_bounding_box: bool = False):
         if self.sword_swing:
@@ -35,5 +34,5 @@ class Sword(pygame.sprite.Sprite):
             if camera_offset is None:
                 camera_offset = pygame.math.Vector2(*self.rect.center)
 
-            #if show_bounding_box:
-                #pygame.draw.rect(surface=screen, color=(255, 0, 0), rect=self.rect.move(camera_offset), width=1)
+            # if show_bounding_box:
+            # pygame.draw.rect(surface=screen, color=(255, 0, 0), rect=self.rect.move(camera_offset), width=1)
