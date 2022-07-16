@@ -34,14 +34,15 @@ class Player(pygame.sprite.Sprite):
         # This will allow the player to easily remap keys once feature is created
         self.input = {
             "movement": {
-                "right": [pygame.K_RIGHT, pygame.K_d],
                 "left": [pygame.K_LEFT, pygame.K_a],
+                "right": [pygame.K_RIGHT, pygame.K_d],
                 "jump": [pygame.K_SPACE, pygame.K_UP, pygame.K_w]
             },
-            "action": {
+            "abilities": {
                 "shoot": [pygame.K_j],
                 "other thing here": [pygame.K_k],
-                "another other thing here": [pygame.K_l]
+                "another other thing here": [pygame.K_l],
+                "super jump": [pygame.K_p],
             },
             "interact": {
                 "pickup": [pygame.K_e],
@@ -95,9 +96,9 @@ class Player(pygame.sprite.Sprite):
                 if event.key in self.input["movement"]["jump"]:
                     if self._is_grounded:
                         self._jump()
-                if event.key in self.input["action"]["shoot"]:
+                if event.key in self.input["abilities"]["shoot"]:
                     self._shoot()
-                if event.key in [pygame.K_p]:
+                if event.key in self.input["abilities"]["super jump"]:
                     if self._is_grounded:
                         self._super_jump()
                 if event.key in [pygame.K_LSHIFT]:
