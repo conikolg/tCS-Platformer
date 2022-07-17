@@ -2,6 +2,7 @@ from collections import defaultdict
 from pathlib import Path
 
 import pygame
+import math
 
 from scripts.bullet.bullet import Bullet
 from scripts.sword.sword import Sword
@@ -23,7 +24,8 @@ class Player(pygame.sprite.Sprite):
 
         self.animations: dict[str, list] = self.load_animations(size=(self.rect.w, self.rect.h))
         self.health: float = 100.0
-        self.x_speed: float = 5.0
+        self.x_speed: float = 0.0
+        self.delta_x: float = 5.0
         self.y_speed: float = 0.0
         self.jump_speed: float = 10.0
         self.gravity: float = 0.5
@@ -32,10 +34,12 @@ class Player(pygame.sprite.Sprite):
 
         # Nested dict to store all player input key binds
         # This will allow the player to easily remap keys once feature is created
+        # WARNING: Do not make changes to this dict without also adding the image bind to assets/keys
         self.input = {
             "movement": {
                 "left": [pygame.K_LEFT, pygame.K_a],
                 "right": [pygame.K_RIGHT, pygame.K_d],
+                "sprint": [pygame.K_LSHIFT, pygame.K_s],
                 "jump": [pygame.K_SPACE, pygame.K_UP, pygame.K_w]
             },
             "abilities": {
@@ -101,10 +105,10 @@ class Player(pygame.sprite.Sprite):
                 if event.key in self.input["abilities"]["super jump"]:
                     if self._is_grounded:
                         self._super_jump()
-                if event.key in [pygame.K_LSHIFT]:
+                if event.key in self.input["movement"]["sprint"]:
                     self._sprint()
-                if event.key not in [pygame.K_LSHIFT]:
-                    self.x_speed = 5.0
+                # if event.key not in self.input["movement"]["sprint"]:
+                #     self.x_speed = 5.0
                 if event.key in [pygame.K_m]:
                     self._swordSwing()
                 if event.key in [pygame.K_n]:
@@ -116,7 +120,7 @@ class Player(pygame.sprite.Sprite):
         self.set_animation("jump")
 
     def _sprint(self):
-        self.x_speed = 10
+        self.delta_x = 10.0
 
     def _super_jump(self):
         self.y_speed = self.jump_speed * 2
@@ -147,17 +151,24 @@ class Player(pygame.sprite.Sprite):
         # Move left/right
         horizontal_movement = pygame.math.Vector2(0, 0)
 
-        # If this is not necessary or can be written better feel free to change
-        # Tried creating a dict that will store all key binds with type and value
-        # To loop through for input. Didn't work too well tbh
         for key in self.input["movement"]["right"]:
             if keys[key]:
                 horizontal_movement.x += 1
                 self.horizontal_direction = 1
+                self.x_speed = self.delta_x
         for key in self.input["movement"]["left"]:
             if keys[key]:
                 horizontal_movement.x -= 1
                 self.horizontal_direction = -1
+                self.x_speed = self.delta_x
+
+        # Slowly decrease x_speed
+        # Check if player is not moving horizontally
+        # Reset delta x to normal value
+        self.x_speed *= 0.8
+        self.x_speed = math.floor(self.x_speed)
+        if self.x_speed < 1:
+            self.delta_x = 5.0
 
         # Horizontal movement
         self.rect.move_ip(horizontal_movement * self.x_speed)

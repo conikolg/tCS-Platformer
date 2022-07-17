@@ -1,5 +1,6 @@
 import pygame
 from pathlib import Path
+import os
 
 
 class UI:
@@ -9,11 +10,11 @@ class UI:
         """
         self.x = 25
         self.y = 25
-        self.input_keys: dict[pygame.Surface, str] = self.find_binds(player, size=(25, 25))
+        self.input_keys: dict[pygame.Surface, str] = self.find_binds(player)
 
     # TODO: ErrorHandling to make sure only images that are also input binds are in each directory
     @staticmethod
-    def find_binds(player, size: tuple):
+    def find_binds(player):
         """
         This function will find the player input binds and create a dict
         that stores the image of the key with a description of that key input.
@@ -31,10 +32,10 @@ class UI:
             # Path of each input type image folder
             action_path_dir = Path(f"assets/keys/{input_type}")
             # Iterate through each key in each input type folder
-            for key_image in sorted(action_path_dir.iterdir()):
-                img: pygame.Surface = pygame.image.load(key_image).convert_alpha()
+            for key_image_dir in sorted(action_path_dir.iterdir()):
+                img: pygame.Surface = pygame.image.load(key_image_dir).convert_alpha()
                 # Create image from image file name in each input type
-                img = pygame.transform.scale(img, size)
+                img = pygame.transform.scale(img, (img.get_width(), img.get_height()))
                 # Add image and description from player input to main dict
                 input_keys[img] = list(player.input[input_type].keys())[i].title()
                 i += 1
@@ -50,6 +51,6 @@ class UI:
             font = pygame.font.Font("assets/dogicapixelbold.ttf", 12)
             text = font.render(desc, True, (255, 255, 255))
             screen.blit(text, dest=(
-                self.x + 50,
+                image.get_rect().right + 50,
                 i*self.y + text.get_height() / 2))
             i += 1
