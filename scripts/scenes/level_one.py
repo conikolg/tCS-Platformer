@@ -89,12 +89,12 @@ class LevelOneScene(BaseScene):
         for collision in collisions:
             collision_side = physics.get_collision_side(collision.rect, self.player.rect)
             # Land on the platform
-            if collision_side == "bottom" and self.player.y_speed < 0:
+            if collision_side == "bottom" and self.player.velocity.y < 0:
                 self.player.is_grounded = True
                 self.player.rect.bottom = collision.rect.top
             # Bump head on a platform
-            elif collision_side == "top" and self.player.y_speed > 0:
-                self.player.y_speed = 0
+            elif collision_side == "top" and self.player.velocity.y > 0:
+                self.player.velocity.y = 0
             # Run into a platform moving left to right
             elif collision_side == "right":
                 self.player.rect.right = collision.rect.left
@@ -103,7 +103,7 @@ class LevelOneScene(BaseScene):
                 self.player.rect.left = collision.rect.right
 
         # Did the player fall off something?
-        if self.player.is_grounded and self.player.y_speed < -0.5:
+        if self.player.is_grounded and self.player.velocity.y < -0.5:
             self.player.is_grounded = False
 
         # Update bullets

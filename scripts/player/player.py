@@ -2,7 +2,6 @@ from collections import defaultdict
 from pathlib import Path
 
 import pygame
-import math
 
 from scripts.bullet.bullet import Bullet
 from scripts.sword.sword import Sword
@@ -24,13 +23,14 @@ class Player(pygame.sprite.Sprite):
 
         self.animations: dict[str, list] = self.load_animations(size=(self.rect.w, self.rect.h))
         self.health: float = 100.0
-        self.x_speed: float = 0.0
-        self.delta_x: float = 5.0
-        self.y_speed: float = 0.0
+        self.velocity = pygame.math.Vector2(0, 0)
+        self.direction = pygame.math.Vector2(0, 0)
         self.jump_speed: float = 10.0
         self.gravity: float = 0.5
-        self.horizontal_direction: int = 1  # Right
         self.update_time: int = 0
+
+        self.walk_speed = 6
+        self.sprint_speed = 8
 
         # Nested dict to store all player input key binds
         # This will allow the player to easily remap keys once feature is created
@@ -57,6 +57,7 @@ class Player(pygame.sprite.Sprite):
         # TODO: add shoot cooldown once the bullet is working properly
 
         self._is_grounded: bool = True
+        self.is_sprinting: bool = False
         self.current_animation_frame = ["idle", 0]
 
         self.bullet_group = pygame.sprite.Group()
@@ -77,7 +78,7 @@ class Player(pygame.sprite.Sprite):
         """
         self._is_grounded = grounded
         if self._is_grounded:
-            self.y_speed = 0
+            self.velocity.y = 0
 
     @property
     def center(self) -> tuple:
@@ -107,75 +108,66 @@ class Player(pygame.sprite.Sprite):
                         self._super_jump()
                 if event.key in self.input["movement"]["sprint"]:
                     self._sprint()
-                # if event.key not in self.input["movement"]["sprint"]:
-                #     self.x_speed = 5.0
                 if event.key in [pygame.K_m]:
-                    self._swordSwing()
+                    self._sword_swing()
                 if event.key in [pygame.K_n]:
-                    self._swordAway()
+                    self._sword_away()
 
     def _jump(self):
-        self.y_speed = self.jump_speed
+        self.velocity.y = self.jump_speed
         self._is_grounded = False
         self.set_animation("jump")
 
     def _sprint(self):
-        self.delta_x = 10.0
+        self.is_sprinting = True
 
     def _super_jump(self):
-        self.y_speed = self.jump_speed * 2
+        self.velocity.y = self.jump_speed * 2
         self._is_grounded = False
         self.set_animation("jump")
 
     def _shoot(self):
         self.bullet_group.add(Bullet(location=(self.rect.centerx, self.rect.centery),
-                                     direction=pygame.math.Vector2(1, 0) * self.horizontal_direction))
+                                     direction=pygame.math.Vector2(1, 0) * self.direction.x))
 
-    def _moveSword(self):
-        if self.horizontal_direction == 1:
+    def _move_sword(self):
+        if self.direction.x == 1:
             self.sword_sprite.sword_direction = 0
             self.sword_sprite.rect.center = (self.rect.centerx + 33, self.rect.centery - 6)
         else:
             self.sword_sprite.sword_direction = 1
             self.sword_sprite.rect.center = (self.rect.centerx - 33, self.rect.centery - 6)
 
-    def _swordSwing(self):
+    def _sword_swing(self):
         self.sword_sprite.sword_swing = True
 
-    def _swordAway(self):
+    def _sword_away(self):
         self.sword_sprite.sword_swing = False
 
     def update(self) -> None:
         keys = pygame.key.get_pressed()
 
         # Move left/right
-        horizontal_movement = pygame.math.Vector2(0, 0)
-
+        self.direction = pygame.math.Vector2(0, 0)
         for key in self.input["movement"]["right"]:
             if keys[key]:
-                horizontal_movement.x += 1
-                self.horizontal_direction = 1
-                self.x_speed = self.delta_x
+                self.direction.x = 1
+                self.velocity.x = self.sprint_speed if self.is_sprinting else self.walk_speed
         for key in self.input["movement"]["left"]:
             if keys[key]:
-                horizontal_movement.x -= 1
-                self.horizontal_direction = -1
-                self.x_speed = self.delta_x
+                self.direction.x = -1
+                self.velocity.x = self.sprint_speed if self.is_sprinting else self.walk_speed
 
-        # Slowly decrease x_speed
-        # Check if player is not moving horizontally
-        # Reset delta x to normal value
-        self.x_speed *= 0.8
-        self.x_speed = math.floor(self.x_speed)
-        if self.x_speed < 1:
-            self.delta_x = 5.0
+        # Ramp down velocity (if not actively moving) to see if sprinting should be turned off
+        self.velocity.x *= 0.98
+        if abs(self.velocity.x) < self.walk_speed:
+            self.is_sprinting = False
 
-        # Horizontal movement
-        self.rect.move_ip(horizontal_movement * self.x_speed)
+        # Gravity
+        self.velocity.y -= self.gravity
 
-        # Vertical movement
-        self.y_speed -= self.gravity
-        self.rect.move_ip(0, -self.y_speed)
+        # Apply movement
+        self.rect.move_ip(self.direction.x * self.velocity.x, -self.velocity.y)
         # Collided with "ground"?
         if self.rect.bottom >= 650:
             self.rect.bottom = 650
@@ -183,11 +175,11 @@ class Player(pygame.sprite.Sprite):
 
         # Update animation state
         if not self._is_grounded:
-            if self.y_speed >= 0:
+            if self.velocity.y >= 0:
                 self.set_animation("jump")
             else:
                 self.set_animation("fall")
-        elif horizontal_movement.x != 0:
+        elif self.direction.x != 0:
             self.set_animation("run")
         else:
             self.set_animation("idle")
@@ -233,10 +225,10 @@ class Player(pygame.sprite.Sprite):
             camera_offset = pygame.math.Vector2(0, 0)
 
         self.update_animation()
-        screen.blit(source=pygame.transform.flip(self.image, self.horizontal_direction == -1, False),
+        screen.blit(source=pygame.transform.flip(self.image, self.direction.x == -1, False),
                     dest=self.rect.move(camera_offset))
 
         if show_bounding_box:
             pygame.draw.rect(surface=screen, color=(255, 0, 0), rect=self.rect.move(camera_offset), width=1)
 
-        self._moveSword()
+        self._move_sword()
