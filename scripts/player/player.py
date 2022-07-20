@@ -29,7 +29,7 @@ class Player(pygame.sprite.Sprite):
         self.gravity: float = 0.5
         self.update_time: int = 0
 
-        self.walk_speed = 6
+        self.walk_speed = 5
         self.sprint_speed = 8
 
         # Nested dict to store all player input key binds
@@ -148,26 +148,36 @@ class Player(pygame.sprite.Sprite):
         keys = pygame.key.get_pressed()
 
         # Move left/right
-        self.direction = pygame.math.Vector2(0, 0)
+        actively_moving = False
         for key in self.input["movement"]["right"]:
             if keys[key]:
-                self.direction.x = 1
                 self.velocity.x = self.sprint_speed if self.is_sprinting else self.walk_speed
+                actively_moving = True
         for key in self.input["movement"]["left"]:
             if keys[key]:
-                self.direction.x = -1
-                self.velocity.x = self.sprint_speed if self.is_sprinting else self.walk_speed
+                self.velocity.x = -(self.sprint_speed if self.is_sprinting else self.walk_speed)
+                actively_moving = True
 
-        # Ramp down velocity (if not actively moving) to see if sprinting should be turned off
-        self.velocity.x *= 0.98
-        if abs(self.velocity.x) < self.walk_speed:
-            self.is_sprinting = False
+        # Apply friction
+        if not actively_moving:
+            self.velocity.x *= 0.75
+            # No longer sprinting?
+            if self.is_sprinting and abs(self.velocity.x) < self.walk_speed:
+                self.is_sprinting = False
+            # Not really moving
+            if abs(self.velocity.x) < 0.5:
+                self.velocity.x = 0
 
         # Gravity
         self.velocity.y -= self.gravity
 
         # Apply movement
-        self.rect.move_ip(self.direction.x * self.velocity.x, -self.velocity.y)
+        self.rect.move_ip(self.velocity.x, -self.velocity.y)
+        if self.velocity.x != 0:
+            self.direction.x = self.velocity.x / abs(self.velocity.x)
+        if self.velocity.y != 0:
+            self.direction.y = self.velocity.y / abs(self.velocity.y)
+
         # Collided with "ground"?
         if self.rect.bottom >= 650:
             self.rect.bottom = 650
@@ -179,7 +189,7 @@ class Player(pygame.sprite.Sprite):
                 self.set_animation("jump")
             else:
                 self.set_animation("fall")
-        elif self.direction.x != 0:
+        elif self.velocity.x != 0:
             self.set_animation("run")
         else:
             self.set_animation("idle")
