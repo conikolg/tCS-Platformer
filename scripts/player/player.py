@@ -24,7 +24,7 @@ class Player(pygame.sprite.Sprite):
         self.animations: dict[str, list] = self.load_animations(size=(self.rect.w, self.rect.h))
         self.health: float = 100.0
         self.velocity = pygame.math.Vector2(0, 0)
-        self.direction = pygame.math.Vector2(0, 0)
+        self.direction = pygame.math.Vector2(1, 0)
         self.jump_speed: float = 10.0
         self.gravity: float = 0.5
         self.update_time: int = 0
