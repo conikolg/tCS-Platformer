@@ -36,7 +36,7 @@ class LevelOneScene(BaseScene):
         self.platforms: CustomGroup = CustomGroup()
         platforms = [
             # Little obstacle course
-            Platform(rect=pygame.rect.Rect(800, 600, 100, 10)),
+            Platform(rect=pygame.rect.Rect(800, 600, 100, 10), image=pygame.image.load("assets/scenery/5.png")),
             Platform(rect=pygame.rect.Rect(900, 550, 100, 10)),
             Platform(rect=pygame.rect.Rect(1000, 500, 100, 10)),
             Platform(rect=pygame.rect.Rect(1100, 450, 100, 10)),

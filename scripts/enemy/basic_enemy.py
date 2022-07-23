@@ -29,6 +29,8 @@ class BasicEnemy(CustomSprite):
         self.direction: int = 1
         self.healthbar = Healthbar()
 
+        self.enemy_type: str = "slime"
+
     def update(self) -> None:
         # Try going right
         if self.direction == 1:
