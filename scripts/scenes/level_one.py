@@ -4,11 +4,11 @@ import pygame
 
 from scripts.player.player import Player
 from scripts.scenes.base_scene import BaseScene
+from scripts.ui.ui import UI
 from scripts.util import physics
 from scripts.util.camera import Camera, BoundedFollowTarget
 from scripts.util.custom_group import CustomGroup
 from scripts.util.platform import Platform
-from scripts.ui.ui import UI
 
 
 class LevelOneScene(BaseScene):
@@ -159,15 +159,19 @@ class LevelOneScene(BaseScene):
         # Move the camera
         self.camera.scroll()
 
-        # Draw player and update sprite animation
-        self.player.update_animation()
-        self.player.draw(screen=screen, camera_offset=-self.camera.offset, show_bounding_box=True)
-        
-        self.player.sword_sprite.draw(screen, camera_offset=-self.camera.offset, show_bounding_box=True)
-
+        # Draw level elements first
         self.platforms.draw(surface=screen, camera_offset=-self.camera.offset, show_bounding_box=True)
-        self.ui.draw(screen)
+
+        # Draw bullets
         if self.player.bullet_group:
             for bullet in self.player.bullet_group:
                 bullet.draw(screen, camera_offset=-self.camera.offset)
                 bullet.draw(screen, camera_offset=-self.camera.offset, show_bounding_box=True)
+
+        # Draw player and update sprite animation
+        self.player.update_animation()
+        self.player.draw(screen=screen, camera_offset=-self.camera.offset, show_bounding_box=True)
+        self.player.sword_sprite.draw(screen, camera_offset=-self.camera.offset, show_bounding_box=True)
+
+        # Draw UI last
+        self.ui.draw(screen)

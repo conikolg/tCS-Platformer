@@ -5,6 +5,7 @@ import pygame
 
 from scripts.bullet.bullet import Bullet
 from scripts.sword.sword import Sword
+from scripts.util.healthbar import Healthbar
 
 
 class Player(pygame.sprite.Sprite):
@@ -22,7 +23,7 @@ class Player(pygame.sprite.Sprite):
         self.rect: pygame.rect.Rect = rect
 
         self.animations: dict[str, list] = self.load_animations(size=(self.rect.w, self.rect.h))
-        self.health: float = 100.0
+        self.healthbar = Healthbar()
         self.velocity = pygame.math.Vector2(0, 0)
         self.direction = pygame.math.Vector2(1, 0)
         self.jump_speed: float = 10.0
@@ -183,6 +184,9 @@ class Player(pygame.sprite.Sprite):
             self.rect.bottom = 650
             self.is_grounded = True
 
+        # Update sword
+        self._move_sword()
+
         # Update animation state
         if not self._is_grounded:
             if self.velocity.y >= 0:
@@ -237,8 +241,8 @@ class Player(pygame.sprite.Sprite):
         self.update_animation()
         screen.blit(source=pygame.transform.flip(self.image, self.direction.x == -1, False),
                     dest=self.rect.move(camera_offset))
+        screen.blit(source=self.healthbar.render(self.image.get_width(), 12),
+                    dest=self.rect.move(camera_offset).move(0, -12))
 
         if show_bounding_box:
             pygame.draw.rect(surface=screen, color=(255, 0, 0), rect=self.rect.move(camera_offset), width=1)
-
-        self._move_sword()
