@@ -2,6 +2,7 @@ from pathlib import Path
 
 import pygame
 
+from scripts.enemy.basic_enemy import BasicEnemy
 from scripts.player.player import Player
 from scripts.scenes.base_scene import BaseScene
 from scripts.ui.ui import UI
@@ -33,7 +34,8 @@ class LevelOneScene(BaseScene):
 
         # Create all active platforms in this level
         self.platforms: CustomGroup = CustomGroup()
-        self.platforms.add(
+        platforms = [
+            # Little obstacle course
             Platform(rect=pygame.rect.Rect(800, 600, 100, 10)),
             Platform(rect=pygame.rect.Rect(900, 550, 100, 10)),
             Platform(rect=pygame.rect.Rect(1000, 500, 100, 10)),
@@ -42,29 +44,29 @@ class LevelOneScene(BaseScene):
             Platform(rect=pygame.rect.Rect(1400, 575, 100, 10)),
             Platform(rect=pygame.rect.Rect(1525, 575, 100, 10)),
 
-            Platform(rect=pygame.rect.Rect(1650, 200, 100, 10)),
-            Platform(rect=pygame.rect.Rect(1750, 200, 100, 10)),
-            Platform(rect=pygame.rect.Rect(1850, 200, 100, 10)),
-            Platform(rect=pygame.rect.Rect(1950, 200, 100, 10)),
-            Platform(rect=pygame.rect.Rect(2050, 200, 100, 10)),
+            # Long tunnel
+            Platform(rect=pygame.rect.Rect(1650, 200, 800, 10)),
+            Platform(rect=pygame.rect.Rect(1650, 80, 800, 10))
+        ]
+        self.platforms.add(*platforms)
 
-            Platform(rect=pygame.rect.Rect(2150, 200, 100, 10)),
-            Platform(rect=pygame.rect.Rect(2250, 200, 100, 10)),
-            Platform(rect=pygame.rect.Rect(2350, 200, 100, 10)),
-            Platform(rect=pygame.rect.Rect(2450, 200, 100, 10)),
+        # Create enemies
+        self.enemy_group: CustomGroup = CustomGroup()
+        enemies = [
+            # Enemy on the first platform
+            BasicEnemy(platform=platforms[0], horizontal_offset=10),
 
-            Platform(rect=pygame.rect.Rect(1650, 80, 100, 10)),
-            Platform(rect=pygame.rect.Rect(1750, 80, 100, 10)),
-            Platform(rect=pygame.rect.Rect(1850, 80, 100, 10)),
-            Platform(rect=pygame.rect.Rect(1950, 80, 100, 10)),
-            Platform(rect=pygame.rect.Rect(2050, 80, 100, 10)),
+            # Enemies inside the tunnel
+            BasicEnemy(platform=platforms[8], horizontal_offset=10),
+            BasicEnemy(platform=platforms[8], horizontal_offset=100),
+            BasicEnemy(platform=platforms[8], horizontal_offset=500),
 
-            Platform(rect=pygame.rect.Rect(2150, 80, 100, 10)),
-            Platform(rect=pygame.rect.Rect(2250, 80, 100, 10)),
-            Platform(rect=pygame.rect.Rect(2350, 80, 100, 10)),
-            Platform(rect=pygame.rect.Rect(2450, 80, 100, 10)),
-
-        )
+            # Enemies on top of the tunnel
+            BasicEnemy(platform=platforms[7], horizontal_offset=75),
+            BasicEnemy(platform=platforms[7], horizontal_offset=345),
+            BasicEnemy(platform=platforms[7], horizontal_offset=740),
+        ]
+        self.enemy_group.add(*enemies)
 
     def handle_events(self, events: list[pygame.event.Event]):
         """
@@ -109,6 +111,9 @@ class LevelOneScene(BaseScene):
         # Update bullets
         self.player.bullet_group.update(self.player.rect.x + self.camera.DISPLAY_W / 2,
                                         self.player.rect.x - self.camera.DISPLAY_W / 2)
+
+        # Update enemies
+        self.enemy_group.update()
 
     @staticmethod
     def load_scenery(size: tuple) -> dict[pygame.Surface, float]:
@@ -161,6 +166,9 @@ class LevelOneScene(BaseScene):
 
         # Draw level elements first
         self.platforms.draw(surface=screen, camera_offset=-self.camera.offset, show_bounding_box=True)
+
+        # Draw enemies
+        self.enemy_group.draw(surface=screen, camera_offset=-self.camera.offset)
 
         # Draw bullets
         if self.player.bullet_group:

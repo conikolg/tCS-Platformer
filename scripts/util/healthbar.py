@@ -35,18 +35,18 @@ class Healthbar:
         new_health = min(self._maximum_health, new_health)
         self._current_health = new_health
 
-    def render(self, width: int, height: int) -> pygame.Surface:
+    def render(self, width: int, height: int, outline_width: int = 3) -> pygame.Surface:
         """
         Returns an image of the healthbar, with a black outline and a left-aligned green portion
         representing current remaining health.
 
         :param width: How wide in pixels the healthbar should be.
         :param height: How tall in pixels the healthbar should be.
+        :param outline_width: How many pixels should be used for the outline.
         :return: a pygame.Surface of the specified width and height.
         """
 
         img = pygame.Surface((width, height))
-        outline_width = 3
 
         # Fill in red background
         pygame.draw.rect(surface=img, color=(210, 40, 0), rect=(

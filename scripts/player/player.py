@@ -26,12 +26,13 @@ class Player(pygame.sprite.Sprite):
         self.healthbar = Healthbar()
         self.velocity = pygame.math.Vector2(0, 0)
         self.direction = pygame.math.Vector2(1, 0)
-        self.jump_speed: float = 10.0
         self.gravity: float = 0.5
         self.update_time: int = 0
 
-        self.walk_speed = 5
-        self.sprint_speed = 8
+        self.jump_speed: float = 12.0
+        self.super_jump_speed: float = 20.0
+        self.walk_speed: float = 5.0
+        self.sprint_speed: float = 8.0
 
         # Nested dict to store all player input key binds
         # This will allow the player to easily remap keys once feature is created
@@ -123,7 +124,7 @@ class Player(pygame.sprite.Sprite):
         self.is_sprinting = True
 
     def _super_jump(self):
-        self.velocity.y = self.jump_speed * 2
+        self.velocity.y = self.super_jump_speed
         self._is_grounded = False
         self.set_animation("jump")
 
