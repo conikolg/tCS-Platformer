@@ -1,5 +1,6 @@
 import pygame
 
+
 # NOTE: Bullet is inheriting from pygame.sprite.Sprite whereas some other classes inherit from CustomSprite
 # which should it be?
 class Bullet(pygame.sprite.Sprite):
@@ -22,11 +23,7 @@ class Bullet(pygame.sprite.Sprite):
         self.damage = damage
 
     def __str__(self):
-        out_str = ""
-        out_str += "Bullet Sprite"
-        out_str += " located @ (" + str(self.rect.x) + ", " + str(self.rect.y) + ")"
-        out_str += " with speed " + str(self.speed) + " and damage " + str(self.damage)
-        return out_str
+        return f"Bullet located at {self.rect.topleft} with speed {self.speed} and {self.damage} damage"
 
     # should a bullet disappear going off screen?
     # technically it still physically exists, allowing us to shoot offscreen enemies or obstacles...

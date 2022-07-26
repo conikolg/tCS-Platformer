@@ -1,3 +1,4 @@
+import time
 from collections import defaultdict
 from pathlib import Path
 
@@ -6,7 +7,6 @@ from scripts.sword.sword import Sword
 from scripts.util.healthbar import Healthbar
 from scripts.util.sound import *
 
-import time
 
 # NOTE: Bullet is inheriting from pygame.sprite.Sprite whereas some other classes inherit from CustomSprite
 # which should it be?
@@ -56,8 +56,8 @@ class Player(pygame.sprite.Sprite):
             }
         }
 
-        self.fire_rate = 500 # in ms
-        self.last_fire_time = -1 # timestamp representing last time player fired a bullet
+        self.fire_rate = 500  # in ms
+        self.last_fire_time = -1  # timestamp representing last time player fired a bullet
 
         self._is_grounded: bool = True
         self.is_sprinting: bool = False
@@ -70,14 +70,9 @@ class Player(pygame.sprite.Sprite):
         Sound("laser", "assets/sounds/sfx/laser.wav")
 
     def __str__(self):
-        out_str = ""
-        out_str += "Player Sprite"
-        out_str += " located @ (" + str(self.rect.x) + ", " + str(self.rect.y) + ")"
-        health_percent = self.healthbar.health / self.healthbar.maximum_health        
-        health_percent *= 100
-        health_percent = round(health_percent, 2)
-        out_str += " with " + str(health_percent) + "% HP"
-        out_str += " (" + str(self.healthbar.health) + " / " + str(self.healthbar.maximum_health) + ")"
+        out_str = f"Player sprite located @ {self.rect.topleft}"
+        health_percent = round(self.healthbar.health / self.healthbar.maximum_health * 100, 2)
+        out_str += f" with {self.healthbar.health}/{self.healthbar.maximum_health} ({health_percent}%) HP"
         return out_str
 
     @property
@@ -154,8 +149,8 @@ class Player(pygame.sprite.Sprite):
 
     def _shoot(self):
         self.bullet_group.add(Bullet(location=(self.rect.centerx, self.rect.centery),
-            direction=pygame.math.Vector2(1, 0) * self.direction.x,
-            damage=10))
+                                     direction=pygame.math.Vector2(1, 0) * self.direction.x,
+                                     damage=10))
         play_sound("laser")
 
     def _move_sword(self):
