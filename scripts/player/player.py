@@ -6,6 +6,7 @@ from scripts.sword.sword import Sword
 from scripts.util.healthbar import Healthbar
 from scripts.util.sound import *
 
+import time
 
 class Player(pygame.sprite.Sprite):
     """
@@ -53,7 +54,8 @@ class Player(pygame.sprite.Sprite):
             }
         }
 
-        # TODO: add shoot cooldown once the bullet is working properly
+        self.fire_rate = 500 # in ms
+        self.last_fire_time = -1 # timestamp representing last time player fired a bullet
 
         self._is_grounded: bool = True
         self.is_sprinting: bool = False
@@ -61,6 +63,8 @@ class Player(pygame.sprite.Sprite):
 
         self.bullet_group = pygame.sprite.Group()
         self.sword_sprite = Sword(location=(self.rect.centerx + 24, self.rect.centery - 18))
+
+
 
         # Load sounds that are associated with the player
         Sound("laser", "assets/sounds/sfx/laser.wav")
@@ -104,7 +108,14 @@ class Player(pygame.sprite.Sprite):
                     if self._is_grounded:
                         self._jump()
                 if event.key in self.input["abilities"]["shoot"]:
-                    self._shoot()
+                    # NOTE: there is probably a more accurate way to track this
+                    # since this is based off system time rather than game time,
+                    # this timer will break if we implement pausing
+                    # i.e. fire, pause, wait a bit, unpause, can fire again
+                    current_time = time.time() * 1000
+                    if current_time - self.last_fire_time >= self.fire_rate:
+                        self._shoot()
+                        self.last_fire_time = current_time
                 if event.key in self.input["abilities"]["super jump"]:
                     if self._is_grounded:
                         self._super_jump()
