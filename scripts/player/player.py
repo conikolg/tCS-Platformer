@@ -4,13 +4,12 @@ from pathlib import Path
 
 from scripts.bullet.bullet import Bullet
 from scripts.sword.sword import Sword
+from scripts.util.custom_sprite import CustomSprite
 from scripts.util.healthbar import Healthbar
 from scripts.util.sound import *
 
 
-# NOTE: Bullet is inheriting from pygame.sprite.Sprite whereas some other classes inherit from CustomSprite
-# which should it be?
-class Player(pygame.sprite.Sprite):
+class Player(CustomSprite):
     """
     Class for initializing a player and controller.
 
@@ -66,6 +65,8 @@ class Player(pygame.sprite.Sprite):
         self.bullet_group = pygame.sprite.Group()
         self.sword_sprite = Sword(location=(self.rect.centerx + 24, self.rect.centery - 18))
 
+        self._image = None
+
         # Load sounds that are associated with the player
         Sound("laser", "assets/sounds/sfx/laser.wav")
 
@@ -114,10 +115,8 @@ class Player(pygame.sprite.Sprite):
                     if self._is_grounded:
                         self._jump()
                 if event.key in self.input["abilities"]["shoot"]:
-                    # NOTE: there is probably a more accurate way to track this
-                    # since this is based off system time rather than game time,
-                    # this timer will break if we implement pausing
-                    # i.e. fire, pause, wait a bit, unpause, can fire again
+                    # todo: use pygame time, rather than system time
+                    # todo: make a proper game clock that compensates for pausing/resuming
                     current_time = time.time() * 1000
                     if current_time - self.last_fire_time >= self.fire_rate:
                         self._shoot()
@@ -228,7 +227,7 @@ class Player(pygame.sprite.Sprite):
 
     def update_animation(self):
         animation_cooldown = 100
-        self.image = self.animations[self.current_animation_frame[0]][self.current_animation_frame[1]]
+        self._image = self.animations[self.current_animation_frame[0]][self.current_animation_frame[1]]
         if pygame.time.get_ticks() - self.update_time > animation_cooldown:
             self.update_time = pygame.time.get_ticks()
             self.current_animation_frame[1] += 1
@@ -255,15 +254,12 @@ class Player(pygame.sprite.Sprite):
 
         return animations
 
+    @property
+    def image(self):
+        return pygame.transform.flip(self._image, self.direction.x == -1, False)
+
     def draw(self, screen: pygame.Surface, camera_offset: pygame.math.Vector2 = None, show_bounding_box: bool = False):
-        if camera_offset is None:
-            camera_offset = pygame.math.Vector2(0, 0)
-
         self.update_animation()
-        screen.blit(source=pygame.transform.flip(self.image, self.direction.x == -1, False),
-                    dest=self.rect.move(camera_offset))
-        screen.blit(source=self.healthbar.render(self.image.get_width(), 12),
+        super(Player, self).draw(screen, camera_offset, show_bounding_box)
+        screen.blit(source=self.healthbar.render(self._image.get_width(), 12),
                     dest=self.rect.move(camera_offset).move(0, -12))
-
-        if show_bounding_box:
-            pygame.draw.rect(surface=screen, color=(255, 0, 0), rect=self.rect.move(camera_offset), width=1)

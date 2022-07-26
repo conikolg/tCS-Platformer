@@ -1,9 +1,9 @@
 import pygame
 
+from scripts.util.custom_sprite import CustomSprite
 
-# NOTE: Bullet is inheriting from pygame.sprite.Sprite whereas some other classes inherit from CustomSprite
-# which should it be?
-class Bullet(pygame.sprite.Sprite):
+
+class Bullet(CustomSprite):
     def __init__(self, location: tuple, direction: pygame.math.Vector2, damage: int):
         """
         Creates a bullet that spawns in a particular location and travels in a particular direction.
@@ -16,8 +16,8 @@ class Bullet(pygame.sprite.Sprite):
         self.speed: int = 10
         self.direction: pygame.math.Vector2 = direction.normalize()
 
-        self.image: pygame.Surface = pygame.image.load("assets/bullet/bullet.png").convert_alpha()
-        self.image = pygame.transform.scale(self.image, (100, 100))
+        self._image: pygame.Surface = pygame.image.load("assets/bullet/bullet.png").convert_alpha()
+        self._image = pygame.transform.scale(self._image, (100, 100))
         self.rect: pygame.rect.Rect = self.image.get_rect()
         self.rect.center = location
         self.damage = damage
@@ -32,12 +32,6 @@ class Bullet(pygame.sprite.Sprite):
         if self.rect.right < left_bound or self.rect.left > right_bound:
             self.kill()
 
-    def draw(self, screen: pygame.Surface, camera_offset: pygame.math.Vector2 = None, show_bounding_box: bool = False):
-        if camera_offset is None:
-            camera_offset = pygame.math.Vector2(*self.rect.center)
-
-        screen.blit(source=pygame.transform.flip(self.image, self.direction.x < 0, False),
-                    dest=self.rect.move(camera_offset))
-
-        if show_bounding_box:
-            pygame.draw.rect(surface=screen, color=(255, 0, 0), rect=self.rect.move(camera_offset), width=1)
+    @property
+    def image(self):
+        return pygame.transform.flip(self._image, self.direction.x == -1, False)
