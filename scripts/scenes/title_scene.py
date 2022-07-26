@@ -8,10 +8,14 @@ class TitleScene(BaseScene):
     def __init__(self):
         super().__init__()
 
+        def on_play_clicked():
+            stop_sound("titleTheme")
+            self.scene_manager.go_to(LevelOneScene())
+
         self.play_button = Button(
             text="Play",
             rect=(580, 400, 120, 40),
-            on_click_fn=lambda: self.scene_manager.go_to(LevelOneScene())
+            on_click_fn=on_play_clicked
         )
         self.quit_button = Button(
             text="Quit",
@@ -19,7 +23,7 @@ class TitleScene(BaseScene):
             on_click_fn=lambda: quit(0)
         )
 
-        # load and play title theme song when this TitleScene is created
+        # Load and play title theme song
         Sound("titleTheme", "assets/sounds/music/metroid_title_theme.mp3", 50)
         play_sound("titleTheme")
 

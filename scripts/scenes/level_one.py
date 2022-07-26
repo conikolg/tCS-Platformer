@@ -71,12 +71,6 @@ class LevelOneScene(BaseScene):
         Sound("levelOneTheme", "assets/sounds/music/metroid_brinstar_theme.mp3", 50)
         Sound("jump", "assets/sounds/sfx/mario_jump.mp3", 10)
 
-        # stop the title screen music
-        # NOTE: since this has to to do with the title, I feel like this code belongs in title_scene.py,
-        #       but I couldn't find any easy way to integrate this with the lambda function given to the play button
-        #       so I figure it's not that bad for a level to make sure to pause the previous level's music
-        stop_sound("titleTheme")
-
         # start level 1 music
         play_sound("levelOneTheme")
 
