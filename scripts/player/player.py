@@ -35,20 +35,18 @@ class Player(pygame.sprite.Sprite):
         self.sprint_speed: float = 8.0
 
         # Nested dict to store all player input key binds
-        # This will allow the player to easily remap keys once feature is created
+        # Allow us to easily remap keys as features are created
         # WARNING: Do not make changes to this dict without also adding the image bind to assets/keys
         self.input = {
             "movement": {
                 "left": [pygame.K_LEFT, pygame.K_a],
                 "right": [pygame.K_RIGHT, pygame.K_d],
-                "sprint": [pygame.K_LSHIFT, pygame.K_s],
-                "jump": [pygame.K_SPACE, pygame.K_UP, pygame.K_w]
+                "sprint": [pygame.K_LSHIFT, pygame.K_RSHIFT],
+                "jump": [pygame.K_UP, pygame.K_w]
             },
             "abilities": {
-                "shoot": [pygame.K_j],
-                "other thing here": [pygame.K_k],
-                "another other thing here": [pygame.K_l],
                 "super jump": [pygame.K_p],
+                "shoot": [pygame.K_SPACE],                
             },
             "interact": {
                 "pickup": [pygame.K_e],
@@ -64,6 +62,11 @@ class Player(pygame.sprite.Sprite):
 
         self.bullet_group = pygame.sprite.Group()
         self.sword_sprite = Sword(location=(self.rect.centerx + 24, self.rect.centery - 18))
+
+        # flags whether the player wants to display keybinds
+        # NOTE: this is a sloppy workaround to have the player communicate with the ui's draw method
+        # see the render() method in level_one.py
+        self.help_enabled = True
 
         # load sounds that are associated with the player
         Sound("laser", "assets/sounds/sfx/laser.wav")
@@ -117,6 +120,8 @@ class Player(pygame.sprite.Sprite):
                     self._sword_swing()
                 if event.key in [pygame.K_n]:
                     self._sword_away()
+                if event.key in [pygame.K_F1]:
+                    self.help_enabled = not self.help_enabled
 
     def _jump(self):
         self.velocity.y = self.jump_speed

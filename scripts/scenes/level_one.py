@@ -194,5 +194,8 @@ class LevelOneScene(BaseScene):
         self.player.draw(screen=screen, camera_offset=-self.camera.offset, show_bounding_box=True)
         self.player.sword_sprite.draw(screen, camera_offset=-self.camera.offset, show_bounding_box=True)
 
+        # UI only draws keys on screen if player has "help enabled" (F1)
+        self.ui.draw_inputs = self.player.help_enabled
+
         # Draw UI last
         self.ui.draw(screen)
