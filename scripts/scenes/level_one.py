@@ -21,11 +21,13 @@ class LevelOneScene(BaseScene):
         # Length of level used in render method
         self.length = 5
 
-        self.camera = Camera(behavior=BoundedFollowTarget(target=self.player,
-                                                          horizontal_limits=(0, 6000),
-                                                          vertical_limits=(-100, 0)),
-                             # TODO: compensate for weirdness with bottom being cut-off on Macs
-                             constant=pygame.math.Vector2(-640 + self.player.rect.w / 2, -self.player.rect.top))
+        self.camera = Camera(
+            behavior=BoundedFollowTarget(
+                target=self.player,
+                horizontal_limits=(0, 6000),
+                vertical_limits=(-100, 0)),
+            # TODO: compensate for weirdness with bottom being cut-off on Macs
+            constant=pygame.math.Vector2(-640 + self.player.rect.w / 2, -self.player.rect.top))
 
         # Store all layers in a dict with the delta scroll for each layer
         self.scenery: dict[pygame.Surface, float] = self.load_scenery(size=(self.camera.DISPLAY_W,
@@ -67,12 +69,15 @@ class LevelOneScene(BaseScene):
         ]
         self.enemy_group.add(*enemies)
 
-        # create Sound objects used in level 1 (see sound.py for more info)
+        # Create Sound objects used in level 1 (see sound.py for more info)
         Sound("levelOneTheme", "assets/sounds/music/metroid_brinstar_theme.mp3", 50)
         Sound("jump", "assets/sounds/sfx/mario_jump.mp3", 10)
 
-        # start level 1 music
+        # Start level 1 music
         play_sound("levelOneTheme")
+
+        # Show Controls
+        self.show_controls_help: bool = True
 
     def handle_events(self, events: list[pygame.event.Event]):
         """
@@ -81,6 +86,10 @@ class LevelOneScene(BaseScene):
         :param events: a list of pygame events.
         :return: None
         """
+
+        for event in events:
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_F1:
+                self.show_controls_help = not self.show_controls_help
 
         self.player.handle_events(events)
 
@@ -187,8 +196,8 @@ class LevelOneScene(BaseScene):
         self.player.draw(screen=screen, camera_offset=-self.camera.offset, show_bounding_box=True)
         self.player.sword_sprite.draw(screen, camera_offset=-self.camera.offset, show_bounding_box=True)
 
-        # UI only draws keys on screen if player has "help enabled" (F1)
-        self.ui.draw_inputs = self.player.help_enabled
-
         # Draw UI last
-        self.ui.draw(screen)
+        # @Jared - Just track the show/hide status in this file, not player.py. Also, if we have different
+        # components of the UI, you can create a param for each component and set them like this. So maybe
+        # later have a param like show_cooldowns=self.show_cooldowns, show_ammo=self.show_ammo, etc.
+        self.ui.draw(screen, show_controls=self.show_controls_help)

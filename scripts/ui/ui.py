@@ -11,7 +11,6 @@ class UI:
         self.x = 25
         self.y = 25
         self.input_keys: dict[pygame.Surface, str] = self.find_binds(player)
-        self.draw_inputs = True
 
     # TODO: ErrorHandling to make sure only images that are also input binds are in each directory
     @staticmethod
@@ -42,17 +41,15 @@ class UI:
 
         return input_keys
 
-    def draw(self, screen):
+    def draw(self, screen, show_controls: bool = True):
         # Iterate through items in input keys dict
         # Blit image at corresponding iteration of loop
         # Blit text at same y additive x value of image
-        if self.draw_inputs:
-            i = 1
-            for image, desc in self.input_keys.items():
+        if show_controls:
+            for i, (image, desc) in enumerate(self.input_keys.items(), start=1):
                 screen.blit(image, (self.x, i * self.y))
                 font = pygame.font.Font("assets/dogicapixelbold.ttf", 12)
                 text = font.render(desc, True, (255, 255, 255))
                 screen.blit(text, dest=(
                     image.get_rect().right + 50,
                     i * self.y + text.get_height() / 2))
-                i += 1
