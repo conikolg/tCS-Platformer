@@ -1,5 +1,6 @@
-import pygame
 from pathlib import Path
+
+import pygame
 
 
 class UI:
@@ -48,10 +49,10 @@ class UI:
         if self.draw_inputs:
             i = 1
             for image, desc in self.input_keys.items():
-                screen.blit(image, (self.x, i*self.y))
+                screen.blit(image, (self.x, i * self.y))
                 font = pygame.font.Font("assets/dogicapixelbold.ttf", 12)
                 text = font.render(desc, True, (255, 255, 255))
                 screen.blit(text, dest=(
                     image.get_rect().right + 50,
-                    i*self.y + text.get_height() / 2))
+                    i * self.y + text.get_height() / 2))
                 i += 1

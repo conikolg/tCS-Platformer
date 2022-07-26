@@ -1,6 +1,7 @@
-import pygame
-from pathlib import Path
 from collections import defaultdict
+from pathlib import Path
+
+import pygame
 
 from scripts.util.custom_sprite import CustomSprite
 from scripts.util.healthbar import Healthbar

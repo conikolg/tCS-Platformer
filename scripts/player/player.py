@@ -1,12 +1,11 @@
 from collections import defaultdict
 from pathlib import Path
 
-import pygame
-
 from scripts.bullet.bullet import Bullet
 from scripts.sword.sword import Sword
 from scripts.util.healthbar import Healthbar
 from scripts.util.sound import *
+
 
 class Player(pygame.sprite.Sprite):
     """
@@ -46,7 +45,7 @@ class Player(pygame.sprite.Sprite):
             },
             "abilities": {
                 "super jump": [pygame.K_p],
-                "shoot": [pygame.K_SPACE],                
+                "shoot": [pygame.K_SPACE],
             },
             "interact": {
                 "pickup": [pygame.K_e],
@@ -127,7 +126,7 @@ class Player(pygame.sprite.Sprite):
         self.velocity.y = self.jump_speed
         self._is_grounded = False
         self.set_animation("jump")
-        playSound("jump")
+        play_sound("jump")
 
     def _sprint(self):
         self.is_sprinting = True
@@ -136,12 +135,12 @@ class Player(pygame.sprite.Sprite):
         self.velocity.y = self.super_jump_speed
         self._is_grounded = False
         self.set_animation("jump")
-        playSound("jump")
+        play_sound("jump")
 
     def _shoot(self):
         self.bullet_group.add(Bullet(location=(self.rect.centerx, self.rect.centery),
                                      direction=pygame.math.Vector2(1, 0) * self.direction.x))
-        playSound("laser")
+        play_sound("laser")
 
     def _move_sword(self):
         if self.direction.x == 1:

@@ -1,9 +1,8 @@
-import pygame
-
 from scripts.scenes.base_scene import BaseScene
 from scripts.scenes.level_one import LevelOneScene
 from scripts.util.button import Button
 from scripts.util.sound import *
+
 
 class TitleScene(BaseScene):
     def __init__(self):
@@ -22,7 +21,7 @@ class TitleScene(BaseScene):
 
         # load and play title theme song when this TitleScene is created
         Sound("titleTheme", "assets/sounds/music/metroid_title_theme.mp3", 50)
-        playSound("titleTheme")
+        play_sound("titleTheme")
 
     def handle_events(self, events: list[pygame.event.Event]):
         self.play_button.handle_events(events)

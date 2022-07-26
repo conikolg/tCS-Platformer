@@ -32,8 +32,9 @@ sounds = {}
 GAME_VOLUME = 100
 """
 
-class Sound():
-    def __init__(self, name, fpath, volume = 100):
+
+class Sound:
+    def __init__(self, name, fpath, volume=100):
         """
         Creates a sound object that can be started and stopped at will.
 
@@ -47,36 +48,42 @@ class Sound():
         self.fpath = fpath
         self.volume = volume
         self.pygameSound = pygame.mixer.Sound(fpath)
-        self.pygameSound.set_volume(volume/100)
+        self.pygameSound.set_volume(volume / 100)
 
         # add this sound to sounds dictionary when created
         sounds[name] = self
+
 
 # plays the sound with the given name
 # when a sound is played, it will start from where it last paused
 # if it hasn't been played yet, it simply starts from the beginning
 # if a sound was previously played until completion, this will restart it
-def playSound(name):
-	if name not in sounds:
-		raise ValueError("Invalid value given to playSound(). Sound with name " + str(name) + " has not been loaded into sounds dictionary.")
-	soundObj = sounds[name]
-	pygame.mixer.Sound.play(soundObj.pygameSound)
+def play_sound(name):
+    if name not in sounds:
+        raise ValueError(
+            f"Invalid value given to play_sound(). Sound with name {name} has not been loaded into sounds dictionary.")
+    sound_obj = sounds[name]
+    pygame.mixer.Sound.play(sound_obj.pygameSound)
+
 
 # stops a sound with the given name so that it stops producing noise
-# unlike pauseSound, this will cause the sound to restart from the beginning when it is played next
-def stopSound(name):
+# unlike pause_sound, this will cause the sound to restart from the beginning when it is played next
+def stop_sound(name):
     if name not in sounds:
-        raise ValueError("Invalid value given to stopSound(). Sound with name " + str(name) + " has not been loaded into sounds dictionary.")
-    soundObj = sounds[name]
-    pygame.mixer.Sound.stop(soundObj.pygameSound)
+        raise ValueError(
+            f"Invalid value given to stop_sound(). Sound with name {name} has not been loaded into sounds dictionary.")
+    sound_obj = sounds[name]
+    pygame.mixer.Sound.stop(sound_obj.pygameSound)
+
 
 """
 # NOT YET IMPLEMENTED
 # pauses a sound with the given name so that it stops producing noise
-# unlike stopSound, this will cause the sound to start from where it paused when it is played next
-def pauseSound(name):
+# unlike stop_sound, this will cause the sound to start from where it paused when it is played next
+def pause_sound(name):
     if name not in sounds:
-        raise ValueError("Invalid value given to pauseSound(). Sound with name " + str(name) + " has not been loaded into sounds dictionary.")
-    soundObj = sounds[name]
-    pygame.mixer.Sound.pause(soundObj.pygameSound)
+        raise ValueError(
+            f"Invalid value given to pause_sound(). Sound with name {name} has not been loaded into sounds dictionary.")
+    sound_obj = sounds[name]
+    pygame.mixer.Sound.pause(sound_obj.pygameSound)
 """

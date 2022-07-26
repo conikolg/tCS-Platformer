@@ -1,7 +1,5 @@
 from pathlib import Path
 
-import pygame
-
 from scripts.enemy.basic_enemy import BasicEnemy
 from scripts.player.player import Player
 from scripts.scenes.base_scene import BaseScene
@@ -11,6 +9,7 @@ from scripts.util.camera import Camera, BoundedFollowTarget
 from scripts.util.custom_group import CustomGroup
 from scripts.util.platform import Platform
 from scripts.util.sound import *
+
 
 class LevelOneScene(BaseScene):
     def __init__(self):
@@ -76,10 +75,10 @@ class LevelOneScene(BaseScene):
         # NOTE: since this has to to do with the title, I feel like this code belongs in title_scene.py,
         #       but I couldn't find any easy way to integrate this with the lambda function given to the play button
         #       so I figure it's not that bad for a level to make sure to pause the previous level's music
-        stopSound("titleTheme")
+        stop_sound("titleTheme")
 
         # start level 1 music
-        playSound("levelOneTheme")
+        play_sound("levelOneTheme")
 
     def handle_events(self, events: list[pygame.event.Event]):
         """
