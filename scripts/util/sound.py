@@ -13,10 +13,10 @@
 # Sound("jump", "assets/sounds/jump.mp3") 
 
 # playing a sound:
-# playSound("jump")
+# play_sound("jump")
 
 # stopping a sound:
-# stopSound("jump")
+# stop_sound("jump")
 
 # --- CODE ---
 
@@ -40,7 +40,8 @@ class Sound:
 
         :param name: string specifying the arbitrary name used to reference to this sound effect
         :param fpath: string specifying the file path to the sound effect file to load
-        :param volume: integer ranging from 0 to 100, specifies the volume percentage (defaults to 100%, full volume of original sound effect file)
+        :param volume: integer ranging from 0 to 100, specifies the volume percentage (defaults to 100%,
+        full volume of original sound effect file)
         """
 
         # setup properties
