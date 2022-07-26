@@ -56,7 +56,14 @@ class BasicEnemy(CustomSprite):
 
     @property
     def image(self):
-        return pygame.transform.flip(self._image, flip_x=self.direction == 1, flip_y=False)
+
+        # Note from Nathan: As of 7/25/22 6:24 PM this was generating an error. Previously the line of code was: 
+        # return pygame.transform.flip(self._image, flip_x=self.direction == 1, flip_y=False)
+        # the error we were getting was: TypeError: flip() takes no keyword arguments
+        # so after looking up a reference on pygame.transform.flip(), I just removed the positional arguments and it seems to work
+        # (I know a lot of this would show up in the revision history but whatever)
+
+        return pygame.transform.flip(self._image, self.direction == 1, False)
 
     def draw(self, surface: pygame.Surface, camera_offset: pygame.math.Vector2 = None, show_bounding_box: bool = False):
         super(BasicEnemy, self).draw(surface, camera_offset, show_bounding_box)

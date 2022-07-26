@@ -6,7 +6,7 @@ import pygame
 from scripts.bullet.bullet import Bullet
 from scripts.sword.sword import Sword
 from scripts.util.healthbar import Healthbar
-
+from scripts.util.sound import *
 
 class Player(pygame.sprite.Sprite):
     """
@@ -65,6 +65,9 @@ class Player(pygame.sprite.Sprite):
         self.bullet_group = pygame.sprite.Group()
         self.sword_sprite = Sword(location=(self.rect.centerx + 24, self.rect.centery - 18))
 
+        # load sounds that are associated with the player
+        Sound("laser", "assets/sounds/sfx/laser.wav")
+
     @property
     def is_grounded(self) -> bool:
         """ Returns True if the player is grounded (not falling), False otherwise. """
@@ -119,6 +122,7 @@ class Player(pygame.sprite.Sprite):
         self.velocity.y = self.jump_speed
         self._is_grounded = False
         self.set_animation("jump")
+        playSound("jump")
 
     def _sprint(self):
         self.is_sprinting = True
@@ -127,10 +131,12 @@ class Player(pygame.sprite.Sprite):
         self.velocity.y = self.super_jump_speed
         self._is_grounded = False
         self.set_animation("jump")
+        playSound("jump")
 
     def _shoot(self):
         self.bullet_group.add(Bullet(location=(self.rect.centerx, self.rect.centery),
                                      direction=pygame.math.Vector2(1, 0) * self.direction.x))
+        playSound("laser")
 
     def _move_sword(self):
         if self.direction.x == 1:

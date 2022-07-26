@@ -10,7 +10,7 @@ from scripts.util import physics
 from scripts.util.camera import Camera, BoundedFollowTarget
 from scripts.util.custom_group import CustomGroup
 from scripts.util.platform import Platform
-
+from scripts.util.sound import *
 
 class LevelOneScene(BaseScene):
     def __init__(self):
@@ -67,6 +67,19 @@ class LevelOneScene(BaseScene):
             BasicEnemy(platform=platforms[7], horizontal_offset=740),
         ]
         self.enemy_group.add(*enemies)
+
+        # create Sound objects used in level 1 (see sound.py for more info)
+        Sound("levelOneTheme", "assets/sounds/music/metroid_brinstar_theme.mp3", 50)
+        Sound("jump", "assets/sounds/sfx/mario_jump.mp3", 10)
+
+        # stop the title screen music
+        # NOTE: since this has to to do with the title, I feel like this code belongs in title_scene.py,
+        #       but I couldn't find any easy way to integrate this with the lambda function given to the play button
+        #       so I figure it's not that bad for a level to make sure to pause the previous level's music
+        stopSound("titleTheme")
+
+        # start level 1 music
+        playSound("levelOneTheme")
 
     def handle_events(self, events: list[pygame.event.Event]):
         """
