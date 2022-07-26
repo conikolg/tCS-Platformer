@@ -101,7 +101,7 @@ class LevelOneScene(BaseScene):
         # Update player
         self.player.update()
 
-        # Process collisions
+        # Process player-platform collisions
         collisions = pygame.sprite.spritecollide(self.player, self.platforms, dokill=False)
         for collision in collisions:
             collision_side = physics.get_collision_side(collision.rect, self.player.rect)
@@ -129,6 +129,21 @@ class LevelOneScene(BaseScene):
 
         # Update enemies
         self.enemy_group.update()
+
+        # Process enemy-bullet collisions
+        # NOTE: I (Nathan) am not as familiar with pygame sprite groups 
+        #       so not sure if this is the way to go here
+        # also, are there any issues with deleting the bullet enemy from the list as we iterate over it?
+        # BUG: this is causing damage to all enemies. Why? Is this the proper way to interact with health?
+        for bullet in self.player.bullet_group:
+            for enemy in self.enemy_group:
+                collisions = pygame.sprite.spritecollide(bullet, self.enemy_group, dokill=False)
+                if len(collisions) > 0: # collision occurred - enemy takes damage, bullet dies
+                    enemy.healthbar._current_health = enemy.healthbar._current_health - bullet.damage
+                    bullet.kill()
+                # check if enemy took enough damage to die
+                if enemy.healthbar._current_health <= 0:
+                    enemy.kill()
 
     @staticmethod
     def load_scenery(size: tuple) -> dict[pygame.Surface, float]:

@@ -2,7 +2,7 @@ import pygame
 
 
 class Bullet(pygame.sprite.Sprite):
-    def __init__(self, location: tuple, direction: pygame.math.Vector2):
+    def __init__(self, location: tuple, direction: pygame.math.Vector2, damage: int):
         """
         Creates a bullet that spawns in a particular location and travels in a particular direction.
 
@@ -18,6 +18,7 @@ class Bullet(pygame.sprite.Sprite):
         self.image = pygame.transform.scale(self.image, (100, 100))
         self.rect: pygame.rect.Rect = self.image.get_rect()
         self.rect.center = location
+        self.damage = damage
 
     def update(self, right_bound, left_bound):
         self.rect.move_ip(self.speed * self.direction.x, self.speed * self.direction.y)

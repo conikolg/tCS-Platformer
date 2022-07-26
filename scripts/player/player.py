@@ -143,7 +143,8 @@ class Player(pygame.sprite.Sprite):
 
     def _shoot(self):
         self.bullet_group.add(Bullet(location=(self.rect.centerx, self.rect.centery),
-                                     direction=pygame.math.Vector2(1, 0) * self.direction.x))
+            direction=pygame.math.Vector2(1, 0) * self.direction.x,
+            damage=10))
         play_sound("laser")
 
     def _move_sword(self):
