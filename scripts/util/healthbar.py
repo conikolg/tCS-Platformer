@@ -35,6 +35,14 @@ class Healthbar:
         new_health = min(self._maximum_health, new_health)
         self._current_health = new_health
 
+    @property
+    def minimum_health(self):
+        return self._minimum_health
+
+    @property
+    def maximum_health(self):
+        return self._maximum_health
+
     def render(self, width: int, height: int, outline_width: int = 3) -> pygame.Surface:
         """
         Returns an image of the healthbar, with a black outline and a left-aligned green portion

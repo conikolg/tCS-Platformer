@@ -7,7 +7,8 @@ from scripts.util.custom_sprite import CustomSprite
 from scripts.util.healthbar import Healthbar
 from scripts.util.platform import Platform
 
-
+# NOTE: BasicEnemy is inheriting from CustomSprite whereas some other classes inherit from pygame.sprite.Sprite
+# which should it be?
 class BasicEnemy(CustomSprite):
     def __init__(self, enemy_type: str, platform: Platform, horizontal_offset: int = 0):
         """
@@ -42,6 +43,18 @@ class BasicEnemy(CustomSprite):
 
         if self.rect.left < self.platform.rect.left or self.rect.right > self.platform.rect.right:
             raise Exception("Basic enemies cannot hang off platforms.")
+
+    def __str__(self):
+        out_str = ""
+        out_str += "Enemy CustomSprite"
+        out_str += " of type " + str(self.enemy_type)
+        out_str += " located @ (" + str(self.rect.x) + ", " + str(self.rect.y) + ")"
+        health_percent = self.healthbar.health / self.healthbar.maximum_health
+        health_percent *= 100
+        health_percent = round(health_percent, 2)
+        out_str += " with " + str(health_percent) + "% HP"
+        out_str += " (" + str(self.healthbar.health) + " / " + str(self.healthbar.maximum_health) + ")"
+        return out_str
 
     def update(self) -> None:
         # Try going right

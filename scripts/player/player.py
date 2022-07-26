@@ -8,6 +8,8 @@ from scripts.util.sound import *
 
 import time
 
+# NOTE: Bullet is inheriting from pygame.sprite.Sprite whereas some other classes inherit from CustomSprite
+# which should it be?
 class Player(pygame.sprite.Sprite):
     """
     Class for initializing a player and controller.
@@ -64,10 +66,19 @@ class Player(pygame.sprite.Sprite):
         self.bullet_group = pygame.sprite.Group()
         self.sword_sprite = Sword(location=(self.rect.centerx + 24, self.rect.centery - 18))
 
-
-
         # Load sounds that are associated with the player
         Sound("laser", "assets/sounds/sfx/laser.wav")
+
+    def __str__(self):
+        out_str = ""
+        out_str += "Player Sprite"
+        out_str += " located @ (" + str(self.rect.x) + ", " + str(self.rect.y) + ")"
+        health_percent = self.healthbar.health / self.healthbar.maximum_health        
+        health_percent *= 100
+        health_percent = round(health_percent, 2)
+        out_str += " with " + str(health_percent) + "% HP"
+        out_str += " (" + str(self.healthbar.health) + " / " + str(self.healthbar.maximum_health) + ")"
+        return out_str
 
     @property
     def is_grounded(self) -> bool:
