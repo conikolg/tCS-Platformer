@@ -1,6 +1,5 @@
 import pygame
 from pathlib import Path
-import os
 
 
 class UI:
@@ -20,7 +19,6 @@ class UI:
         that stores the image of the key with a description of that key input.
         I don't know how it works
         :param player: Player to use for inputs
-        :param size: Size to draw UI on screen
         """
 
         # Create dict to store input keys
@@ -43,8 +41,9 @@ class UI:
         return input_keys
 
     def draw(self, screen):
-        # No way in hell this is the best way to do it
-        # But it works so f*** you
+        # Iterate through items in input keys dict
+        # Blit image at corresponding iteration of loop
+        # Blit text at same y additive x value of image
         i = 1
         for image, desc in self.input_keys.items():
             screen.blit(image, (self.x, i*self.y))

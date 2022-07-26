@@ -36,7 +36,7 @@ class LevelOneScene(BaseScene):
         self.platforms: CustomGroup = CustomGroup()
         platforms = [
             # Little obstacle course
-            Platform(rect=pygame.rect.Rect(800, 600, 100, 10), image=pygame.image.load("assets/scenery/5.png")),
+            Platform(rect=pygame.rect.Rect(800, 600, 100, 10)),
             Platform(rect=pygame.rect.Rect(900, 550, 100, 10)),
             Platform(rect=pygame.rect.Rect(1000, 500, 100, 10)),
             Platform(rect=pygame.rect.Rect(1100, 450, 100, 10)),
@@ -54,17 +54,17 @@ class LevelOneScene(BaseScene):
         self.enemy_group: CustomGroup = CustomGroup()
         enemies = [
             # Enemy on the first platform
-            BasicEnemy(platform=platforms[0], horizontal_offset=10),
+            BasicEnemy(enemy_type="slime", platform=platforms[0], horizontal_offset=10),
 
-            # Enemies inside the tunnel
-            BasicEnemy(platform=platforms[8], horizontal_offset=10),
-            BasicEnemy(platform=platforms[8], horizontal_offset=100),
-            BasicEnemy(platform=platforms[8], horizontal_offset=500),
-
-            # Enemies on top of the tunnel
-            BasicEnemy(platform=platforms[7], horizontal_offset=75),
-            BasicEnemy(platform=platforms[7], horizontal_offset=345),
-            BasicEnemy(platform=platforms[7], horizontal_offset=740),
+            # # Enemies inside the tunnel
+            BasicEnemy(enemy_type="scorpion", platform=platforms[8], horizontal_offset=10),
+            BasicEnemy(enemy_type="frog", platform=platforms[8], horizontal_offset=100),
+            # BasicEnemy(platform=platforms[8], horizontal_offset=500),
+            #
+            # # Enemies on top of the tunnel
+            # BasicEnemy(platform=platforms[7], horizontal_offset=75),
+            # BasicEnemy(platform=platforms[7], horizontal_offset=345),
+            # BasicEnemy(platform=platforms[7], horizontal_offset=740),
         ]
         self.enemy_group.add(*enemies)
 
