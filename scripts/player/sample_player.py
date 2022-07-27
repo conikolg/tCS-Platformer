@@ -90,9 +90,9 @@ class Player(pygame.sprite.Sprite):
         self.rect.move_ip(dx, dy)
 
     def update_animation(self):
-        ANIMATION_COOLDOWN = 100
+        animation_cooldown = 100
         self.image = self.animation_list[self.action][self.frame_index]
-        if pygame.time.get_ticks() - self.update_time > ANIMATION_COOLDOWN:
+        if pygame.time.get_ticks() - self.update_time > animation_cooldown:
             self.update_time = pygame.time.get_ticks()
             self.frame_index += 1
 

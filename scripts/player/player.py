@@ -2,7 +2,6 @@ import time
 from collections import defaultdict
 from pathlib import Path
 
-from scripts.util.custom_sprite import CustomSprite
 from scripts.bullet.bullet import Bullet
 from scripts.sword.sword import Sword
 from scripts.util.custom_sprite import CustomSprite
@@ -19,10 +18,10 @@ class Player(CustomSprite):
     """
 
     def __init__(self, char_type: str, rect: pygame.rect.Rect):
-        super().__init__(hitbox_w_percent = 50, hitbox_h_percent = 100, hitbox_offset_x = 25, hitbox_offset_y = 0)
+        super().__init__(hitbox_w_percent=50, hitbox_h_percent=100, hitbox_offset_x=25, hitbox_offset_y=0)
 
         self.char_type: str = char_type
-        self.rect: pygame.rect.Rect = rect       
+        self.rect: pygame.rect.Rect = rect
 
         self.animations: dict[str, list] = self.load_animations(size=(self.rect.w, self.rect.h))
         self.healthbar = Healthbar()
@@ -152,14 +151,14 @@ class Player(CustomSprite):
 
     def _shoot(self):
         new_bullet = Bullet(location=(self.rect.centerx, self.rect.centery),
-                                     direction=pygame.math.Vector2(1, 0) * self.direction.x,
-                                     damage=10)
+                            direction=pygame.math.Vector2(1, 0) * self.direction.x,
+                            damage=10)
         # adjust starting position of new bullet so that its left/right edge starts at our center
         # rather than the center of the bullet starting at our center
         if self.direction.x == 1:
-            new_bullet.rect.left = self.rect.centerx 
+            new_bullet.rect.left = self.rect.centerx
         else:
-            new_bullet.rect.right = self.rect.centerx 
+            new_bullet.rect.right = self.rect.centerx
         self.bullet_group.add(new_bullet)
         play_sound("laser")
 

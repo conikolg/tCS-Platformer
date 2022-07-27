@@ -9,8 +9,9 @@ from scripts.util.platform import Platform
 
 
 class BasicEnemy(CustomSprite):
-    def __init__(self, enemy_type: str, platform: Platform, horizontal_offset: int = 0, 
-         hitbox_w_percent: int = 100, hitbox_h_percent: int = 100, hitbox_offset_x: int = 0, hitbox_offset_y: int = 0):
+    def __init__(self, enemy_type: str, platform: Platform, horizontal_offset: int = 0,
+                 hitbox_w_percent: int = 100, hitbox_h_percent: int = 100, hitbox_offset_x: int = 0,
+                 hitbox_offset_y: int = 0):
         """
         Creates a basic enemy at a certain position that patrols on a platform.
 
@@ -40,10 +41,10 @@ class BasicEnemy(CustomSprite):
         self.rect: pygame.rect.Rect = self._image.get_rect()
         self.init_hitbox()
 
-        # ensure that all of the enemy is on the platform
+        # Ensure that the entire enemy is on the platform
         if self.rect.left < self.platform.rect.left or self.rect.right > self.platform.rect.right:
             raise Exception("Basic enemies cannot hang off platforms.")
-        
+
     def __str__(self):
         out_str = f"BasicEnemy located at {self.rect.topleft}"
         health_percent = round(self.healthbar.health / self.healthbar.maximum_health * 100, 2)
@@ -80,7 +81,7 @@ class BasicEnemy(CustomSprite):
     def draw(self, screen: pygame.Surface, camera_offset: pygame.math.Vector2 = None, show_bounding_box: bool = False):
         super(BasicEnemy, self).draw(screen, camera_offset, show_bounding_box)
         screen.blit(source=self.healthbar.render(self.image.get_width(), 8, outline_width=2),
-                     dest=self.rect.move(camera_offset).move(0, -8).move(-self.hitbox_offset_x, -self.hitbox_offset_y))
+                    dest=self.rect.move(camera_offset).move(0, -8).move(-self.hitbox_offset_x, -self.hitbox_offset_y))
 
     @staticmethod
     def load_animations(size: tuple) -> dict[str, list]:

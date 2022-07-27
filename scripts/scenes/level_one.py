@@ -63,7 +63,7 @@ class LevelOneScene(BaseScene):
             BasicEnemy(enemy_type="scorpion", platform=platforms[8], horizontal_offset=10),
             BasicEnemy(enemy_type="frog", platform=platforms[8], horizontal_offset=100),
 
-            # unused enemeis
+            # unused enemies
             # BasicEnemy(platform=platforms[8], horizontal_offset=500),
             # BasicEnemy(platform=platforms[7], horizontal_offset=75),
             # BasicEnemy(platform=platforms[7], horizontal_offset=345),
