@@ -9,7 +9,8 @@ from scripts.util.platform import Platform
 
 
 class BasicEnemy(CustomSprite):
-    def __init__(self, enemy_type: str, platform: Platform, horizontal_offset: int = 0):
+    def __init__(self, enemy_type: str, platform: Platform, horizontal_offset: int = 0, 
+         hitbox_w_percent: int = 100, hitbox_h_percent: int = 100, hitbox_offset_x: int = 0, hitbox_offset_y: int = 0):
         """
         Creates a basic enemy at a certain position that patrols on a platform.
 
@@ -17,7 +18,7 @@ class BasicEnemy(CustomSprite):
         :param horizontal_offset: how far from the left edge of the platform the enemy will begin.
         """
 
-        super().__init__()
+        super().__init__(hitbox_w_percent, hitbox_h_percent, hitbox_offset_x, hitbox_offset_y)
 
         self.platform: Platform = platform
         # self._image: pygame.Surface = pygame.image.load(f"assets/enemy/basic_enemy.png")
@@ -25,7 +26,7 @@ class BasicEnemy(CustomSprite):
         self.speed: float = 1.0
         self.direction: int = 1
         self.healthbar = Healthbar()
-
+        self.horizontal_offset = horizontal_offset
         self.update_time: int = 0
         self.enemy_type = enemy_type
         self.animations: dict[str, list] = self.load_animations(size=(50, 50))
@@ -36,13 +37,14 @@ class BasicEnemy(CustomSprite):
         self._image: pygame.Surface = pygame.image.load(f"assets/enemy/slime/slime 0.png").convert_alpha()
         self._image = pygame.transform.scale(self._image, (50, 50))
 
+        # enemy hitbox defaults to rect that would naturally encompass image file
         self.rect: pygame.rect.Rect = self._image.get_rect()
-        self.rect.bottom = self.platform.rect.top
-        self.rect.left = self.platform.rect.left + horizontal_offset
+        self.init_hitbox()
 
+        # ensure that all of the enemy is on the platform
         if self.rect.left < self.platform.rect.left or self.rect.right > self.platform.rect.right:
             raise Exception("Basic enemies cannot hang off platforms.")
-
+        
     def __str__(self):
         out_str = f"BasicEnemy located at {self.rect.topleft}"
         health_percent = round(self.healthbar.health / self.healthbar.maximum_health * 100, 2)
@@ -76,21 +78,10 @@ class BasicEnemy(CustomSprite):
     def image(self):
         return pygame.transform.flip(self._image, self.direction == 1, False)
 
-    def draw(self, surface: pygame.Surface, camera_offset: pygame.math.Vector2 = None, show_bounding_box: bool = False):
-        self.update_animation()
-        super(BasicEnemy, self).draw(surface, camera_offset, show_bounding_box)
-        surface.blit(source=self.healthbar.render(self.image.get_width(), 8, outline_width=2),
-                     dest=self.rect.move(camera_offset).move(0, -8))
-
-    def update_animation(self):
-        animation_cooldown = 100
-        self._image = self.animations[self.current_animation_frame[0]][self.current_animation_frame[1]]
-        if pygame.time.get_ticks() - self.update_time > animation_cooldown:
-            self.update_time = pygame.time.get_ticks()
-            self.current_animation_frame[1] += 1
-
-        if self.current_animation_frame[1] >= len(self.animations[self.current_animation_frame[0]]):
-            self.current_animation_frame[1] = 0
+    def draw(self, screen: pygame.Surface, camera_offset: pygame.math.Vector2 = None, show_bounding_box: bool = False):
+        super(BasicEnemy, self).draw(screen, camera_offset, show_bounding_box)
+        screen.blit(source=self.healthbar.render(self.image.get_width(), 8, outline_width=2),
+                     dest=self.rect.move(camera_offset).move(0, -8).move(-self.hitbox_offset_x, -self.hitbox_offset_y))
 
     @staticmethod
     def load_animations(size: tuple) -> dict[str, list]:
@@ -111,3 +102,8 @@ class BasicEnemy(CustomSprite):
                 animations[enemy_type_dir.name].append(img)
 
         return animations
+
+    def init_hitbox(self):
+        self.rect.bottom = self.platform.rect.top
+        self.rect.left = self.platform.rect.left + self.horizontal_offset
+        super().init_hitbox()

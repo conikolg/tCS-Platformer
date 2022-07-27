@@ -5,6 +5,7 @@ from scripts.util.custom_sprite import CustomSprite
 
 class Bullet(CustomSprite):
     def __init__(self, location: tuple, direction: pygame.math.Vector2, damage: int):
+
         """
         Creates a bullet that spawns in a particular location and travels in a particular direction.
 
@@ -12,7 +13,7 @@ class Bullet(CustomSprite):
         :param direction: A Vector2 indicating at what angle the bullet should travel.
         """
 
-        super().__init__()
+        super().__init__(hitbox_w_percent = 80, hitbox_h_percent = 30, hitbox_offset_x = 10, hitbox_offset_y = 35)
         self.speed: int = 10
         self.direction: pygame.math.Vector2 = direction.normalize()
 
@@ -21,6 +22,8 @@ class Bullet(CustomSprite):
         self.rect: pygame.rect.Rect = self.image.get_rect()
         self.rect.center = location
         self.damage = damage
+        print(self.rect)
+        super().init_hitbox()
 
     def __str__(self):
         return f"Bullet located at {self.rect.topleft} with speed {self.speed} and {self.damage} damage"

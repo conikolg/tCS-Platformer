@@ -2,6 +2,7 @@ import time
 from collections import defaultdict
 from pathlib import Path
 
+from scripts.util.custom_sprite import CustomSprite
 from scripts.bullet.bullet import Bullet
 from scripts.sword.sword import Sword
 from scripts.util.custom_sprite import CustomSprite
@@ -18,10 +19,10 @@ class Player(CustomSprite):
     """
 
     def __init__(self, char_type: str, rect: pygame.rect.Rect):
-        super().__init__()
+        super().__init__(hitbox_w_percent = 50, hitbox_h_percent = 100, hitbox_offset_x = 25, hitbox_offset_y = 0)
 
         self.char_type: str = char_type
-        self.rect: pygame.rect.Rect = rect
+        self.rect: pygame.rect.Rect = rect       
 
         self.animations: dict[str, list] = self.load_animations(size=(self.rect.w, self.rect.h))
         self.healthbar = Healthbar()
@@ -34,6 +35,9 @@ class Player(CustomSprite):
         self.super_jump_speed: float = 20.0
         self.walk_speed: float = 5.0
         self.sprint_speed: float = 8.0
+
+        # hitbox should be initialized after animation is loaded so that animation images have the original size
+        super().init_hitbox()
 
         # Nested dict to store all player input key binds
         # Allow us to easily remap keys as features are created
@@ -147,9 +151,16 @@ class Player(CustomSprite):
         play_sound("jump")
 
     def _shoot(self):
-        self.bullet_group.add(Bullet(location=(self.rect.centerx, self.rect.centery),
+        new_bullet = Bullet(location=(self.rect.centerx, self.rect.centery),
                                      direction=pygame.math.Vector2(1, 0) * self.direction.x,
-                                     damage=10))
+                                     damage=10)
+        # adjust starting position of new bullet so that its left/right edge starts at our center
+        # rather than the center of the bullet starting at our center
+        if self.direction.x == 1:
+            new_bullet.rect.left = self.rect.centerx 
+        else:
+            new_bullet.rect.right = self.rect.centerx 
+        self.bullet_group.add(new_bullet)
         play_sound("laser")
 
     def _move_sword(self):
@@ -225,16 +236,6 @@ class Player(CustomSprite):
 
         self.current_animation_frame = [animation, 0]
 
-    def update_animation(self):
-        animation_cooldown = 100
-        self._image = self.animations[self.current_animation_frame[0]][self.current_animation_frame[1]]
-        if pygame.time.get_ticks() - self.update_time > animation_cooldown:
-            self.update_time = pygame.time.get_ticks()
-            self.current_animation_frame[1] += 1
-
-        if self.current_animation_frame[1] >= len(self.animations[self.current_animation_frame[0]]):
-            self.current_animation_frame[1] = 0
-
     def load_animations(self, size: tuple) -> dict[str, list]:
         # Create container for animations
         animations: dict[str, list] = defaultdict(lambda: list())
@@ -259,7 +260,6 @@ class Player(CustomSprite):
         return pygame.transform.flip(self._image, self.direction.x == -1, False)
 
     def draw(self, screen: pygame.Surface, camera_offset: pygame.math.Vector2 = None, show_bounding_box: bool = False):
-        self.update_animation()
         super(Player, self).draw(screen, camera_offset, show_bounding_box)
         screen.blit(source=self.healthbar.render(self._image.get_width(), 12),
-                    dest=self.rect.move(camera_offset).move(0, -12))
+                    dest=self.rect.move(camera_offset).move(0, -12).move(-self.hitbox_offset_x, self.hitbox_offset_y))

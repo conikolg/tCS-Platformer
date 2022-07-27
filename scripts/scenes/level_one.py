@@ -1,6 +1,7 @@
 from pathlib import Path
 
 from scripts.enemy.basic_enemy import BasicEnemy
+from scripts.enemy.slime import Slime
 from scripts.player.player import Player
 from scripts.scenes.base_scene import BaseScene
 from scripts.ui.ui import UI
@@ -55,7 +56,9 @@ class LevelOneScene(BaseScene):
         self.enemy_group: CustomGroup = CustomGroup()
         enemies = [
             # Enemy on the first platform
-            BasicEnemy(enemy_type="slime", platform=platforms[0], horizontal_offset=10),
+            # BasicEnemy(enemy_type="slime", platform=platforms[0], horizontal_offset=0, 
+                # hitbox_offset_x = 0, hitbox_offset_y = 0, hitbox_w_percent = 100, hitbox_h_percent = 50),
+            Slime(platform=platforms[0], horizontal_offset=0),
 
             # # Enemies inside the tunnel
             BasicEnemy(enemy_type="scorpion", platform=platforms[8], horizontal_offset=10),
@@ -199,7 +202,7 @@ class LevelOneScene(BaseScene):
         self.platforms.draw(surface=screen, camera_offset=-self.camera.offset, show_bounding_box=True)
 
         # Draw enemies
-        self.enemy_group.draw(surface=screen, camera_offset=-self.camera.offset)
+        self.enemy_group.draw(surface=screen, camera_offset=-self.camera.offset, show_bounding_box=True)
 
         # Draw bullets
         if self.player.bullet_group:
