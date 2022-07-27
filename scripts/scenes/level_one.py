@@ -55,17 +55,16 @@ class LevelOneScene(BaseScene):
         # Create enemies
         self.enemy_group: CustomGroup = CustomGroup()
         enemies = [
+
             # Enemy on the first platform
-            # BasicEnemy(enemy_type="slime", platform=platforms[0], horizontal_offset=0, 
-                # hitbox_offset_x = 0, hitbox_offset_y = 0, hitbox_w_percent = 100, hitbox_h_percent = 50),
             Slime(platform=platforms[0], horizontal_offset=0),
 
             # # Enemies inside the tunnel
             BasicEnemy(enemy_type="scorpion", platform=platforms[8], horizontal_offset=10),
             BasicEnemy(enemy_type="frog", platform=platforms[8], horizontal_offset=100),
+
+            # unused enemeis
             # BasicEnemy(platform=platforms[8], horizontal_offset=500),
-            #
-            # # Enemies on top of the tunnel
             # BasicEnemy(platform=platforms[7], horizontal_offset=75),
             # BasicEnemy(platform=platforms[7], horizontal_offset=345),
             # BasicEnemy(platform=platforms[7], horizontal_offset=740),

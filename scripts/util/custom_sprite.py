@@ -31,26 +31,15 @@ class CustomSprite(pygame.sprite.Sprite):
 
     def draw(self, surface: pygame.Surface, camera_offset: pygame.math.Vector2 = None, show_bounding_box: bool = False):       
         if self.visible:
+
+            # update animations if this sprite has any
             if hasattr(self, "animations"):
                 self.update_animation()
+
+            # update hitbox based on camera offset
             if camera_offset is None:
                 camera_offset = pygame.math.Vector2(0, 0)
             hitbox = self.rect.move(camera_offset)
-
-            """
-            # copy the CustomSprite's hitbox rectangle
-            image_rect = pygame.Rect(original_rect) 
- 
-            # adjust image by undoing the transformations applied to rect by hitbox offset and percents
-            image_rect.left = original_rect.left - self.hitbox_offset_x
-            image_rect.top = original_rect.top - self.hitbox_offset_y
-            width = image_rect.right - image_rect.left
-            height = image_rect.bottom - image_rect.top
-            new_width = width / (self.hitbox_w_percent / 100)
-            new_height = height / (self.hitbox_h_percent / 100)
-            image_rect.right = image_rect.left + new_width
-            image_rect.top = image_rect.bottom - new_height
-            """
 
             # adjust image by undoing the transformations applied to rect by hitbox offset and percents
             imageX = hitbox.x - self.hitbox_offset_x
@@ -66,18 +55,12 @@ class CustomSprite(pygame.sprite.Sprite):
             if show_bounding_box:
                 pygame.draw.rect(surface=surface, color=(255, 0, 0), rect=hitbox, width=1)
 
+    # initializes this CustomSprite's hitbox based on hitbox offset and hitbox percent variables
     def init_hitbox(self):        
         image_width = self.rect.width
-        print(image_width)
         image_height = self.rect.height
-        print(image_height)
         new_width = image_width * (self.hitbox_w_percent / 100)
-        print(new_width)
         new_height = image_height * (self.hitbox_h_percent / 100)
-        print(new_height)
         new_x = self.rect.left + self.hitbox_offset_x
-        print(new_x)
         new_y = self.rect.top + self.hitbox_offset_y
-        print(new_y)
         self.rect = pygame.Rect(new_x, new_y, new_width, new_height)
-        print(self.rect)

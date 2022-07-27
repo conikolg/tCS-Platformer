@@ -21,7 +21,6 @@ class BasicEnemy(CustomSprite):
         super().__init__(hitbox_w_percent, hitbox_h_percent, hitbox_offset_x, hitbox_offset_y)
 
         self.platform: Platform = platform
-        # self._image: pygame.Surface = pygame.image.load(f"assets/enemy/basic_enemy.png")
 
         self.speed: float = 1.0
         self.direction: int = 1
