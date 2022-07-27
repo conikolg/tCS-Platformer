@@ -206,11 +206,9 @@ class LevelOneScene(BaseScene):
         # Draw bullets
         if self.player.bullet_group:
             for bullet in self.player.bullet_group:
-                bullet.draw(screen, camera_offset=-self.camera.offset)
                 bullet.draw(screen, camera_offset=-self.camera.offset, show_bounding_box=True)
 
         # Draw player and update sprite animation
-        self.player.update_animation()
         self.player.draw(screen=screen, camera_offset=-self.camera.offset, show_bounding_box=True)
         self.player.sword_sprite.draw(screen, camera_offset=-self.camera.offset, show_bounding_box=True)
 

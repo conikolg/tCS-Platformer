@@ -28,7 +28,6 @@ class Player(CustomSprite):
         self.velocity = pygame.math.Vector2(0, 0)
         self.direction = pygame.math.Vector2(1, 0)
         self.gravity: float = 0.5
-        self.update_time: int = 0
 
         self.jump_speed: float = 12.0
         self.super_jump_speed: float = 20.0

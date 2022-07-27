@@ -28,7 +28,7 @@ class CustomSprite(pygame.sprite.Sprite):
         # Animation management
         self.animations = None
         self.current_animation_frame = None
-        self.update_time = None
+        self.update_time: int = 0
 
     def update_animation(self):
         animation_cooldown = 100
