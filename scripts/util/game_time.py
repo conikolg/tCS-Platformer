@@ -1,5 +1,25 @@
+import heapq
+import time
 from datetime import datetime, timedelta
-from typing import Union
+from typing import Callable, Iterable, Union
+
+
+class ScheduledEvent:
+    def __init__(self, callback, timestamp, cb_args, delay):
+        self.callback: Callable = callback
+        self.timestamp: timedelta = timestamp
+        self.cb_args: Iterable = cb_args
+        self.delay: timedelta = delay
+
+    def __lt__(self, other):
+        if not isinstance(other, ScheduledEvent):
+            raise Exception(f"Cannot compare sizes of {type(self)} and {type(other)}")
+
+        return self.timestamp.__lt__(other.timestamp)
+
+    def execute(self) -> None:
+        """ Executes the callback function with provided arguments. """
+        self.callback(*self.cb_args)
 
 
 class Clock:
@@ -12,6 +32,7 @@ class Clock:
         self._paused: bool = False
         self._time: timedelta = timedelta()
         self._last_sys_time: datetime = datetime.now()
+        self._events: list[ScheduledEvent] = []
 
     @property
     def paused(self) -> bool:
@@ -73,12 +94,116 @@ class Clock:
         else:
             raise Exception(f"Unit '{as_unit}' is supported, but has no defined conversion. This is a bug!")
 
-    def reset(self) -> None:
-        """ Zero's out the time tracker of the clock. """
+    def reset(self, action: str = "clear") -> None:
+        """
+        Zero's out the time tracker of the clock. Clears, shifts, or does nothing to scheduled events.
+
+        The action must be either "clear", which removes all scheduled events; "shift", which offsets all
+        timestamps so events continue to execute with the expected amount of delay; or "none", which does not
+        do anything to the scheduled events. Default action is "clear".
+
+        :param action: Determines what to do with already scheduled events. Must be one of "clear", "shift", and "none".
+        :return: None
+        """
+
+        # Verify valid action was given
+        actions = ["clear", "shift", "none"]
+        if action not in actions:
+            raise Exception(f"Reset action must be one of {actions}")
+
+        # Handle actions
+        if action == "clear":
+            self._events.clear()
+        elif action == "shift":
+            for event in self._events:
+                event.timestamp -= self.time
+
+        # Zero the time
         self._time = timedelta()
 
     def tick(self) -> None:
+        """ Advances in time and processes any events that needed to occur. """
+
+        # Update time
         now = datetime.now()
         if not self._paused:
             self._time += now - self._last_sys_time
         self._last_sys_time = now
+
+        # Trigger any events
+        while len(self._events) > 0 and self._events[0].timestamp <= self.time:
+            # Trigger the event that needs to happen the soonest
+            ev: ScheduledEvent = heapq.heappop(self._events)
+            ev.execute()
+            # Reschedule if needed
+            if ev.delay is not None:
+                ev.timestamp += ev.delay
+                heapq.heappush(self._events, ev)
+
+    def schedule(self, callback: Callable, delay: float,
+                 cb_args: Iterable = None, unique: bool = False, repeating: bool = False) -> ScheduledEvent:
+        """
+        Schedules a function to execute after the clock ticks to or past a point in time, which is computed as the
+        current clock time plus the delay.
+
+        :param callback: The function to be executed after the delay. Its return value is not (currently) accessible.
+        :param delay: A float for how long, in seconds, to wait from current clock time before the callback executes.
+        :param cb_args: A iterable providing any arguments that need to be passed to the function when invoked.
+        :param unique: If True, any already scheduled instances of the callback are unscheduled first.
+        :param repeating: If True, the callback will automatically be rescheduled after execution, with the same delay.
+        :return: The ScheduledEvent object created.
+        """
+
+        # Defaults and validation
+        if delay < 0:
+            raise Exception(f"Events can only be scheduled with positive delay values (provided: {delay})")
+        if delay == 0:
+            raise Exception(f"Events scheduled with zero delay should instead be invoked in-line")
+        if cb_args is None:
+            cb_args = ()
+        if not isinstance(cb_args, Iterable):
+            raise Exception(f"Arguments to the callback function must be provided as an iterable object")
+
+        # Handle uniqueness
+        if unique:
+            for i in reversed(range(len(self._events))):
+                if self._events[i].callback == callback:
+                    self._events.pop(i)
+
+        # Create/schedule the event
+        se = ScheduledEvent(
+            callback=callback,
+            timestamp=self.time + timedelta(seconds=delay),
+            cb_args=cb_args,
+            delay=timedelta(seconds=delay) if repeating else None)
+        self._events.append(se)
+
+        # Heapify the event heap
+        heapq.heapify(self._events)
+
+        return se
+
+    # todo: write an unschedule function that accepts callback functions OR ScheduledEvent objects
+
+
+if __name__ == '__main__':
+    # This is for testing the clock. Only runs if you run this file directly.
+
+    def func(arg):
+        print(arg)
+
+
+    gc = Clock()
+    gc.schedule(lambda unit: print(gc.get_time(as_unit=unit)), 2.0, cb_args=("ms",))
+    gc.schedule(func, 3.0, cb_args="hello")
+    gc.schedule(func, 3.0, cb_args=("hello",), unique=True)
+    gc.schedule(lambda: print("bye"), 1.0, repeating=True)
+    gc.schedule(lambda: gc.reset(action="shift"), 4.0)
+    gc.tick()
+
+    t, dt = 0, 0.5
+    while True:
+        time.sleep(dt)
+        t += dt
+        print(f"@{t=}, {gc.time=}")
+        gc.tick()
