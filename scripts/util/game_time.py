@@ -183,7 +183,35 @@ class Clock:
 
         return se
 
-    # todo: write an unschedule function that accepts callback functions OR ScheduledEvent objects
+    def unschedule(self, func_or_event: Union[Callable, ScheduledEvent], max_removals: int = None) -> int:
+        """
+        Removes an ScheduledEvent or a (ScheduledEvent's callback) from the schedule, so it will not execute.
+        A maximum number of removals can be optionally set.
+
+        :param func_or_event: the ScheduledEvent or callback to unschedule.
+        :param max_removals: the maximum number of instances to unschedule. Default is None, meaning no limit.
+        :return: the number of removals made.
+        """
+
+        if max_removals is not None and max_removals < 0:
+            raise Exception(f"Cannot unschedule less than zero events.")
+        if max_removals == 0:
+            return 0
+
+        # Remove matches until the
+        idx, removals = 0, 0
+        while idx < len(self._events):
+            event: ScheduledEvent = self._events[idx]
+            if event == func_or_event or event.callback == func_or_event:
+                self._events.pop(idx)
+                removals += 1
+                if removals == max_removals:
+                    break
+                idx -= 1
+            idx += 1
+
+        heapq.heapify(self._events)
+        return removals
 
 
 if __name__ == '__main__':
@@ -192,6 +220,9 @@ if __name__ == '__main__':
     def func(arg):
         print(arg)
 
+    def func2():
+        print("func2 running")
+
 
     gc = Clock()
     gc.schedule(lambda unit: print(gc.get_time(as_unit=unit)), 2.0, cb_args=("ms",))
@@ -199,6 +230,11 @@ if __name__ == '__main__':
     gc.schedule(func, 3.0, cb_args=("hello",), unique=True)
     gc.schedule(lambda: print("bye"), 1.0, repeating=True)
     gc.schedule(lambda: gc.reset(action="shift"), 4.0)
+    gc.schedule(func2, 1.0)
+    e = gc.schedule(func2, 1.5)
+    gc.schedule(func2, 2.0)
+    gc.unschedule(e)
+    gc.unschedule(func2, max_removals=1)
     gc.tick()
 
     t, dt = 0, 0.5
