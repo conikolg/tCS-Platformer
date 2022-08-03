@@ -5,7 +5,7 @@ from scripts.enemy.slime import Slime
 from scripts.player.player import Player
 from scripts.scenes.base_scene import BaseScene
 from scripts.ui.ui import UI
-from scripts.util import physics
+from scripts.util import physics, game_time
 from scripts.util.camera import Camera, BoundedFollowTarget
 from scripts.util.custom_group import CustomGroup
 from scripts.util.platform import Platform
@@ -81,6 +81,9 @@ class LevelOneScene(BaseScene):
         # Show Controls
         self.show_controls_help: bool = True
 
+        # Reset clock when this level begins
+        game_time.reset()
+
     def handle_events(self, events: list[pygame.event.Event]):
         """
         Allows the player to move up and down, to help test the camera system.
@@ -99,6 +102,9 @@ class LevelOneScene(BaseScene):
         """
         Moves the player based on arrow keys or WASD keys pressed.
         """
+
+        # Tick time
+        game_time.tick()
 
         # Update player
         self.player.update()

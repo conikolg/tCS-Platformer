@@ -1,9 +1,9 @@
-import time
 from collections import defaultdict
 from pathlib import Path
 
 from scripts.bullet.bullet import Bullet
 from scripts.sword.sword import Sword
+from scripts.util import game_time
 from scripts.util.custom_sprite import CustomSprite
 from scripts.util.healthbar import Healthbar
 from scripts.util.sound import *
@@ -57,8 +57,8 @@ class Player(CustomSprite):
             }
         }
 
-        self.fire_rate = 500  # in ms
-        self.last_fire_time = -1  # timestamp representing last time player fired a bullet
+        self.shoot_cooldown = 0.5  # Minimum time between new bullets, in seconds
+        self.can_shoot = True
 
         self._is_grounded: bool = True
         self.is_sprinting: bool = False
@@ -117,12 +117,11 @@ class Player(CustomSprite):
                     if self._is_grounded:
                         self._jump()
                 if event.key in self.input["abilities"]["shoot"]:
-                    # todo: use pygame time, rather than system time
-                    # todo: make a proper game clock that compensates for pausing/resuming
-                    current_time = time.time() * 1000
-                    if current_time - self.last_fire_time >= self.fire_rate:
+                    # If possible, shoot and begin cooldown for next shot
+                    if self.can_shoot:
                         self._shoot()
-                        self.last_fire_time = current_time
+                        self._toggle_shoot(False)
+                        game_time.schedule(self._toggle_shoot, self.shoot_cooldown, cb_args=(True,))
                 if event.key in self.input["abilities"]["super jump"]:
                     if self._is_grounded:
                         self._super_jump()
@@ -148,16 +147,22 @@ class Player(CustomSprite):
         self.set_animation("jump")
         play_sound("jump")
 
+    def _toggle_shoot(self, override: bool = None):
+        """ Changes whether the player can or cannot shoot. """
+        self.can_shoot = not self.can_shoot if override is None else override
+
     def _shoot(self):
+        """ Creates a bullet with correct direction/positioning and add it to local bullet group. """
+
+        # Create bullet with non-outgoing edge positioned at player's center
         new_bullet = Bullet(location=(self.rect.centerx, self.rect.centery),
                             direction=pygame.math.Vector2(1, 0) * self.direction.x,
                             damage=10)
-        # adjust starting position of new bullet so that its left/right edge starts at our center
-        # rather than the center of the bullet starting at our center
         if self.direction.x == 1:
             new_bullet.rect.left = self.rect.centerx
         else:
             new_bullet.rect.right = self.rect.centerx
+
         self.bullet_group.add(new_bullet)
         play_sound("laser")
 

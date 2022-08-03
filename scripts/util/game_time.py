@@ -1,5 +1,4 @@
 import heapq
-import time
 from datetime import datetime, timedelta
 from typing import Callable, Iterable, Union
 
@@ -45,7 +44,7 @@ class Clock:
         self._paused = value
 
     @property
-    def time(self) -> timedelta:
+    def elapsed(self) -> timedelta:
         """
         Returns how much time has elapsed since creation or last reset.
         """
@@ -58,7 +57,7 @@ class Clock:
 
         # Return timedelta object if no unit is specified
         if as_unit is None:
-            return self.time
+            return self.elapsed
 
         # Define time unit mapping
         units: dict[str, str] = {
@@ -116,7 +115,7 @@ class Clock:
             self._events.clear()
         elif action == "shift":
             for event in self._events:
-                event.timestamp -= self.time
+                event.timestamp -= self.elapsed
 
         # Zero the time
         self._time = timedelta()
@@ -131,7 +130,7 @@ class Clock:
         self._last_sys_time = now
 
         # Trigger any events
-        while len(self._events) > 0 and self._events[0].timestamp <= self.time:
+        while len(self._events) > 0 and self._events[0].timestamp <= self.elapsed:
             # Trigger the event that needs to happen the soonest
             ev: ScheduledEvent = heapq.heappop(self._events)
             ev.execute()
@@ -173,7 +172,7 @@ class Clock:
         # Create/schedule the event
         se = ScheduledEvent(
             callback=callback,
-            timestamp=self.time + timedelta(seconds=delay),
+            timestamp=self.elapsed + timedelta(seconds=delay),
             cb_args=cb_args,
             delay=timedelta(seconds=delay) if repeating else None)
         self._events.append(se)
@@ -214,32 +213,12 @@ class Clock:
         return removals
 
 
-if __name__ == '__main__':
-    # This is for testing the clock. Only runs if you run this file directly.
-
-    def func(arg):
-        print(arg)
-
-    def func2():
-        print("func2 running")
-
-
-    gc = Clock()
-    gc.schedule(lambda unit: print(gc.get_time(as_unit=unit)), 2.0, cb_args=("ms",))
-    gc.schedule(func, 3.0, cb_args="hello")
-    gc.schedule(func, 3.0, cb_args=("hello",), unique=True)
-    gc.schedule(lambda: print("bye"), 1.0, repeating=True)
-    gc.schedule(lambda: gc.reset(action="shift"), 4.0)
-    gc.schedule(func2, 1.0)
-    e = gc.schedule(func2, 1.5)
-    gc.schedule(func2, 2.0)
-    gc.unschedule(e)
-    gc.unschedule(func2, max_removals=1)
-    gc.tick()
-
-    t, dt = 0, 0.5
-    while True:
-        time.sleep(dt)
-        t += dt
-        print(f"@{t=}, {gc.time=}")
-        gc.tick()
+# Convenience bindings to make using this class/module easier
+main_clock = Clock()
+paused = main_clock.paused
+elapsed = main_clock.elapsed
+reset = main_clock.reset
+tick = main_clock.tick
+schedule = main_clock.schedule
+unschedule = main_clock.unschedule
+get_time = main_clock.get_time
