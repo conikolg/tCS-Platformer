@@ -75,7 +75,7 @@ class LevelOneScene(BaseScene):
         self.enemy_group.add(*enemies)
 
         # Create Sound objects used in level 1 (see sound.py for more info)
-        Sound("levelOneTheme", "assets/sounds/music/metroid_brinstar_theme.mp3", 50)
+        Sound("levelOneTheme", "assets/sounds/wavFiles/metroid_brinstar_theme.wav", 50)
 
         # Start level 1 music
         play_sound("levelOneTheme")
