@@ -1,9 +1,10 @@
+from pathlib import Path
+
 from scripts.scenes.base_scene import BaseScene
 from scripts.scenes.level_one import LevelOneScene
 from scripts.util.button import Button
-from scripts.util.sound import *
 from scripts.util.camera import Camera, AutoScroll
-from pathlib import Path
+from scripts.util.sound import *
 
 
 class TitleScene(BaseScene):
@@ -15,7 +16,6 @@ class TitleScene(BaseScene):
 
         # Processes transition from title to level 1
         def on_play_clicked():
-
             # Stop title theme
             stop_sound("titleTheme")
 
@@ -23,7 +23,7 @@ class TitleScene(BaseScene):
             level_one = LevelOneScene()
 
             # Make sure level one's sound setting matches title's sound setting
-            level_one.sound_enabled = self.sound_enabled      
+            level_one.sound_enabled = self.sound_enabled
             level_one.update_sounds()
 
             # Transition to level 1      
@@ -34,24 +34,24 @@ class TitleScene(BaseScene):
             rect=(580, 400, 120, 40),
             on_click_fn=on_play_clicked,
             text_color=self.title_theme_color,
-            background_color = (0, 0, 0),
-            hover_color = (50, 50, 50)
+            background_color=(0, 0, 0),
+            hover_color=(50, 50, 50)
         )
         self.quit_button = Button(
             text="Quit",
             rect=(580, 500, 120, 40),
             on_click_fn=lambda: quit(0),
-            text_color = self.title_theme_color,
-            background_color = (0, 0, 0),
-            hover_color = (50, 50, 50)
+            text_color=self.title_theme_color,
+            background_color=(0, 0, 0),
+            hover_color=(50, 50, 50)
         )
 
         # Load and play title theme song
-        Sound("titleTheme", "assets/sounds/wavFiles/metroid_title_theme.wav", 50)
+        load_sound("titleTheme", "assets/sounds/wavFiles/metroid_title_theme.wav", volume=50)
         play_sound("titleTheme")
 
         # Load camera for title scene (used for auto scrolling)
-        self.camera = Camera(behavior=AutoScroll(speed = 1))
+        self.camera = Camera(behavior=AutoScroll(speed=1))
 
         # Load scenery for title animation (copied from level_one.py)
         # Store all layers in a dict with the delta scroll for each layer
@@ -61,7 +61,7 @@ class TitleScene(BaseScene):
         # Length of level used in render method (for scenery layers)
         self.length = 5
 
-        # Whether or not sound is enabled for title scene
+        # If is enabled for title scene
         self.sound_enabled = True
 
         # Ensure sounds are properly muted or muted when this scene loads ... probably unnecessary but sanity check

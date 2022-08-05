@@ -1,8 +1,6 @@
 from scripts.scenes.base_scene import BaseScene
 from scripts.util.button import Button
 from scripts.util.sound import *
-from scripts.util.camera import Camera, AutoScroll
-from pathlib import Path
 
 
 class GameOverScene(BaseScene):
@@ -17,7 +15,6 @@ class GameOverScene(BaseScene):
 
         # Processes transition from game over back to level 1
         def on_try_again_clicked():
-
             # Stop title theme
             stop_sound("gameOverTheme")
 
@@ -25,7 +22,7 @@ class GameOverScene(BaseScene):
             level_one = LevelOneScene()
 
             # Make sure level one's sound setting matches game over scene's sound setting
-            level_one.sound_enabled = self.sound_enabled      
+            level_one.sound_enabled = self.sound_enabled
             level_one.update_sounds()
 
             # Transition to level 1      
@@ -36,12 +33,12 @@ class GameOverScene(BaseScene):
             rect=(520, 400, 240, 40),
             on_click_fn=on_try_again_clicked,
             text_color=self.game_over_theme_color,
-            background_color = (0, 0, 0),
-            hover_color = (50, 50, 50)
+            background_color=(0, 0, 0),
+            hover_color=(50, 50, 50)
         )
 
         # Load and play game over theme song
-        Sound("gameOverTheme", "assets/sounds/wavFiles/game_over_theme_2.wav", 30)
+        load_sound("gameOverTheme", "assets/sounds/wavFiles/game_over_theme_2.wav", volume=30)
         play_sound("gameOverTheme")
 
         # Load camera for title scene (used for auto scrolling)
@@ -55,7 +52,7 @@ class GameOverScene(BaseScene):
         # Length of level used in render method (for scenery layers)
         # self.length = 5
 
-        # Whether or not sound is enabled for title scene
+        # If sound is enabled for title scene
         self.sound_enabled = True
 
         # Ensure sounds are properly muted or muted when this scene loads ... probably unnecessary but sanity check
