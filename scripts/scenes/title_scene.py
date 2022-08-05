@@ -47,7 +47,7 @@ class TitleScene(BaseScene):
         )
 
         # Load and play title theme song
-        Sound("titleTheme", "assets/sounds/music/metroid_title_theme.mp3", 50)
+        Sound("titleTheme", "assets/sounds/wavFiles/metroid_title_theme.wav", 50)
         play_sound("titleTheme")
 
         # Load camera for title scene (used for auto scrolling)
