@@ -17,7 +17,7 @@ class LevelOneScene(BaseScene):
     def __init__(self):
         super().__init__()
 
-        self.player = Player("usman", rect=pygame.rect.Rect(600, 550, 100, 100))
+        self.player = Player("jared", rect=pygame.rect.Rect(600, 550, 100, 100))
         self.ui = UI(player=self.player)
 
         # Length of level used in render method

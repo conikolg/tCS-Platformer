@@ -83,7 +83,7 @@ class Player(CustomSprite):
                 "show controls": [pygame.K_F1],
                 "show hitboxes": [pygame.K_F9],
                 "toggle sound": [pygame.K_m],
-            }            
+            }
         }
 
         self.shoot_cooldown = 0.5  # Minimum time between new bullets, in seconds
