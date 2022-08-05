@@ -21,6 +21,32 @@ class Player(CustomSprite):
         super().__init__(hitbox_w_percent=50, hitbox_h_percent=100, hitbox_offset_x=25, hitbox_offset_y=0)
 
         self.char_type: str = char_type
+        self.outfits = {
+            "default": {
+                "shirt_main": (227, 224, 224),
+                "shirt_shadow": (184, 177, 177),
+                "skin_main": (193, 136, 103),
+                "skin_shadow": (153, 104, 76),
+                "hair": (71, 45, 60)
+            },
+
+            "jared": {
+                "shirt_main": (100, 100, 100),
+                "shirt_shadow": (40, 40, 40),
+                "skin_main": (221, 160, 127),
+                "skin_shadow": (159, 112, 90),
+                "hair": (39, 22, 19)
+            },
+
+            "usman": {
+                "shirt_main": (218, 65, 103),
+                "shirt_shadow": (131, 33, 97),
+                "skin_main": (167, 108, 71),
+                "skin_shadow": (159, 112, 90),
+                "hair": (39, 22, 19)
+            }
+        }
+
         self.rect: pygame.rect.Rect = rect
 
         self.animations: dict[str, list] = self.load_animations(size=(self.rect.w, self.rect.h))
@@ -243,7 +269,7 @@ class Player(CustomSprite):
         # Create container for animations
         animations: dict[str, list] = defaultdict(lambda: list())
         # Start at content root for this character type
-        root_animations_dir = Path(f"assets/{self.char_type}/animations")
+        root_animations_dir = Path(f"assets/player/animations")
 
         # Iterate through animation types
         for animation_type_dir in root_animations_dir.iterdir():
@@ -253,6 +279,11 @@ class Player(CustomSprite):
                 img: pygame.Surface = pygame.image.load(frame).convert_alpha()
                 # Scale it
                 img = pygame.transform.scale(img, size)
+                # Shift color values of image
+                # self.shift_color(img=img, color_shift=0)
+                for char, colors in self.outfits.items():
+                    for color_name, color_value in colors.items():
+                        self.recolor(img, self.outfits["default"][color_name], self.outfits[self.char_type][color_name])
                 # Add it to big animation dictionary
                 animations[animation_type_dir.name].append(img)
 
@@ -266,3 +297,28 @@ class Player(CustomSprite):
         super(Player, self).draw(screen, camera_offset, show_bounding_box)
         screen.blit(source=self.healthbar.render(self._image.get_width(), 12),
                     dest=self.rect.move(camera_offset).move(0, -12).move(-self.hitbox_offset_x, self.hitbox_offset_y))
+
+    @staticmethod
+    def shift_color(img: pygame.Surface = None, color_shift: int = 0):
+        # Get the pixels
+        pixels = pygame.PixelArray(img)
+        # Iterate over every pixel
+        for x in range(img.get_width()):
+            for y in range(img.get_height()):
+                # Turn the pixel data into an RGB tuple
+                rgb = img.unmap_rgb(pixels[x][y])
+                # Get a new color object using the RGB tuple and convert to HSLA
+                color = pygame.Color(*rgb)
+                h, s, l, a = color.hsla
+                # Add 120 to the hue (or however much you want) and wrap to under 360
+                color.hsla = (int(h) + color_shift) % 360, int(s), int(l), int(a)
+                # Assign directly to the pixel
+                pixels[x][y] = color
+        # The old way of closing a PixelArray object
+        del pixels
+
+    @staticmethod
+    def recolor(img: pygame.Surface, old_color: tuple = None, new_color: tuple = None):
+        new_img = pygame.PixelArray(img)
+        new_img.replace(old_color, new_color)
+        del new_img
