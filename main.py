@@ -11,7 +11,7 @@ def main():
     # Control for pygame itself
     pygame.init()
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-    pygame.display.set_caption("theCoderSchool Frisco Coaches' Platformer Game")
+    pygame.display.set_caption("Lost in Cyberspace")
     clock = pygame.time.Clock()
     running = True
 

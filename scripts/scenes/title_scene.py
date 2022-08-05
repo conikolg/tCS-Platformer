@@ -5,6 +5,9 @@ from scripts.util.sound import *
 from scripts.util.camera import Camera, AutoScroll
 from pathlib import Path
 
+# Color used by title text and buttons
+title_theme_color = (0, 150, 0)
+
 class TitleScene(BaseScene):
     def __init__(self):
         super().__init__()
@@ -16,12 +19,16 @@ class TitleScene(BaseScene):
         self.play_button = Button(
             text="Play",
             rect=(580, 400, 120, 40),
-            on_click_fn=on_play_clicked
+            on_click_fn=on_play_clicked,
+            text_color=title_theme_color,
+            background_color = (0, 0, 0)
         )
         self.quit_button = Button(
             text="Quit",
             rect=(580, 500, 120, 40),
-            on_click_fn=lambda: quit(0)
+            on_click_fn=lambda: quit(0),
+            text_color = title_theme_color,
+            background_color = (0, 0, 0)
         )
 
         # Load and play title theme song
@@ -62,18 +69,17 @@ class TitleScene(BaseScene):
         # Move the camera
         self.camera.scroll()
 
-        print(self.camera.offset.x)
-
         # Reset the camera back to beginning position if it has gone too far
-        # With enough "length" for this "level", the player should rarely see the title screen camera reset
+        # With enough "length" for this title "level", the player should rarely see the title screen camera reset
         # WARNING: This is spaghetti code! This is using a hard-coded value.
         #          Not sure if the value we check here should be based off the shortest layer's length or what.
+        #          I am not sure what would accomplish the smoothest "camera reset" across all layers.
         if self.camera.offset.x >= 2400:
             self.camera.offset.x = 0
 
         # Title
         title_font = pygame.font.Font("assets/dogicapixelbold.ttf", 48)
-        title_text = title_font.render("Platformer", True, (0, 0, 0))
+        title_text = title_font.render("Lost in Cyberspace", True, (0, 150, 0))
         screen.blit(title_text, dest=(
             screen.get_width() / 2 - title_text.get_width() / 2,
             screen.get_height() / 4 - title_text.get_height() / 2))
