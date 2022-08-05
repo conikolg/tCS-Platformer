@@ -143,6 +143,12 @@ class LevelOneScene(BaseScene):
             elif collision_side == "left":
                 self.player.rect.left = collision.rect.right
 
+        # Process player-enemy collisions
+        if self.player.vulnerable:
+            collisions = pygame.sprite.spritecollide(self.player, self.enemy_group, dokill=False)
+            if len(collisions) > 0: 
+                self.player.take_damage(10)
+
         # Did the player fall off something?
         if self.player.is_grounded and self.player.velocity.y < -0.5:
             self.player.is_grounded = False

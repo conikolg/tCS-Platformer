@@ -98,6 +98,14 @@ class Player(CustomSprite):
 
         self._image = None
 
+        self.vulnerable = True
+        self.recovering = False # whether or not the player is currently "recovering" from being damaged
+        self.invulnerability_duration = 100 # how long invulnerability should last during recovery (in frames units)
+        self.invulnerability_frame = 0 # how long the player has been invulernable (in frames units)
+        self.harm_flash_on = False # whether or not the flash is currently on or off 
+        self.harm_flash_duration = 2 # how long a flash (on or off) should last (in frames units)
+        self.harm_flash_frame = 0 # how long the player has been in the current flash state (on or off; in frames units)
+
         # Load sounds that are associated with the player
         Sound("laser", "assets/sounds/sfx/laser.wav")
         Sound("jump", "assets/sounds/sfx/metroid_jump.wav", 40)
@@ -265,10 +273,12 @@ class Player(CustomSprite):
         else:
             self.set_animation("idle")
 
+        # Update vulnerability state and flash effect
+        self.update_vulnerability()
+
     def set_animation(self, animation: str):
         if self.current_animation_frame[0] == animation:
             return
-
         self.current_animation_frame = [animation, 0]
 
     def load_animations(self, size: tuple) -> dict[str, list]:
@@ -300,7 +310,8 @@ class Player(CustomSprite):
         return pygame.transform.flip(self._image, self.direction.x == -1, False)
 
     def draw(self, screen: pygame.Surface, camera_offset: pygame.math.Vector2 = None, show_bounding_box: bool = False):
-        super(Player, self).draw(screen, camera_offset, show_bounding_box)
+        if not self.harm_flash_on:
+            super(Player, self).draw(screen, camera_offset, show_bounding_box)
         screen.blit(source=self.healthbar.render(self._image.get_width(), 12),
                     dest=self.rect.move(camera_offset).move(0, -12).move(-self.hitbox_offset_x, self.hitbox_offset_y))
 
@@ -328,3 +339,36 @@ class Player(CustomSprite):
         new_img = pygame.PixelArray(img)
         new_img.replace(old_color, new_color)
         del new_img
+
+    # Causes the player to take damage and enter a "flashing" state to indicate temporary invulnerability
+    def take_damage(self, amount):
+        if not self.vulnerable:
+            return
+        self.healthbar.health = self.healthbar.health - 10
+        self.vulnerable = False
+        self.harm_flash_on = True
+        self.recovering = True
+
+    # Updates the player's vulnerability state and flash effect, to indicate invulernability
+    def update_vulnerability(self):
+
+        # Flash effect only matters if we are in recovering state
+        if not self.recovering:
+            return
+
+        # Advance frame counts
+        self.harm_flash_frame += 1
+        self.invulnerability_frame += 1
+
+        # Check if we should flip the "flash" on or off 
+        if self.harm_flash_frame >= self.harm_flash_duration:
+            self.harm_flash_on = not self.harm_flash_on
+            self.harm_flash_frame = 0
+
+        # Check if we should end the invulernability state
+        if self.invulnerability_frame >= self.invulnerability_duration:
+            self.vulnerable = True
+            self.recovering = False
+            self.invulnerability_frame = 0 
+            self.harm_flash_on = False 
+            self.harm_flash_frame = 0
