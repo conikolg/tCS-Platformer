@@ -13,9 +13,21 @@ class TitleScene(BaseScene):
         # Color shared by title text and buttons
         self.title_theme_color = (0, 200, 0)
 
+        # Processes transition from title to level 1
         def on_play_clicked():
+
+            # Stop title theme
             stop_sound("titleTheme")
-            self.scene_manager.go_to(LevelOneScene())
+
+            # Create level one scene
+            level_one = LevelOneScene()
+
+            # Make sure level one's sound setting matches title's sound setting
+            level_one.sound_enabled = self.sound_enabled      
+            level_one.update_sounds()
+
+            # Transition to level 1      
+            self.scene_manager.go_to(level_one)
 
         self.play_button = Button(
             text="Play",
@@ -38,7 +50,7 @@ class TitleScene(BaseScene):
         Sound("titleTheme", "assets/sounds/music/metroid_title_theme.mp3", 50)
         play_sound("titleTheme")
 
-        # load camera for title scene (used for auto scrolling)
+        # Load camera for title scene (used for auto scrolling)
         self.camera = Camera(behavior=AutoScroll(speed = 1))
 
         # Load scenery for title animation (copied from level_one.py)
@@ -46,12 +58,24 @@ class TitleScene(BaseScene):
         self.scenery: dict[pygame.Surface, float] = self.load_scenery(size=(self.camera.DISPLAY_W,
                                                                             self.camera.DISPLAY_H))
 
-        # length of level used in render method (for scenery layers)
+        # Length of level used in render method (for scenery layers)
         self.length = 5
+
+        # Whether or not sound is enabled for title scene
+        self.sound_enabled = True
+
+        # Ensure sounds are properly muted or muted when this scene loads ... probably unnecessary but sanity check
+        self.update_sounds()
 
     def handle_events(self, events: list[pygame.event.Event]):
         self.play_button.handle_events(events)
         self.quit_button.handle_events(events)
+
+        # handle keys
+        for event in events:
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_m:
+                self.sound_enabled = not self.sound_enabled
+                self.update_sounds()
 
     def update(self):
         pass
@@ -113,3 +137,12 @@ class TitleScene(BaseScene):
             ds += 0.1
 
         return scenery
+
+    # Updates sound effects according to whether or not sound is enabled for this scene
+    def update_sounds(self):
+        if self.sound_enabled:
+            for sound_name in sounds.keys():
+                unmute_sound(sound_name)
+        else:
+            for sound_name in sounds.keys():
+                mute_sound(sound_name)

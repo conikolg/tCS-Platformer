@@ -77,9 +77,12 @@ class Player(CustomSprite):
                 "super jump": [pygame.K_p],
                 "shoot": [pygame.K_SPACE]
             },
+            # NOTE: We probably ought to make UI controls distinct from the player,
+            #       but this is a quick way to get the keys to show up in the controls menu.
             "ui": {
                 "show controls": [pygame.K_F1],
-                "show hitboxes": [pygame.K_F9]
+                "show hitboxes": [pygame.K_F9],
+                "toggle sound": [pygame.K_m],
             }            
         }
 

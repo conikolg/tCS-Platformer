@@ -48,6 +48,7 @@ class Sound:
         self.name = name
         self.fpath = fpath
         self.volume = volume
+        self.original_volume = volume
         self.pygameSound = pygame.mixer.Sound(fpath)
         self.pygameSound.set_volume(volume / 100)
 
@@ -55,10 +56,7 @@ class Sound:
         sounds[name] = self
 
 
-# plays the sound with the given name
-# when a sound is played, it will start from where it last paused
-# if it hasn't been played yet, it simply starts from the beginning
-# if a sound was previously played until completion, this will restart it
+# plays the sound with the given name from the beginning
 def play_sound(name):
     if name not in sounds:
         raise ValueError(
@@ -68,7 +66,6 @@ def play_sound(name):
 
 
 # stops a sound with the given name so that it stops producing noise
-# unlike pause_sound, this will cause the sound to restart from the beginning when it is played next
 def stop_sound(name):
     if name not in sounds:
         raise ValueError(
@@ -77,14 +74,21 @@ def stop_sound(name):
     pygame.mixer.Sound.stop(sound_obj.pygameSound)
 
 
-"""
-# NOT YET IMPLEMENTED
-# pauses a sound with the given name so that it stops producing noise
-# unlike stop_sound, this will cause the sound to start from where it paused when it is played next
-def pause_sound(name):
+# mutes a sound with the given name, so that it can later be resumed with unmute_sound
+def mute_sound(name):
     if name not in sounds:
         raise ValueError(
-            f"Invalid value given to pause_sound(). Sound with name {name} has not been loaded into sounds dictionary.")
+            f"Invalid value given to mute_sound(). Sound with name {name} has not been loaded into sounds dictionary.")
     sound_obj = sounds[name]
-    pygame.mixer.Sound.pause(sound_obj.pygameSound)
-"""
+    sound_obj.original_volume = sound_obj.volume
+    sound_obj.volume = 0
+    sound_obj.pygameSound.set_volume(sound_obj.volume / 100)
+
+# unmutes a sound effect
+def unmute_sound(name):
+    if name not in sounds:
+        raise ValueError(
+            f"Invalid value given to unmute_sound(). Sound with name {name} has not been loaded into sounds dictionary.")
+    sound_obj = sounds[name]
+    sound_obj.volume = sound_obj.original_volume
+    sound_obj.pygameSound.set_volume(sound_obj.volume / 100)

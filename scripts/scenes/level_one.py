@@ -94,12 +94,17 @@ class LevelOneScene(BaseScene):
         :return: None
         """
 
+        # Handle key events related to UI control
         for event in events:
             if event.type == pygame.KEYDOWN and event.key == pygame.K_F1:
                 self.show_controls_help = not self.show_controls_help
             if event.type == pygame.KEYDOWN and event.key == pygame.K_F9:
                 self.show_hitboxes = not self.show_hitboxes
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_m:
+                self.sound_enabled = not self.sound_enabled
+                self.update_sounds()                
 
+        # Handle key events related to player control
         self.player.handle_events(events)
 
     def update(self):
@@ -234,3 +239,12 @@ class LevelOneScene(BaseScene):
         # components of the UI, you can create a param for each component and set them like this. So maybe
         # later have a param like show_cooldowns=self.show_cooldowns, show_ammo=self.show_ammo, etc.
         self.ui.draw(screen, show_controls=self.show_controls_help)
+
+    # Updates sound effects according to whether or not sound is enabled for this scene
+    def update_sounds(self):
+        if self.sound_enabled:
+            for sound_name in sounds.keys():
+                unmute_sound(sound_name)
+        else:
+            for sound_name in sounds.keys():
+                mute_sound(sound_name)
