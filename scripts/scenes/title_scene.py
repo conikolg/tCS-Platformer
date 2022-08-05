@@ -5,12 +5,13 @@ from scripts.util.sound import *
 from scripts.util.camera import Camera, AutoScroll
 from pathlib import Path
 
-# Color used by title text and buttons
-title_theme_color = (0, 150, 0)
 
 class TitleScene(BaseScene):
     def __init__(self):
         super().__init__()
+
+        # Color shared by title text and buttons
+        self.title_theme_color = (0, 200, 0)
 
         def on_play_clicked():
             stop_sound("titleTheme")
@@ -20,15 +21,17 @@ class TitleScene(BaseScene):
             text="Play",
             rect=(580, 400, 120, 40),
             on_click_fn=on_play_clicked,
-            text_color=title_theme_color,
-            background_color = (0, 0, 0)
+            text_color=self.title_theme_color,
+            background_color = (0, 0, 0),
+            hover_color = (50, 50, 50)
         )
         self.quit_button = Button(
             text="Quit",
             rect=(580, 500, 120, 40),
             on_click_fn=lambda: quit(0),
-            text_color = title_theme_color,
-            background_color = (0, 0, 0)
+            text_color = self.title_theme_color,
+            background_color = (0, 0, 0),
+            hover_color = (50, 50, 50)
         )
 
         # Load and play title theme song
@@ -79,7 +82,7 @@ class TitleScene(BaseScene):
 
         # Title
         title_font = pygame.font.Font("assets/dogicapixelbold.ttf", 48)
-        title_text = title_font.render("Lost in Cyberspace", True, (0, 150, 0))
+        title_text = title_font.render("Lost in Cyberspace", True, self.title_theme_color)
         screen.blit(title_text, dest=(
             screen.get_width() / 2 - title_text.get_width() / 2,
             screen.get_height() / 4 - title_text.get_height() / 2))

@@ -80,6 +80,9 @@ class LevelOneScene(BaseScene):
         # Show Controls
         self.show_controls_help: bool = True
 
+        # Show hitboxes
+        self.show_hitboxes: bool = True
+
         # Reset clock when this level begins
         game_time.reset()
 
@@ -94,6 +97,8 @@ class LevelOneScene(BaseScene):
         for event in events:
             if event.type == pygame.KEYDOWN and event.key == pygame.K_F1:
                 self.show_controls_help = not self.show_controls_help
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_F9:
+                self.show_hitboxes = not self.show_hitboxes
 
         self.player.handle_events(events)
 
@@ -210,19 +215,19 @@ class LevelOneScene(BaseScene):
         self.camera.scroll()
 
         # Draw level elements first
-        self.platforms.draw(surface=screen, camera_offset=-self.camera.offset, show_bounding_box=True)
+        self.platforms.draw(surface=screen, camera_offset=-self.camera.offset, show_bounding_box=self.show_hitboxes)
 
         # Draw enemies
-        self.enemy_group.draw(surface=screen, camera_offset=-self.camera.offset, show_bounding_box=True)
+        self.enemy_group.draw(surface=screen, camera_offset=-self.camera.offset, show_bounding_box=self.show_hitboxes)
 
         # Draw bullets
         if self.player.bullet_group:
             for bullet in self.player.bullet_group:
-                bullet.draw(screen, camera_offset=-self.camera.offset, show_bounding_box=True)
+                bullet.draw(screen, camera_offset=-self.camera.offset, show_bounding_box=self.show_hitboxes)
 
         # Draw player and update sprite animation
-        self.player.draw(screen=screen, camera_offset=-self.camera.offset, show_bounding_box=True)
-        self.player.sword_sprite.draw(screen, camera_offset=-self.camera.offset, show_bounding_box=True)
+        self.player.draw(screen=screen, camera_offset=-self.camera.offset, show_bounding_box=self.show_hitboxes)
+        self.player.sword_sprite.draw(screen, camera_offset=-self.camera.offset, show_bounding_box=self.show_hitboxes)
 
         # Draw UI last
         # @Jared - Just track the show/hide status in this file, not player.py. Also, if we have different

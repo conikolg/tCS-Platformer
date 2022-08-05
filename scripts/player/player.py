@@ -75,7 +75,11 @@ class Player(CustomSprite):
             },
             "abilities": {
                 "super jump": [pygame.K_p],
-                "shoot": [pygame.K_SPACE],
+                "shoot": [pygame.K_SPACE]
+            },
+            "ui": {
+                "show controls": [pygame.K_F1],
+                "show hitboxes": [pygame.K_F9]
             }            
         }
 
