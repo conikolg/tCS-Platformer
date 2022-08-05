@@ -99,16 +99,16 @@ class Player(CustomSprite):
         self._image = None
 
         self.vulnerable = True
-        self.recovering = False # whether or not the player is currently "recovering" from being damaged
-        self.invulnerability_duration = 100 # how long invulnerability should last during recovery (in frames units)
-        self.invulnerability_frame = 0 # how long the player has been invulernable (in frames units)
-        self.harm_flash_on = False # whether or not the flash is currently on or off 
-        self.harm_flash_duration = 2 # how long a flash (on or off) should last (in frames units)
-        self.harm_flash_frame = 0 # how long the player has been in the current flash state (on or off; in frames units)
+        self.recovering = False  # if the player is currently "recovering" from being damaged
+        self.invulnerability_duration = 100  # how long invulnerability should last during recovery (in frames units)
+        self.invulnerability_frame = 0  # how long the player has been invulnerable (in frames units)
+        self.harm_flash_on = False  # if the flash is currently on or off
+        self.harm_flash_duration = 2  # how long a flash (on or off) should last (in frames units)
+        self.harm_flash_frame = 0  # how long the player has been in the current flash state (on/off; in frames units)
 
         # Load sounds that are associated with the player
-        Sound("laser", "assets/sounds/sfx/laser.wav")
-        Sound("jump", "assets/sounds/sfx/metroid_jump.wav", 40)
+        load_sound("laser", "assets/sounds/sfx/laser.wav")
+        load_sound("jump", "assets/sounds/sfx/metroid_jump.wav", volume=40)
 
     def __str__(self):
         out_str = f"Player sprite located @ {self.rect.topleft}"
@@ -349,7 +349,7 @@ class Player(CustomSprite):
         self.harm_flash_on = True
         self.recovering = True
 
-    # Updates the player's vulnerability state and flash effect, to indicate invulernability
+    # Updates the player's vulnerability state and flash effect, to indicate invulnerability
     def update_vulnerability(self):
 
         # Flash effect only matters if we are in recovering state
@@ -365,10 +365,10 @@ class Player(CustomSprite):
             self.harm_flash_on = not self.harm_flash_on
             self.harm_flash_frame = 0
 
-        # Check if we should end the invulernability state
+        # Check if we should end the invulnerability state
         if self.invulnerability_frame >= self.invulnerability_duration:
             self.vulnerable = True
             self.recovering = False
-            self.invulnerability_frame = 0 
-            self.harm_flash_on = False 
+            self.invulnerability_frame = 0
+            self.harm_flash_on = False
             self.harm_flash_frame = 0

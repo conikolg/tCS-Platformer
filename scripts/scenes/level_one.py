@@ -4,13 +4,13 @@ from scripts.enemy.basic_enemy import BasicEnemy
 from scripts.enemy.slime import Slime
 from scripts.player.player import Player
 from scripts.scenes.base_scene import BaseScene
+from scripts.scenes.game_over import GameOverScene
 from scripts.ui.ui import UI
 from scripts.util import physics, game_time
 from scripts.util.camera import Camera, BoundedFollowTarget
 from scripts.util.custom_group import CustomGroup
 from scripts.util.platform import Platform
 from scripts.util.sound import *
-from scripts.scenes.game_over import GameOverScene
 
 
 class LevelOneScene(BaseScene):
@@ -74,10 +74,9 @@ class LevelOneScene(BaseScene):
         ]
         self.enemy_group.add(*enemies)
 
-        # Create Sound objects used in level 1 (see sound.py for more info)
-        Sound("levelOneTheme", "assets/sounds/wavFiles/metroid_brinstar_theme.wav", 50)
-
-        # Start level 1 music
+        # Level 1 sound
+        self.sound_enabled = None
+        load_sound("levelOneTheme", "assets/sounds/wavFiles/metroid_brinstar_theme.wav", 50)
         play_sound("levelOneTheme")
 
         # Show Controls
@@ -105,9 +104,9 @@ class LevelOneScene(BaseScene):
                 self.show_hitboxes = not self.show_hitboxes
             if event.type == pygame.KEYDOWN and event.key == pygame.K_m:
                 self.sound_enabled = not self.sound_enabled
-                self.update_sounds()                
+                self.update_sounds()
 
-        # Handle key events related to player control
+                # Handle key events related to player control
         self.player.handle_events(events)
 
     def update(self):
@@ -149,7 +148,7 @@ class LevelOneScene(BaseScene):
         # Process player-enemy collisions
         if self.player.vulnerable:
             collisions = pygame.sprite.spritecollide(self.player, self.enemy_group, dokill=False)
-            if len(collisions) > 0: 
+            if len(collisions) > 0:
                 self.player.take_damage(10)
 
         # Did the player fall off something?
@@ -276,7 +275,7 @@ class LevelOneScene(BaseScene):
         game_over_scene = GameOverScene()
 
         # Make sure game over scene's sound setting matches level one's sound setting
-        game_over_scene.sound_enabled = self.sound_enabled      
+        game_over_scene.sound_enabled = self.sound_enabled
         game_over_scene.update_sounds()
 
         # Transition to game over scene    
