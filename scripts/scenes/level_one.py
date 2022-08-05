@@ -108,6 +108,13 @@ class LevelOneScene(BaseScene):
         # Update player
         self.player.update()
 
+        # Prevent player from going out of bounds
+        if self.player.rect.left < 0:
+            self.player.rect.left = 0
+        right_bound = self.camera.behavior.horizontal_limits[1]
+        if self.player.rect.right > self.camera.behavior.horizontal_limits[1]:
+            self.player.rect.right = right_bound
+
         # Process player-platform collisions
         collisions = pygame.sprite.spritecollide(self.player, self.platforms, dokill=False)
         for collision in collisions:
