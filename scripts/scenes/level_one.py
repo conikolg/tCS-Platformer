@@ -73,7 +73,6 @@ class LevelOneScene(BaseScene):
 
         # Create Sound objects used in level 1 (see sound.py for more info)
         Sound("levelOneTheme", "assets/sounds/music/metroid_brinstar_theme.mp3", 50)
-        Sound("jump", "assets/sounds/sfx/mario_jump.mp3", 10)
 
         # Start level 1 music
         play_sound("levelOneTheme")

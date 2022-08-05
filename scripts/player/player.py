@@ -97,6 +97,7 @@ class Player(CustomSprite):
 
         # Load sounds that are associated with the player
         Sound("laser", "assets/sounds/sfx/laser.wav")
+        Sound("jump", "assets/sounds/sfx/metroid_jump.wav", 40)
 
     def __str__(self):
         out_str = f"Player sprite located @ {self.rect.topleft}"
