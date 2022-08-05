@@ -10,6 +10,7 @@ from scripts.util.camera import Camera, BoundedFollowTarget
 from scripts.util.custom_group import CustomGroup
 from scripts.util.platform import Platform
 from scripts.util.sound import *
+from scripts.scenes.game_over import GameOverScene
 
 
 class LevelOneScene(BaseScene):
@@ -81,7 +82,7 @@ class LevelOneScene(BaseScene):
         self.show_controls_help: bool = True
 
         # Show hitboxes
-        self.show_hitboxes: bool = True
+        self.show_hitboxes: bool = False
 
         # Reset clock when this level begins
         game_time.reset()
@@ -176,6 +177,9 @@ class LevelOneScene(BaseScene):
                 if collidedEnemy.healthbar.health <= 0:
                     collidedEnemy.kill()
 
+        # Check if the game should end
+        self.game_over_check()
+
     @staticmethod
     def load_scenery(size: tuple) -> dict[pygame.Surface, float]:
         # Create container for scenery
@@ -254,3 +258,24 @@ class LevelOneScene(BaseScene):
         else:
             for sound_name in sounds.keys():
                 mute_sound(sound_name)
+
+    # Check if the game should end due to player's health falling below, falling off the level, etc.
+    def game_over_check(self):
+        if self.player.healthbar.health <= 0:
+            self.fail_level()
+
+    # Transition to Game Over scene
+    def fail_level(self):
+
+        # Stop title theme
+        stop_sound("levelOneTheme")
+
+        # Create level one scene
+        game_over_scene = GameOverScene()
+
+        # Make sure game over scene's sound setting matches level one's sound setting
+        game_over_scene.sound_enabled = self.sound_enabled      
+        game_over_scene.update_sounds()
+
+        # Transition to game over scene    
+        self.scene_manager.go_to(game_over_scene)

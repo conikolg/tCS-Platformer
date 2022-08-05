@@ -344,7 +344,7 @@ class Player(CustomSprite):
     def take_damage(self, amount):
         if not self.vulnerable:
             return
-        self.healthbar.health = self.healthbar.health - 10
+        self.healthbar.health = self.healthbar.health - amount
         self.vulnerable = False
         self.harm_flash_on = True
         self.recovering = True
