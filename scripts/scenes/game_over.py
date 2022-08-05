@@ -41,7 +41,7 @@ class GameOverScene(BaseScene):
         )
 
         # Load and play game over theme song
-        Sound("gameOverTheme", "assets/sounds/music/game_over_theme_1.mp3", 30)
+        Sound("gameOverTheme", "assets/sounds/wavFiles/game_over_theme_2.wav", 30)
         play_sound("gameOverTheme")
 
         # Load camera for title scene (used for auto scrolling)
