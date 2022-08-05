@@ -197,7 +197,7 @@ class Player(CustomSprite):
         # Create bullet with non-outgoing edge positioned at player's center
         new_bullet = Bullet(location=(self.rect.centerx, self.rect.centery),
                             direction=pygame.math.Vector2(1, 0) * self.direction.x,
-                            damage=10)
+                            damage=50)
         if self.direction.x == 1:
             new_bullet.rect.left = self.rect.centerx
         else:

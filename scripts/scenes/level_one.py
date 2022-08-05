@@ -35,17 +35,19 @@ class LevelOneScene(BaseScene):
         self.scenery: dict[pygame.Surface, float] = self.load_scenery(size=(self.camera.DISPLAY_W,
                                                                             self.camera.DISPLAY_H))
 
+        platform_image = pygame.image.load("assets/platforms/purple_platform.png")
+
         # Create all active platforms in this level
         self.platforms: CustomGroup = CustomGroup()
         platforms = [
             # Little obstacle course
-            Platform(rect=pygame.rect.Rect(800, 600, 100, 10)),
-            Platform(rect=pygame.rect.Rect(900, 550, 100, 10)),
-            Platform(rect=pygame.rect.Rect(1000, 500, 100, 10)),
-            Platform(rect=pygame.rect.Rect(1100, 450, 100, 10)),
-            Platform(rect=pygame.rect.Rect(1175, 500, 100, 10)),
-            Platform(rect=pygame.rect.Rect(1400, 575, 100, 10)),
-            Platform(rect=pygame.rect.Rect(1525, 575, 100, 10)),
+            Platform(rect=pygame.rect.Rect(800, 600, 64, 32), image=platform_image),
+            Platform(rect=pygame.rect.Rect(900, 550, 64, 32), image=platform_image),
+            Platform(rect=pygame.rect.Rect(1000, 500, 64, 32), image=platform_image),
+            Platform(rect=pygame.rect.Rect(1100, 450, 64, 32), image=platform_image),
+            Platform(rect=pygame.rect.Rect(1175, 500, 64, 32), image=platform_image),
+            Platform(rect=pygame.rect.Rect(1400, 575, 64, 32), image=platform_image),
+            Platform(rect=pygame.rect.Rect(1525, 575, 64, 32), image=platform_image),
 
             # Long tunnel
             Platform(rect=pygame.rect.Rect(1650, 200, 800, 10)),
