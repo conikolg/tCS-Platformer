@@ -76,11 +76,7 @@ class Player(CustomSprite):
             "abilities": {
                 "super jump": [pygame.K_p],
                 "shoot": [pygame.K_SPACE],
-            },
-            "interact": {
-                "pickup": [pygame.K_e],
-                "drop": [pygame.K_q]
-            }
+            }            
         }
 
         self.shoot_cooldown = 0.5  # Minimum time between new bullets, in seconds
@@ -154,10 +150,12 @@ class Player(CustomSprite):
                         self._super_jump()
                 if event.key in self.input["movement"]["sprint"]:
                     self._sprint()
+                """
                 if event.key in [pygame.K_m]:
                     self._sword_swing()
                 if event.key in [pygame.K_n]:
                     self._sword_away()
+                """
 
     def _jump(self):
         self.velocity.y = self.jump_speed
