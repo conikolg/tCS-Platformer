@@ -27,24 +27,30 @@ class Player(CustomSprite):
                 "shirt_shadow": (184, 177, 177),
                 "skin_main": (193, 136, 103),
                 "skin_shadow": (153, 104, 76),
-                "hair": (71, 45, 60)
+                "hair": (71, 45, 60),
+                "belt": (0, 162, 157),
+                "pants_main": (47, 43, 92),
+                "pants_shadow": (0, 33, 59)
             },
 
             "jared": {
-                "shirt_main": (100, 100, 100),
-                "shirt_shadow": (40, 40, 40),
-                "skin_main": (221, 160, 127),
-                "skin_shadow": (159, 112, 90),
-                "hair": (39, 22, 19)
+                "shirt_main": (40, 40, 40),
+                "shirt_shadow": (20, 20, 20),
+                "skin_main": (196, 148, 130),
+                "skin_shadow": (162, 116, 95),
+                "hair": (39, 22, 19),
+                "belt": (103, 21, 16),
+                "pants_main": (44, 36, 60),
+                "pants_shadow": (4, 36, 60)
             },
 
-            "usman": {
-                "shirt_main": (218, 65, 103),
-                "shirt_shadow": (131, 33, 97),
-                "skin_main": (167, 108, 71),
-                "skin_shadow": (159, 112, 90),
-                "hair": (39, 22, 19)
-            }
+            # "usman": {
+            #     "shirt_main": (218, 65, 103),
+            #     "shirt_shadow": (131, 33, 97),
+            #     "skin_main": (167, 108, 71),
+            #     "skin_shadow": (159, 112, 90),
+            #     "hair": (39, 22, 19)
+            # }
         }
 
         self.rect: pygame.rect.Rect = rect

@@ -11,13 +11,14 @@ from scripts.util.camera import Camera, BoundedFollowTarget
 from scripts.util.custom_group import CustomGroup
 from scripts.util.platform import Platform
 from scripts.util.sound import *
+from scripts.leveldesigner.level_designer import LevelDesigner
 
 
 class LevelOneScene(BaseScene):
     def __init__(self):
         super().__init__()
 
-        self.player = Player("jared", rect=pygame.rect.Rect(600, 550, 100, 100))
+        self.player = Player("default", rect=pygame.rect.Rect(600, 550, 100, 100))
         self.ui = UI(player=self.player)
 
         # Length of level used in render method
@@ -34,6 +35,9 @@ class LevelOneScene(BaseScene):
         # Store all layers in a dict with the delta scroll for each layer
         self.scenery: dict[pygame.Surface, float] = self.load_scenery(size=(self.camera.DISPLAY_W,
                                                                             self.camera.DISPLAY_H))
+
+        level_designer = LevelDesigner(level=1)
+        level_designer.get_level_data()
 
         platform_image = pygame.image.load("assets/platforms/purple_platform.png")
 
