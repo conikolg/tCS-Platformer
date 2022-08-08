@@ -14,6 +14,11 @@ class TitleScene(BaseScene):
         # Color shared by title text and buttons
         self.title_theme_color = (0, 200, 0)
 
+        # Create scene on initialization to render background as well.
+        # Is this bad practice? I know ideally we would not want to render the whole scene
+        # until we click play. But this helps us with background on title screen.
+        self.level_one = LevelOneScene()
+
         # Processes transition from title to level 1
         def on_play_clicked():
             # Stop title theme
@@ -53,11 +58,6 @@ class TitleScene(BaseScene):
         # Load camera for title scene (used for auto scrolling)
         self.camera = Camera(behavior=AutoScroll(speed=1))
 
-        # Load scenery for title animation (copied from level_one.py)
-        # Store all layers in a dict with the delta scroll for each layer
-        self.scenery: dict[pygame.Surface, float] = self.load_scenery(size=(self.camera.DISPLAY_W,
-                                                                            self.camera.DISPLAY_H))
-
         # Length of level used in render method (for scenery layers)
         self.length = 5
 
@@ -84,14 +84,8 @@ class TitleScene(BaseScene):
         # White background
         screen.fill((255, 255, 255))
 
-        # Iterate through scenery dict and display
-        for x in range(self.length):
-            for layer, ds in self.scenery.items():
-                # In order to account for vertical parallax, the layers have to be displayed at a negative offset
-                # Calculate this offset by multiplying the delta scroll by the player height and subtract the
-                # difference between the camera offset y times the delta scroll and the player height
-                screen.blit(layer, ((x * self.camera.DISPLAY_W) - self.camera.offset.x * ds,
-                                    self.camera.offset.y * ds))
+        # Just realized doing it this way stops the title screen scrolling...
+        self.level_one.render_scenery(screen)
 
         # Move the camera
         self.camera.scroll()
@@ -114,29 +108,6 @@ class TitleScene(BaseScene):
         # Buttons
         screen.blit(self.play_button.render(), dest=self.play_button.rect)
         screen.blit(self.quit_button.render(), dest=self.quit_button.rect)
-
-    @staticmethod
-    def load_scenery(size: tuple) -> dict[pygame.Surface, float]:
-        # Create container for scenery
-        scenery: dict[pygame.Surface, float] = dict()
-        # Start at content root
-        # Sort path for macOS to read clearly
-        root_scenery_dir = sorted(Path("assets/scenery").iterdir())
-
-        # Delta scrolls for each layer
-        ds = 0.5
-
-        for layer in root_scenery_dir:
-            # Load the image
-            img: pygame.Surface = pygame.image.load(layer).convert_alpha()
-            # Scale it
-            img = pygame.transform.scale(img, size)
-            # Create img layer key and assign ds value
-            scenery[img] = round(ds, 1)
-            # Increment by 0.1 for each layer
-            ds += 0.1
-
-        return scenery
 
     # Updates sound effects according to whether or not sound is enabled for this scene
     def update_sounds(self):

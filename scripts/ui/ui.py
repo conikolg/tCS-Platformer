@@ -50,6 +50,7 @@ class UI:
                 screen.blit(image, (self.x, i * self.y))
                 font = pygame.font.Font("assets/dogicapixelbold.ttf", 12)
                 text = font.render(desc, True, (255, 255, 255))
+                # To make more even maybe push from the largest image rect.right instead of all same?
                 screen.blit(text, dest=(
                     image.get_rect().right + 50,
                     i * self.y + text.get_height() / 2))

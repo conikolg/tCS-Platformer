@@ -18,7 +18,7 @@ class LevelOneScene(BaseScene):
     def __init__(self):
         super().__init__()
 
-        self.player = Player("default", rect=pygame.rect.Rect(600, 550, 100, 100))
+        self.player = Player("default", rect=pygame.rect.Rect(800, 550, 100, 100))
         self.ui = UI(player=self.player)
 
         # Length of level used in render method
@@ -28,7 +28,7 @@ class LevelOneScene(BaseScene):
             behavior=BoundedFollowTarget(
                 target=self.player,
                 horizontal_limits=(0, 6000),
-                vertical_limits=(-100, 0)),
+                vertical_limits=(-720, 720)),
             # TODO: compensate for weirdness with bottom being cut-off on Macs
             constant=pygame.math.Vector2(-640 + self.player.rect.w / 2, -self.player.rect.top))
 
@@ -36,8 +36,9 @@ class LevelOneScene(BaseScene):
         self.scenery: dict[pygame.Surface, float] = self.load_scenery(size=(self.camera.DISPLAY_W,
                                                                             self.camera.DISPLAY_H))
 
-        level_designer = LevelDesigner(level=1)
-        level_designer.get_level_data()
+        self.level_designer = LevelDesigner(level=1)
+        self.level_designer.get_level_data()
+        self.level_designer.process_data()
 
         platform_image = pygame.image.load("assets/platforms/purple_platform.png")
 
@@ -57,7 +58,10 @@ class LevelOneScene(BaseScene):
             Platform(rect=pygame.rect.Rect(1650, 200, 800, 10)),
             Platform(rect=pygame.rect.Rect(1650, 80, 800, 10))
         ]
-        self.platforms.add(*platforms)
+        # self.platforms.add(*platforms)
+        # Eventually we will remove all platforms above in replace for level designer platforms below. - Jared
+        # For now it breaks if the above platforms aren't added.
+        self.platforms.add(*self.level_designer.platforms)
 
         # Create enemies
         self.enemy_group: CustomGroup = CustomGroup()
@@ -76,12 +80,12 @@ class LevelOneScene(BaseScene):
             # BasicEnemy(platform=platforms[7], horizontal_offset=345),
             # BasicEnemy(platform=platforms[7], horizontal_offset=740),
         ]
-        self.enemy_group.add(*enemies)
+        # self.enemy_group.add(*enemies)
 
         # Level 1 sound
         self.sound_enabled = None
-        load_sound("levelOneTheme", "assets/sounds/wavFiles/metroid_brinstar_theme.wav", 50)
-        play_sound("levelOneTheme")
+        # load_sound("levelOneTheme", "assets/sounds/wavFiles/metroid_brinstar_theme.wav", 50)
+        # play_sound("levelOneTheme")
 
         # Show Controls
         self.show_controls_help: bool = True
@@ -200,13 +204,23 @@ class LevelOneScene(BaseScene):
             # Load the image
             img: pygame.Surface = pygame.image.load(layer).convert_alpha()
             # Scale it
-            img = pygame.transform.scale(img, size)
+            img = pygame.transform.scale(img, size=(1280, 2880))
             # Create img layer key and assign ds value
             scenery[img] = round(ds, 1)
             # Increment by 0.1 for each layer
             ds += 0.1
 
         return scenery
+
+    def render_scenery(self, screen: pygame.Surface):
+        # Iterate through scenery dict and display
+        for x in range(self.length):
+            for layer, ds in self.scenery.items():
+                # In order to account for vertical parallax, the layers have to be displayed at a negative offset
+                # Calculate this offset by multiplying the delta scroll by the player height and subtract the
+                # difference between the camera offset y times the delta scroll and the player height
+                screen.blit(layer, ((x * self.camera.DISPLAY_W) - self.camera.offset.x * ds,
+                                    (self.player.rect.h * ds) - 640 - self.camera.offset.y * ds - self.player.rect.h))
 
     def render(self, screen: pygame.Surface):
         """
@@ -222,14 +236,7 @@ class LevelOneScene(BaseScene):
         # White background
         screen.fill((255, 255, 255))
 
-        # Iterate through scenery dict and display
-        for x in range(self.length):
-            for layer, ds in self.scenery.items():
-                # In order to account for vertical parallax, the layers have to be displayed at a negative offset
-                # Calculate this offset by multiplying the delta scroll by the player height and subtract the
-                # difference between the camera offset y times the delta scroll and the player height
-                screen.blit(layer, ((x * self.camera.DISPLAY_W) - self.camera.offset.x * ds,
-                                    (self.player.rect.h * ds) - self.camera.offset.y * ds - self.player.rect.h))
+        self.render_scenery(screen=screen)
 
         # Move the camera
         self.camera.scroll()
@@ -238,7 +245,7 @@ class LevelOneScene(BaseScene):
         self.platforms.draw(surface=screen, camera_offset=-self.camera.offset, show_bounding_box=self.show_hitboxes)
 
         # Draw enemies
-        self.enemy_group.draw(surface=screen, camera_offset=-self.camera.offset, show_bounding_box=self.show_hitboxes)
+        # self.enemy_group.draw(surface=screen, camera_offset=-self.camera.offset, show_bounding_box=self.show_hitboxes)
 
         # Draw bullets
         if self.player.bullet_group:

@@ -52,7 +52,7 @@ class BoundedFollowTarget(CameraBehavior):
         self.camera.offset.x = min(self.camera.offset.x, self.horizontal_limits[1] - self.camera.DISPLAY_W)
 
         self.camera.offset.y = max(self.vertical_limits[0], self.camera.offset.y)
-        self.camera.offset.y = min(self.camera.offset.y, self.horizontal_limits[1] - self.camera.DISPLAY_H)
+        self.camera.offset.y = min(self.camera.offset.y, self.vertical_limits[1] - self.camera.DISPLAY_H)
 
 
 class AutoScroll(CameraBehavior):

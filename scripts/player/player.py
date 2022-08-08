@@ -261,9 +261,10 @@ class Player(CustomSprite):
             self.direction.y = self.velocity.y / abs(self.velocity.y)
 
         # Collided with "ground"?
-        if self.rect.bottom >= 650:
-            self.rect.bottom = 650
-            self.is_grounded = True
+        # if self.rect.bottom >= 650:
+        #     self.rect.bottom = 650
+        #     self.is_grounded = True
+        # Unnecessary collision as long as level csv file has a solid line of platforms (0)'s at bottom now.
 
         # Update sword
         self._move_sword()
