@@ -1,8 +1,10 @@
-import pygame
 import csv
 from pathlib import Path
+
 import pandas as pd
-from scripts.util.simple_platform import Platform
+import pygame
+
+from scripts.scenes.simple_platform import Platform
 
 
 class LevelDesigner:
@@ -44,8 +46,5 @@ class LevelDesigner:
                     # 0: Platform
                     # 1: Enemy
                     # etc.
-                    self.platforms.append(Platform(rect=pygame.Rect(x*64,
-                                                                    y*32+150,
-                                                                    64,
-                                                                    32),
-                                                   image=self.platform_img))
+                    self.platforms.append(
+                        Platform(rect=pygame.Rect(x * 64, y * 32 + 150, 64, 32), image=self.platform_img))

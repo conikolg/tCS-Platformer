@@ -1,10 +1,10 @@
-from scripts.scenes.sample_scene import SampleScene
+from scripts.scenes.title_scene import TitleScene
 
 
 class SceneManager:
     def __init__(self, initial_scene=None):
         if initial_scene is None:
-            initial_scene = SampleScene()
+            initial_scene = TitleScene()
 
         self.current_scene = None
         self.go_to(initial_scene)

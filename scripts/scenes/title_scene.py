@@ -1,8 +1,6 @@
-from pathlib import Path
-
 from scripts.scenes.base_scene import BaseScene
 from scripts.scenes.level_one import LevelOneScene
-from scripts.util.button import Button
+from scripts.ui.button import Button
 from scripts.util.camera import Camera, AutoScroll
 from scripts.util.sound import *
 

@@ -1,5 +1,5 @@
 from scripts.scenes.base_scene import BaseScene
-from scripts.util.button import Button
+from scripts.ui.button import Button
 from scripts.util.sound import *
 
 

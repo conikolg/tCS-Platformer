@@ -2,16 +2,16 @@ from pathlib import Path
 
 from scripts.enemy.basic_enemy import BasicEnemy
 from scripts.enemy.slime import Slime
+from scripts.leveldesigner.level_designer import LevelDesigner
 from scripts.player.player import Player
 from scripts.scenes.base_scene import BaseScene
 from scripts.scenes.game_over import GameOverScene
+from scripts.scenes.simple_platform import Platform
 from scripts.ui.ui import UI
 from scripts.util import physics, game_time
 from scripts.util.camera import Camera, BoundedFollowTarget
 from scripts.util.custom_group import CustomGroup
-from scripts.util.simple_platform import Platform
 from scripts.util.sound import *
-from scripts.leveldesigner.level_designer import LevelDesigner
 
 
 class LevelOneScene(BaseScene):
@@ -66,25 +66,18 @@ class LevelOneScene(BaseScene):
         # Create enemies
         self.enemy_group: CustomGroup = CustomGroup()
         enemies = [
-
             # Enemy on the first platform
             Slime(platform=platforms[0], horizontal_offset=0),
 
             # # Enemies inside the tunnel
             BasicEnemy(enemy_type="scorpion", platform=platforms[8], horizontal_offset=10),
             BasicEnemy(enemy_type="frog", platform=platforms[8], horizontal_offset=100),
-
-            # unused enemies
-            # BasicEnemy(platform=platforms[8], horizontal_offset=500),
-            # BasicEnemy(platform=platforms[7], horizontal_offset=75),
-            # BasicEnemy(platform=platforms[7], horizontal_offset=345),
-            # BasicEnemy(platform=platforms[7], horizontal_offset=740),
         ]
         # self.enemy_group.add(*enemies)
 
         # Level 1 sound
         self.sound_enabled = None
-        # load_sound("levelOneTheme", "assets/sounds/wavFiles/metroid_brinstar_theme.wav", 50)
+        load_sound("levelOneTheme", "assets/sounds/wavFiles/metroid_brinstar_theme.wav", 50)
         # play_sound("levelOneTheme")
 
         # Show Controls

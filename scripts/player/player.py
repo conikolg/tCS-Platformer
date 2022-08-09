@@ -1,11 +1,11 @@
 from collections import defaultdict
 from pathlib import Path
 
-from scripts.bullet.bullet import Bullet
-from scripts.sword.sword import Sword
-from scripts.util import game_time
+from scripts.player.bullet import Bullet
+from scripts.player.sword import Sword
+from scripts.ui.healthbar import Healthbar
+from scripts.util import game_time, coloring
 from scripts.util.custom_sprite import CustomSprite
-from scripts.util.healthbar import Healthbar
 from scripts.util.sound import *
 
 
@@ -138,21 +138,6 @@ class Player(CustomSprite):
         self._is_grounded = grounded
         if self._is_grounded:
             self.velocity.y = 0
-
-    @property
-    def center(self) -> tuple:
-        """ Returns the center of the player's hitbox. """
-        return self.rect.center
-
-    @center.setter
-    def center(self, location: tuple):
-        """
-        Sets the center of the player's hitbox to the given location.
-
-        :param location: A tuple representing the new location of the player's hitbox's center.
-        :return: None
-        """
-        self.rect.center = location
 
     def handle_events(self, events: list[pygame.event.Event]):
         for event in events:
@@ -306,7 +291,8 @@ class Player(CustomSprite):
                 # self.shift_color(img=img, color_shift=0)
                 for char, colors in self.outfits.items():
                     for color_name, color_value in colors.items():
-                        self.recolor(img, self.outfits["default"][color_name], self.outfits[self.char_type][color_name])
+                        coloring.recolor(img, self.outfits["default"][color_name],
+                                         self.outfits[self.char_type][color_name])
                 # Add it to big animation dictionary
                 animations[animation_type_dir.name].append(img)
 
@@ -321,31 +307,6 @@ class Player(CustomSprite):
             super(Player, self).draw(screen, camera_offset, show_bounding_box)
         screen.blit(source=self.healthbar.render(self._image.get_width(), 12),
                     dest=self.rect.move(camera_offset).move(0, -12).move(-self.hitbox_offset_x, self.hitbox_offset_y))
-
-    @staticmethod
-    def shift_color(img: pygame.Surface = None, color_shift: int = 0):
-        # Get the pixels
-        pixels = pygame.PixelArray(img)
-        # Iterate over every pixel
-        for x in range(img.get_width()):
-            for y in range(img.get_height()):
-                # Turn the pixel data into an RGB tuple
-                rgb = img.unmap_rgb(pixels[x][y])
-                # Get a new color object using the RGB tuple and convert to HSLA
-                color = pygame.Color(*rgb)
-                h, s, l, a = color.hsla
-                # Add 120 to the hue (or however much you want) and wrap to under 360
-                color.hsla = (int(h) + color_shift) % 360, int(s), int(l), int(a)
-                # Assign directly to the pixel
-                pixels[x][y] = color
-        # The old way of closing a PixelArray object
-        del pixels
-
-    @staticmethod
-    def recolor(img: pygame.Surface, old_color: tuple = None, new_color: tuple = None):
-        new_img = pygame.PixelArray(img)
-        new_img.replace(old_color, new_color)
-        del new_img
 
     # Causes the player to take damage and enter a "flashing" state to indicate temporary invulnerability
     def take_damage(self, amount):

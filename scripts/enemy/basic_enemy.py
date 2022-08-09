@@ -3,9 +3,9 @@ from pathlib import Path
 
 import pygame
 
+from scripts.scenes.simple_platform import Platform
+from scripts.ui.healthbar import Healthbar
 from scripts.util.custom_sprite import CustomSprite
-from scripts.util.healthbar import Healthbar
-from scripts.util.simple_platform import Platform
 
 
 class BasicEnemy(CustomSprite):
