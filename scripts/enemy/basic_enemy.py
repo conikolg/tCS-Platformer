@@ -5,7 +5,7 @@ import pygame
 
 from scripts.util.custom_sprite import CustomSprite
 from scripts.util.healthbar import Healthbar
-from scripts.util.platform import Platform
+from scripts.util.simple_platform import Platform
 
 
 class BasicEnemy(CustomSprite):

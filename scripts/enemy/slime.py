@@ -1,5 +1,5 @@
 from scripts.enemy.basic_enemy import BasicEnemy
-from scripts.util.platform import Platform
+from scripts.util.simple_platform import Platform
 
 
 class Slime(BasicEnemy):

@@ -2,7 +2,7 @@ import pygame
 import csv
 from pathlib import Path
 import pandas as pd
-from scripts.util.platform import Platform
+from scripts.util.simple_platform import Platform
 
 
 class LevelDesigner:

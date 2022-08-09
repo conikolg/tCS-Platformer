@@ -9,7 +9,7 @@ from scripts.ui.ui import UI
 from scripts.util import physics, game_time
 from scripts.util.camera import Camera, BoundedFollowTarget
 from scripts.util.custom_group import CustomGroup
-from scripts.util.platform import Platform
+from scripts.util.simple_platform import Platform
 from scripts.util.sound import *
 from scripts.leveldesigner.level_designer import LevelDesigner
 
