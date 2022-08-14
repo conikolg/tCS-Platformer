@@ -18,7 +18,7 @@ class LevelOneScene(BaseScene):
     def __init__(self):
         super().__init__()
 
-        self.player = Player("default", rect=pygame.rect.Rect(800, 550, 100, 100))
+        self.player = Player("default", rect=pygame.rect.Rect(100, 550, 100, 100))
         self.ui = UI(player=self.player)
 
         # Length of level used in render method
@@ -44,23 +44,26 @@ class LevelOneScene(BaseScene):
 
         # Create all active platforms in this level
         self.platforms: CustomGroup = CustomGroup()
-        platforms = [
-            # Little obstacle course
-            Platform(rect=pygame.rect.Rect(800, 600, 64, 32), image=platform_image),
-            Platform(rect=pygame.rect.Rect(900, 550, 64, 32), image=platform_image),
-            Platform(rect=pygame.rect.Rect(1000, 500, 64, 32), image=platform_image),
-            Platform(rect=pygame.rect.Rect(1100, 450, 64, 32), image=platform_image),
-            Platform(rect=pygame.rect.Rect(1175, 500, 64, 32), image=platform_image),
-            Platform(rect=pygame.rect.Rect(1400, 575, 64, 32), image=platform_image),
-            Platform(rect=pygame.rect.Rect(1525, 575, 64, 32), image=platform_image),
 
-            # Long tunnel
-            Platform(rect=pygame.rect.Rect(1650, 200, 800, 10)),
-            Platform(rect=pygame.rect.Rect(1650, 80, 800, 10))
-        ]
+        # platforms = [
+        #     # Little obstacle course
+        #     Platform(rect=pygame.rect.Rect(800, 600, 64, 32), image=platform_image),
+        #     Platform(rect=pygame.rect.Rect(900, 550, 64, 32), image=platform_image),
+        #     Platform(rect=pygame.rect.Rect(1000, 500, 64, 32), image=platform_image),
+        #     Platform(rect=pygame.rect.Rect(1100, 450, 64, 32), image=platform_image),
+        #     Platform(rect=pygame.rect.Rect(1175, 500, 64, 32), image=platform_image),
+        #     Platform(rect=pygame.rect.Rect(1400, 575, 64, 32), image=platform_image),
+        #     Platform(rect=pygame.rect.Rect(1525, 575, 64, 32), image=platform_image),
+        #
+        #     # Long tunnel
+        #     Platform(rect=pygame.rect.Rect(1650, 200, 800, 10)),
+        #     Platform(rect=pygame.rect.Rect(1650, 80, 800, 10))
+        # ]
         # self.platforms.add(*platforms)
         # Eventually we will remove all platforms above in replace for level designer platforms below. - Jared
         # For now it breaks if the above platforms aren't added.
+        platforms = [*self.level_designer.platforms]
+
         self.platforms.add(*self.level_designer.platforms)
 
         # Create enemies
@@ -127,6 +130,9 @@ class LevelOneScene(BaseScene):
         right_bound = self.camera.behavior.horizontal_limits[1]
         if self.player.rect.right > self.camera.behavior.horizontal_limits[1]:
             self.player.rect.right = right_bound
+        # Did player fall out of bounds and die?
+        if self.player.rect.top > self.camera.behavior.vertical_limits[1]:
+            self.player.healthbar.health = 0
 
         # Process player-platform collisions
         collisions = pygame.sprite.spritecollide(self.player, self.platforms, dokill=False)

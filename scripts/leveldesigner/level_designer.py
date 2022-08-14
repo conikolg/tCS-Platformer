@@ -5,6 +5,7 @@ import pandas as pd
 import pygame
 
 from scripts.scenes.simple_platform import Platform
+from scripts.enemy.basic_enemy import BasicEnemy
 
 
 class LevelDesigner:
@@ -46,5 +47,6 @@ class LevelDesigner:
                     # 0: Platform
                     # 1: Enemy
                     # etc.
-                    self.platforms.append(
-                        Platform(rect=pygame.Rect(x * 64, y * 32 + 150, 64, 32), image=self.platform_img))
+                    if tile == 0:
+                        self.platforms.append(
+                            Platform(rect=pygame.Rect(x * 64, y * 32 + 150, 64, 32), image=self.platform_img))
