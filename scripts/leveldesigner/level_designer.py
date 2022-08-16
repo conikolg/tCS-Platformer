@@ -19,7 +19,8 @@ class LevelDesigner:
         self.cols: int = len(pd.read_csv(self.level_file).axes[1])
         self.level_data = []
         self.create_empty_list()
-        self.platform_img = pygame.image.load("assets/platforms/purple_platform.png")
+        self.top_ground_img = pygame.image.load(Path("assets/platforms/Textures-16.png")).convert_alpha().subsurface((32, 0, 16, 16))
+        self.ground_img = pygame.image.load(Path("assets/platforms/Textures-16.png")).convert_alpha().subsurface((32, 16, 16, 16))
         self.platforms = []
 
     def create_empty_list(self):
@@ -47,6 +48,9 @@ class LevelDesigner:
                     # 0: Platform
                     # 1: Enemy
                     # etc.
-                    if tile == 0:
+                    if tile == 1:
                         self.platforms.append(
-                            Platform(rect=pygame.Rect(x * 64, y * 32 + 150, 64, 32), image=self.platform_img))
+                            Platform(rect=pygame.Rect(x * 32, y * 32, 32, 32), image=self.top_ground_img))
+                    elif tile == 0:
+                        self.platforms.append(
+                            Platform(rect=pygame.Rect(x * 32, y * 32, 32, 32), image=self.ground_img))
