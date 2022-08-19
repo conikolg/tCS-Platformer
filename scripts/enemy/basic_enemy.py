@@ -27,7 +27,10 @@ class BasicEnemy(CustomSprite):
         self.direction: int = 1
         self.healthbar = Healthbar()
         self.horizontal_offset = horizontal_offset
-        self.enemy_type = enemy_type
+        if enemy_type in ["frog", "slime", "scorpion"]:
+            self.enemy_type = enemy_type
+        else:
+            self.enemy_type = None
         self.animations: dict[str, list] = self.load_animations(size=(50, 50))
         self.current_animation_frame = [self.enemy_type, 0]
 

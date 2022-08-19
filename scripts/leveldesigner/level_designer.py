@@ -17,11 +17,12 @@ class LevelDesigner:
         self.level_file = Path(f"scripts/leveldesigner/level{self.level}_data.csv")
         self.rows: int = len(pd.read_csv(self.level_file).axes[0]) + 1
         self.cols: int = len(pd.read_csv(self.level_file).axes[1])
-        self.level_data = []
+        self.level_data: list = []
         self.create_empty_list()
-        self.top_ground_img = pygame.image.load(Path("assets/platforms/Textures-16.png")).convert_alpha().subsurface((32, 0, 16, 16))
-        self.ground_img = pygame.image.load(Path("assets/platforms/Textures-16.png")).convert_alpha().subsurface((32, 16, 16, 16))
-        self.platforms = []
+        self.top_ground_img: pygame.Surface = pygame.image.load(Path("assets/platforms/Textures-16.png")).convert_alpha().subsurface((32, 0, 16, 16))
+        self.ground_img: pygame.surface = pygame.image.load(Path("assets/platforms/Textures-16.png")).convert_alpha().subsurface((32, 16, 16, 16))
+        self.platforms: list = []
+        self.enemies: list = []
 
     def create_empty_list(self):
         # Creates an "empty" list full of -1 values which will not display an object.
@@ -48,9 +49,16 @@ class LevelDesigner:
                     # 0: Platform
                     # 1: Enemy
                     # etc.
-                    if tile == 1:
-                        self.platforms.append(
-                            Platform(rect=pygame.Rect(x * 32, y * 32, 32, 32), image=self.top_ground_img))
-                    elif tile == 0:
+                    if tile == 0:
                         self.platforms.append(
                             Platform(rect=pygame.Rect(x * 32, y * 32, 32, 32), image=self.ground_img))
+                    elif tile == 1:
+                        self.platforms.append(
+                            Platform(rect=pygame.Rect(x * 32, y * 32, 32, 32), image=self.top_ground_img))
+                    elif tile == 2:
+                        self.platforms.append(
+                            Platform(rect=pygame.Rect(x * 32, y * 32, 32*5, 32), image=self.ground_img))
+                    elif tile == 3:
+                        print(len(self.platforms))
+                        self.enemies.append(
+                            BasicEnemy("frog", self.platforms[8]))

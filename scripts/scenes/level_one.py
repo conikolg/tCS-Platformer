@@ -62,21 +62,24 @@ class LevelOneScene(BaseScene):
         # self.platforms.add(*platforms)
         # Eventually we will remove all platforms above in replace for level designer platforms below. - Jared
         # For now it breaks if the above platforms aren't added.
-        platforms = [*self.level_designer.platforms]
+        # platforms = [*self.level_designer.platforms]
 
         self.platforms.add(*self.level_designer.platforms)
+        print(self.platforms)
 
         # Create enemies
         self.enemy_group: CustomGroup = CustomGroup()
-        enemies = [
-            # Enemy on the first platform
-            Slime(platform=platforms[0], horizontal_offset=0),
+        # enemies = [
+        #     # Enemy on the first platform
+        #     Slime(platform=platforms[0], horizontal_offset=0),
+        #
+        #     # # Enemies inside the tunnel
+        #     BasicEnemy(enemy_type="scorpion", platform=platforms[8], horizontal_offset=10),
+        #     BasicEnemy(enemy_type="frog", platform=platforms[8], horizontal_offset=100),
+        # ]
+        self.enemy_group.add(*self.level_designer.enemies)
 
-            # # Enemies inside the tunnel
-            BasicEnemy(enemy_type="scorpion", platform=platforms[8], horizontal_offset=10),
-            BasicEnemy(enemy_type="frog", platform=platforms[8], horizontal_offset=100),
-        ]
-        # self.enemy_group.add(*enemies)
+        print(self.enemy_group)
 
         # Level 1 sound
         self.sound_enabled = None
@@ -244,7 +247,7 @@ class LevelOneScene(BaseScene):
         self.platforms.draw(surface=screen, camera_offset=-self.camera.offset, show_bounding_box=self.show_hitboxes)
 
         # Draw enemies
-        # self.enemy_group.draw(surface=screen, camera_offset=-self.camera.offset, show_bounding_box=self.show_hitboxes)
+        self.enemy_group.draw(surface=screen, camera_offset=-self.camera.offset, show_bounding_box=self.show_hitboxes)
 
         # Draw bullets
         if self.player.bullet_group:
