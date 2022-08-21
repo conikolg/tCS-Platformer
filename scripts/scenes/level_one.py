@@ -1,5 +1,7 @@
 from pathlib import Path
 
+import pygame
+
 from scripts.enemy.basic_enemy import BasicEnemy
 from scripts.enemy.slime import Slime
 from scripts.leveldesigner.level_designer import LevelDesigner
@@ -78,8 +80,6 @@ class LevelOneScene(BaseScene):
         #     BasicEnemy(enemy_type="frog", platform=platforms[8], horizontal_offset=100),
         # ]
         self.enemy_group.add(*self.level_designer.enemies)
-
-        print(self.enemy_group)
 
         # Level 1 sound
         self.sound_enabled = None

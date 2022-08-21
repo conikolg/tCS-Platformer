@@ -24,6 +24,11 @@ class LevelDesigner:
         self.platforms: list = []
         self.enemies: list = []
 
+        self.tilesheet = {
+            "a": self.ground_img,
+            "b": self.top_ground_img
+        }
+
     def create_empty_list(self):
         # Creates an "empty" list full of -1 values which will not display an object.
         for row in range(self.rows):
@@ -36,29 +41,53 @@ class LevelDesigner:
             reader = csv.reader(csvfile, delimiter=',')
             for x, row in enumerate(reader):
                 for y, tile in enumerate(row):
-                    self.level_data[x][y] = int(tile)
+                    self.level_data[x][y] = tile
 
     def process_data(self):
         # Displays data from csv level file onto the game screen.
         for y, row in enumerate(self.level_data):
             for x, tile in enumerate(row):
-                if tile >= 0:
-                    # Get image and create rect
-                    # TODO: Add multiple conditions for each piece of data to display.
-                    # -1: None
-                    # 0: Platform
-                    # 1: Enemy
-                    # etc.
-                    if tile == 0:
-                        self.platforms.append(
-                            Platform(rect=pygame.Rect(x * 32, y * 32, 32, 32), image=self.ground_img))
-                    elif tile == 1:
-                        self.platforms.append(
-                            Platform(rect=pygame.Rect(x * 32, y * 32, 32, 32), image=self.top_ground_img))
-                    elif tile == 2:
-                        self.platforms.append(
-                            Platform(rect=pygame.Rect(x * 32, y * 32, 32*5, 32), image=self.ground_img))
-                    elif tile == 3:
-                        print(len(self.platforms))
-                        self.enemies.append(
-                            BasicEnemy("frog", self.platforms[8]))
+                # Count occurrence of tile
+                # with open(self.level_file, 'r') as csvfile:
+                #     ctx = csvfile.read()
+                #     count = ctx.count(tile)
+
+                if tile[1] in self.tilesheet:
+                    count = int(tile[0])
+
+                    # Create new surface that is count times bigger than image width
+                    new_surface = pygame.Surface((self.tilesheet[tile[1]].get_width() * count,
+                                                  self.tilesheet[tile[1]].get_height()),
+                                                 pygame.SRCALPHA)
+
+                    # Iterate for each count of tile to blit image at new X destination
+                    for image in range(count):
+                        new_surface.blit(self.tilesheet[tile[1]], dest=(self.tilesheet[tile[1]].get_width() * image, 0))
+
+                    # Add new surface to platforms and create new platform with new surface image
+                    self.platforms.append(Platform(rect=pygame.Rect(x * self.tilesheet[tile[1]].get_width() * 4,
+                                                                    y * self.tilesheet[tile[1]].get_height() * 4 - 500,
+                                                                    new_surface.get_width() * 4,
+                                                                    new_surface.get_height() * 4),
+                                                   image=new_surface))
+                    break
+                # if tile >= 0:
+                # Get image and create rect
+                # -1: None
+                # 0: Platform
+                # 1: Enemy
+                # etc.
+                # if tile == 0:
+                #     self.platforms.append(
+                #         Platform(rect=pygame.Rect(x * 32, y * 32, 32, 32), image=self.ground_img))
+                # elif tile == 1:
+                #     self.platforms.append(
+                #         Platform(rect=pygame.Rect(x * 32, y * 32, 32, 32), image=self.top_ground_img))
+                # elif tile == 2:
+                #     self.platforms.append(
+                #         Platform(rect=pygame.Rect(x * 32, y * 32, 32*5, 32), image=self.ground_img))
+                # elif tile == 3:
+                #     print(len(self.platforms))
+                #     self.enemies.append(
+                #         BasicEnemy("frog", self.platforms[8]))
+
