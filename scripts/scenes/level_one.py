@@ -63,11 +63,12 @@ class LevelOneScene(BaseScene):
         # ]
         # self.platforms.add(*platforms)
         # Eventually we will remove all platforms above in replace for level designer platforms below. - Jared
-        # For now it breaks if the above platforms aren't added.
         # platforms = [*self.level_designer.platforms]
+        # Enemy type selection is not working because the level designer
+        # Finds the enemy first and can not instantiate on platform since it doesnt exist yet
 
         self.platforms.add(*self.level_designer.platforms)
-        print(self.platforms)
+        print(f"Platforms: {len(self.platforms)}")
 
         # Create enemies
         self.enemy_group: CustomGroup = CustomGroup()

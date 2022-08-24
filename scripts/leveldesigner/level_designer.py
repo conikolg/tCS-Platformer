@@ -24,6 +24,8 @@ class LevelDesigner:
         self.platforms: list = []
         self.enemies: list = []
 
+        # Enter new letter for each image in sprite sheet
+        # Compared to assets/platforms directory.
         self.tilesheet = {
             "a": self.ground_img,
             "b": self.top_ground_img
@@ -70,24 +72,6 @@ class LevelDesigner:
                                                                     new_surface.get_width() * 4,
                                                                     new_surface.get_height() * 4),
                                                    image=new_surface))
-                    break
-                # if tile >= 0:
-                # Get image and create rect
-                # -1: None
-                # 0: Platform
-                # 1: Enemy
-                # etc.
-                # if tile == 0:
-                #     self.platforms.append(
-                #         Platform(rect=pygame.Rect(x * 32, y * 32, 32, 32), image=self.ground_img))
-                # elif tile == 1:
-                #     self.platforms.append(
-                #         Platform(rect=pygame.Rect(x * 32, y * 32, 32, 32), image=self.top_ground_img))
-                # elif tile == 2:
-                #     self.platforms.append(
-                #         Platform(rect=pygame.Rect(x * 32, y * 32, 32*5, 32), image=self.ground_img))
-                # elif tile == 3:
-                #     print(len(self.platforms))
-                #     self.enemies.append(
-                #         BasicEnemy("frog", self.platforms[8]))
 
+                    # Break loop as soon as a tile is found, find length, create platform.
+                    break
