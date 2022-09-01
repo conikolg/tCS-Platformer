@@ -35,14 +35,14 @@ class LevelOneScene(BaseScene):
             constant=pygame.math.Vector2(-640 + self.player.rect.w / 2, -self.player.rect.top))
 
         # Store all layers in a dict with the delta scroll for each layer
-        self.scenery: dict[pygame.Surface, float] = self.load_scenery(size=(self.camera.DISPLAY_W,
-                                                                            self.camera.DISPLAY_H))
+        self.scenery: dict[pygame.Surface, float] = self.load_scenery()
 
         self.level_designer = LevelDesigner(level=1)
         self.level_designer.get_level_data()
-        self.level_designer.process_data()
+        self.level_designer.generate_platforms()
+        # self.level_designer.process_data()
 
-        platform_image = pygame.image.load("assets/platforms/purple_platform.png")
+        # platform_image = pygame.image.load("assets/platforms/purple_platform.png")
 
         # Create all active platforms in this level
         self.platforms: CustomGroup = CustomGroup()
@@ -193,7 +193,7 @@ class LevelOneScene(BaseScene):
         self.game_over_check()
 
     @staticmethod
-    def load_scenery(size: tuple) -> dict[pygame.Surface, float]:
+    def load_scenery() -> dict[pygame.Surface, float]:
         # Create container for scenery
         scenery: dict[pygame.Surface, float] = dict()
         # Start at content root
