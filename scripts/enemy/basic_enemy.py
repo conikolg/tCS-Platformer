@@ -44,8 +44,11 @@ class BasicEnemy(CustomSprite):
         self.init_hitbox()
 
         # Ensure that the entire enemy is on the platform
-        # if self.rect.left < self.platform.rect.left or self.rect.right > self.platform.rect.right:
-        #     raise Exception("Basic enemies cannot hang off platforms.")
+        # Rewrite to not take in platform? Ideally we would spawn an enemy at an x, y pos then assign platform based on
+        # position.
+
+        if self.rect.left < self.platform.rect.left or self.rect.right > self.platform.rect.right:
+            raise Exception("Basic enemies cannot hang off platforms.")
 
     def __str__(self):
         out_str = f"BasicEnemy located at {self.rect.topleft}"

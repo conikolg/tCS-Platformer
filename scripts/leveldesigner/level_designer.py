@@ -9,7 +9,6 @@ from itertools import groupby
 from scripts.scenes.simple_platform import Platform
 from scripts.enemy.basic_enemy import BasicEnemy
 
-
 class LevelDesigner:
     def __init__(self, level: int = 1):
         # Collects data from csv files to display objects and obstacles in the level.
@@ -112,3 +111,6 @@ class LevelDesigner:
                                                             new_surface.get_width() * 4,
                                                             new_surface.get_height() * 4),
                                            image=new_surface))
+
+    def spawn_enemy(self, enemy_type: str, platform: Platform):
+        self.enemies.append(BasicEnemy(enemy_type, platform))

@@ -26,6 +26,9 @@ class LevelOneScene(BaseScene):
         # Length of level used in render method
         self.length = 5
 
+        # Level - New feature :D
+        self.level = 1
+
         self.camera = Camera(
             behavior=BoundedFollowTarget(
                 target=self.player,
@@ -35,9 +38,9 @@ class LevelOneScene(BaseScene):
             constant=pygame.math.Vector2(-640 + self.player.rect.w / 2, -self.player.rect.top))
 
         # Store all layers in a dict with the delta scroll for each layer
-        self.scenery: dict[pygame.Surface, float] = self.load_scenery()
+        self.scenery: dict[pygame.Surface, float] = self.load_scenery(level=self.level)
 
-        self.level_designer = LevelDesigner(level=1)
+        self.level_designer = LevelDesigner(level=self.level)
         self.level_designer.get_level_data()
         self.level_designer.generate_platforms()
 
@@ -45,6 +48,8 @@ class LevelOneScene(BaseScene):
 
         # Create all active platforms in this level
         self.platforms: CustomGroup = CustomGroup()
+
+        # WARNING: Do not delete comments below. It breaks the game for whatever reason. - Jared
 
         # platforms = [
         #     # Little obstacle course
@@ -194,12 +199,12 @@ class LevelOneScene(BaseScene):
         self.game_over_check()
 
     @staticmethod
-    def load_scenery() -> dict[pygame.Surface, float]:
+    def load_scenery(level: int) -> dict[pygame.Surface, float]:
         # Create container for scenery
         scenery: dict[pygame.Surface, float] = dict()
         # Start at content root
         # Sort path for macOS to read clearly
-        root_scenery_dir = sorted(Path("assets/scenery").iterdir())
+        root_scenery_dir = sorted(Path(f"assets/scenery/level{level}").iterdir())
 
         # Delta scrolls for each layer
         ds = 0.5
