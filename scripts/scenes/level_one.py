@@ -40,7 +40,6 @@ class LevelOneScene(BaseScene):
         self.level_designer = LevelDesigner(level=1)
         self.level_designer.get_level_data()
         self.level_designer.generate_platforms()
-        # self.level_designer.process_data()
 
         # platform_image = pygame.image.load("assets/platforms/purple_platform.png")
 
@@ -69,6 +68,8 @@ class LevelOneScene(BaseScene):
 
         self.platforms.add(*self.level_designer.platforms)
         print(f"Platforms: {len(self.platforms)}")
+        for platform in self.platforms:
+            print(platform.rect.w, platform.rect.h)
 
         # Create enemies
         self.enemy_group: CustomGroup = CustomGroup()

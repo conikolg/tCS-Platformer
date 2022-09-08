@@ -34,23 +34,24 @@ class LevelDesigner:
         }
 
     def create_empty_list(self):
-        # Creates an "empty" list full of -1 values which will not display an object.
+        """Creates an "empty" list full of -1 values which will not display an object."""
         for row in range(self.rows):
             r = [-1] * self.cols
             self.level_data.append(r)
 
     def get_level_data(self):
-        # Pulls data from csv level file to find x and y position of each element in csv mapped to game.
+        """Pulls data from csv level file to find x and y position of each element in csv mapped to game."""
         with open(self.level_file, newline="") as csvfile:
             reader = csv.reader(csvfile, delimiter=',')
             for x, row in enumerate(reader):
                 for y, tile in enumerate(row):
                     self.level_data[x][y] = tile
-        # GOAL:
-        # grouped_data = [[3a, 3a, 3a], [5a, 5a, 5a, 5a, 5a] ... etc]
 
     @staticmethod
     def process_data(data):
+        """
+        Counts consecutive same tile values and returns tile and length of each set.
+        """
         tile = []
         length = []
         running_count = 1
@@ -70,27 +71,30 @@ class LevelDesigner:
 
         return tile, length
 
-        # Goal is to find len of consecutive same values of within 2D array.
-        # Need to find how many times the same value repeats until a new value is found.
-        # The length of the platform is going to be this value.
-        # ONLY MAKE PLATFORM WHEN NEW TILE IS NOT SAME AS PREVIOUS
-        # Can't just use count bc same tile and length can appear multiple times
-        # I could find total count of tile and divide by count of platforms of that tile
-        # But then I would have to find the count of all tiles of that length
-
     def generate_platforms(self):
+        """
+        Calculates x and y position of platform from level data file.
+        Processes data to calculate platform length and tile type.
+        Creates all of the platforms needed in the game of correct tile type and length.
+        """
         pf_tile_len = self.process_data(self.level_data)
-        print(pf_tile_len)
         for x, row in enumerate(self.level_data):
             for y, tile in enumerate(row):
-                if "-1" not in tile and tile in pf_tile_len[0]:
-                    self.make_platform(tile[-1], pf_tile_len[1][pf_tile_len[0].index(tile)], 10, 10)    # x, y broke
-                    continue
+                if self.level_data[x][y] in pf_tile_len[0]:
+                    self.make_platform(self.level_data[x][y][-1], pf_tile_len[1][pf_tile_len[0].index(self.level_data[x][y])], y, x)
+                    break
 
-    def make_platform(self, tile_type: str, pl: int, x, y):
-        # :param tile_type: Tile string from tile sheet to display
-        # :param pl: Platform length to make rect hit box
-        # :param x, y: X and Y coordinates to display platform
+    def make_platform(self, tile_type: str, pl: int,
+                      x: int, y: int):
+        """
+        Creates a platform derived from the simple_platform class from the data
+        generated in the level data file.
+
+        :param tile_type: Tile string from tile sheet to display
+        :param pl: Platform length to make rect hit box
+        :param x: Position of platform along the x axis
+        :param y: Position of platform along the y axis
+        """
         if tile_type in self.tilesheet:
             # Create new surface that is count times bigger than image width
             new_surface = pygame.Surface((self.tilesheet[tile_type].get_width() * pl,
@@ -103,8 +107,8 @@ class LevelDesigner:
                                  dest=(self.tilesheet[tile_type].get_width() * offset, 0))
 
             # Add new surface to platforms and create new platform with new surface image
-            self.platforms.append(Platform(rect=pygame.Rect(x * self.tilesheet[tile_type].get_width() * 4 - 500,
-                                                            y * self.tilesheet[tile_type].get_height() * 4,
+            self.platforms.append(Platform(rect=pygame.Rect(x*64,
+                                                            y*64 - 540,
                                                             new_surface.get_width() * 4,
                                                             new_surface.get_height() * 4),
                                            image=new_surface))
