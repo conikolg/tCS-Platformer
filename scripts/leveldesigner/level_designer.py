@@ -9,6 +9,7 @@ from itertools import groupby
 from scripts.scenes.simple_platform import Platform
 from scripts.enemy.basic_enemy import BasicEnemy
 
+
 class LevelDesigner:
     def __init__(self, level: int = 1):
         # Collects data from csv files to display objects and obstacles in the level.
@@ -20,8 +21,10 @@ class LevelDesigner:
         self.cols: int = len(pd.read_csv(self.level_file).axes[1])
         self.level_data: list = []
         self.create_empty_list()
-        self.top_ground_img: pygame.Surface = pygame.image.load(Path("assets/platforms/Textures-16.png")).convert_alpha().subsurface((32, 0, 16, 16))
-        self.ground_img: pygame.surface = pygame.image.load(Path("assets/platforms/Textures-16.png")).convert_alpha().subsurface((32, 16, 16, 16))
+        self.top_ground_img: pygame.Surface = pygame.image.load(
+            Path("assets/platforms/Textures-16.png")).convert_alpha().subsurface((32, 0, 16, 16))
+        self.ground_img: pygame.surface = pygame.image.load(
+            Path("assets/platforms/Textures-16.png")).convert_alpha().subsurface((32, 16, 16, 16))
         self.platforms: list = []
         self.enemies: list = []
 
@@ -57,7 +60,7 @@ class LevelDesigner:
         for row in range(len(data)):
             for val in range(len(data[row]) - 1):
                 if data[row][val] != "-1z":
-                    if data[row][val] == data[row][val+1]:
+                    if data[row][val] == data[row][val + 1]:
                         running_count += 1
                     else:
                         length.append(running_count)
@@ -65,10 +68,12 @@ class LevelDesigner:
                         running_count = 1
 
         if data[row][val] != "-1z":
-            tile.append(data[row][val+1])
+            tile.append(data[row][val + 1])
             length.append(running_count)
 
-        return tile, length
+        res = {tile[i]: length[i] for i in range(len(tile))}
+
+        return res
 
     def generate_platforms(self):
         """
@@ -76,11 +81,14 @@ class LevelDesigner:
         Processes data to calculate platform length and tile type.
         Creates all of the platforms needed in the game of correct tile type and length.
         """
-        pf_tile_len = self.process_data(self.level_data)
+        tiles_and_lengths = self.process_data(self.level_data)
+        tiles = self.process_data(self.level_data).keys()
+        lengths = self.process_data(self.level_data).values()
+
         for x, row in enumerate(self.level_data):
             for y, tile in enumerate(row):
-                if self.level_data[x][y] in pf_tile_len[0]:
-                    self.make_platform(self.level_data[x][y][-1], pf_tile_len[1][pf_tile_len[0].index(self.level_data[x][y])], y, x)
+                if tile[-1] in self.tilesheet.keys():
+                    self.make_platform(self.level_data[x][y][-1], tiles_and_lengths[tile], y, x)
                     break
 
     def make_platform(self, tile_type: str, pl: int,
@@ -106,8 +114,8 @@ class LevelDesigner:
                                  dest=(self.tilesheet[tile_type].get_width() * offset, 0))
 
             # Add new surface to platforms and create new platform with new surface image
-            self.platforms.append(Platform(rect=pygame.Rect(x*64,
-                                                            y*64 - 540,
+            self.platforms.append(Platform(rect=pygame.Rect(x * 64,
+                                                            y * 64 - 540,
                                                             new_surface.get_width() * 4,
                                                             new_surface.get_height() * 4),
                                            image=new_surface))

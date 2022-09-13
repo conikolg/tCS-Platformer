@@ -27,6 +27,9 @@ class LevelOneScene(BaseScene):
         self.length = 5
 
         # Level - New feature :D
+        # This could easily replace which scene gets displayed.
+        # Could change class name to LevelScene and increase this value in background.
+        # Or we create an entirely new class for LevelTwoScene and literally do the exact same thing as this class.
         self.level = 1
 
         self.camera = Camera(
@@ -73,8 +76,8 @@ class LevelOneScene(BaseScene):
 
         self.platforms.add(*self.level_designer.platforms)
         print(f"Platforms: {len(self.platforms)}")
-        for platform in self.platforms:
-            print(platform.rect.w, platform.rect.h)
+        # for platform in self.platforms:
+        #     print(platform.rect.w, platform.rect.h)
 
         # Create enemies
         self.enemy_group: CustomGroup = CustomGroup()
