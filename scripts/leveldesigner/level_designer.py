@@ -80,6 +80,8 @@ class LevelDesigner:
         Creates a platform derived from the simple_platform class from the data
         generated in the level data file.
 
+        NOTE: THIS VERSION WORKS AND I AM NOT FIXING IT IF IT BREAKS. - JARED
+
         :param tile_type: Tile string from tile sheet to display
         :param pl: Platform length to make rect hit box
         :param x: Position of platform along the x axis
@@ -89,13 +91,11 @@ class LevelDesigner:
             # Create new surface of correct dimensions
             new_surface = pygame.Surface((self.tilesheet[tile_type].get_width() * pl,
                                           self.tilesheet[tile_type].get_height()))
+
             # Create a sequence of images to display on new surface
             seq = [(self.tilesheet[tile_type],
-                    (self.tilesheet[tile_type].get_width() * offset,
-                     self.tilesheet[tile_type].get_height())) for offset in range(pl)]
+                    (self.tilesheet[tile_type].get_width() * offset, 0)) for offset in range(pl)]
 
-            # ? Why does the new surface not display the blitted image ?
-            
             # Blit sequence to new surface
             new_surface.blits(blit_sequence=seq)
 
