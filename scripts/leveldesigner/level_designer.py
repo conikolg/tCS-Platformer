@@ -71,9 +71,9 @@ class LevelDesigner:
             tile.append(data[row][val + 1])
             length.append(running_count)
 
-        res = {tile[i]: length[i] for i in range(len(tile))}
+        # res = {tile[i]: length[i] for i in range(len(tile))}
 
-        return res
+        return tile, length
 
     def generate_platforms(self):
         """
@@ -82,14 +82,17 @@ class LevelDesigner:
         Creates all of the platforms needed in the game of correct tile type and length.
         """
         tiles_and_lengths = self.process_data(self.level_data)
-        tiles = self.process_data(self.level_data).keys()
-        lengths = self.process_data(self.level_data).values()
+        tiles = tiles_and_lengths[0]
+        lengths = tiles_and_lengths[1]
+
+        platform_count = 0
 
         for x, row in enumerate(self.level_data):
             for y, tile in enumerate(row):
                 if tile[-1] in self.tilesheet.keys():
-                    self.make_platform(self.level_data[x][y][-1], tiles_and_lengths[tile], y, x)
-                    break
+                    self.make_platform(tile[-1], lengths[platform_count], y, x)
+                    if platform_count < len(tiles)-1:
+                        platform_count += 1
 
     def make_platform(self, tile_type: str, pl: int,
                       x: int, y: int):
