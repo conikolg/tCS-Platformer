@@ -100,7 +100,7 @@ class LevelOneScene(BaseScene):
         self.show_controls_help: bool = True
 
         # Show hitboxes
-        self.show_hitboxes: bool = False
+        self.show_hitboxes: bool = True
 
         # Reset clock when this level begins
         game_time.reset()

@@ -21,10 +21,15 @@ class LevelDesigner:
         self.cols: int = len(pd.read_csv(self.level_file).axes[1])
         self.level_data: list = []
         self.create_empty_list()
+
         self.top_ground_img: pygame.Surface = pygame.image.load(
             Path("assets/platforms/Textures-16.png")).convert_alpha().subsurface((32, 0, 16, 16))
-        self.ground_img: pygame.surface = pygame.image.load(
+        self.top_ground_img = pygame.transform.scale(self.top_ground_img, (64, 64))
+
+        self.ground_img: pygame.Surface = pygame.image.load(
             Path("assets/platforms/Textures-16.png")).convert_alpha().subsurface((32, 16, 16, 16))
+        self.ground_img = pygame.transform.scale(self.ground_img, (64, 64))
+
         self.platforms: list = []
         self.enemies: list = []
 
@@ -49,50 +54,25 @@ class LevelDesigner:
                 for y, tile in enumerate(row):
                     self.level_data[x][y] = tile
 
-    @staticmethod
-    def process_data(data):
-        """
-        Counts consecutive same tile values and returns tile and length of each set.
-        """
-        tile = []
-        length = []
-        running_count = 1
-        for row in range(len(data)):
-            for val in range(len(data[row]) - 1):
-                if data[row][val] != "-1z":
-                    if data[row][val] == data[row][val + 1]:
-                        running_count += 1
-                    else:
-                        length.append(running_count)
-                        tile.append(data[row][val])
-                        running_count = 1
-
-        if data[row][val] != "-1z":
-            tile.append(data[row][val + 1])
-            length.append(running_count)
-
-        # res = {tile[i]: length[i] for i in range(len(tile))}
-
-        return tile, length
-
     def generate_platforms(self):
         """
         Calculates x and y position of platform from level data file.
         Processes data to calculate platform length and tile type.
         Creates all of the platforms needed in the game of correct tile type and length.
         """
-        tiles_and_lengths = self.process_data(self.level_data)
-        tiles = tiles_and_lengths[0]
-        lengths = tiles_and_lengths[1]
+        platform_length = 1
 
-        platform_count = 0
-
-        for x, row in enumerate(self.level_data):
-            for y, tile in enumerate(row):
-                if tile[-1] in self.tilesheet.keys():
-                    self.make_platform(tile[-1], lengths[platform_count], y, x)
-                    if platform_count < len(tiles)-1:
-                        platform_count += 1
+        for y, row in enumerate(self.level_data):
+            for x, tile in enumerate(row):
+                if tile in self.tilesheet.keys():
+                    if self.level_data[y][x] == self.level_data[y][x + 1]:
+                        platform_length += 1
+                    else:
+                        if platform_length != 1:
+                            self.make_platform(tile, platform_length, x - (platform_length - 1), y)
+                            platform_length = 1
+                        else:
+                            self.make_platform(tile, platform_length, x, y)
 
     def make_platform(self, tile_type: str, pl: int,
                       x: int, y: int):
@@ -106,21 +86,24 @@ class LevelDesigner:
         :param y: Position of platform along the y axis
         """
         if tile_type in self.tilesheet:
-            # Create new surface that is count times bigger than image width
+            # Create new surface of correct dimensions
             new_surface = pygame.Surface((self.tilesheet[tile_type].get_width() * pl,
-                                          self.tilesheet[tile_type].get_height()),
-                                         pygame.SRCALPHA)
+                                          self.tilesheet[tile_type].get_height()))
+            # Create a sequence of images to display on new surface
+            seq = [(self.tilesheet[tile_type],
+                    (self.tilesheet[tile_type].get_width() * offset,
+                     self.tilesheet[tile_type].get_height())) for offset in range(pl)]
 
-            # Iterate for each count of tile to blit image at new X destination
-            for offset in range(pl):
-                new_surface.blit(self.tilesheet[tile_type],
-                                 dest=(self.tilesheet[tile_type].get_width() * offset, 0))
+            # ? Why does the new surface not display the blitted image ?
+            
+            # Blit sequence to new surface
+            new_surface.blits(blit_sequence=seq)
 
             # Add new surface to platforms and create new platform with new surface image
-            self.platforms.append(Platform(rect=pygame.Rect(x * 64,
-                                                            y * 64 - 540,
-                                                            new_surface.get_width() * 4,
-                                                            new_surface.get_height() * 4),
+            self.platforms.append(Platform(rect=pygame.Rect(x * self.tilesheet[tile_type].get_width(),
+                                                            y * self.tilesheet[tile_type].get_height() - 540,
+                                                            new_surface.get_width(),
+                                                            new_surface.get_height()),
                                            image=new_surface))
 
     def spawn_enemy(self, enemy_type: str, platform: Platform):
