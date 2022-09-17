@@ -2,9 +2,9 @@ import csv
 from pathlib import Path
 
 import pandas as pd
-import pygame
+import xlrd, csv
 
-from itertools import groupby
+import pygame
 
 from scripts.scenes.simple_platform import Platform
 from scripts.enemy.basic_enemy import BasicEnemy
@@ -16,9 +16,17 @@ class LevelDesigner:
 
         # :param level: Current level csv file to display.
         self.level = level
-        self.level_file = Path(f"scripts/leveldesigner/level{self.level}_data.csv")
-        self.rows: int = len(pd.read_csv(self.level_file).axes[0]) + 1
-        self.cols: int = len(pd.read_csv(self.level_file).axes[1])
+
+        self.level_file_xlsx = pd.read_excel(Path("scripts/leveldesigner/level_data.xlsx"),
+                                             sheet_name=f"level{self.level}_data", header=None)
+
+        self.level_file_xlsx.to_csv(f"scripts/leveldesigner/level{self.level}_data.csv", index=False,
+                                    header=False)
+
+        self.level_file_csv = Path(f"scripts/leveldesigner/level{self.level}_data.csv")
+
+        self.rows: int = len(pd.read_csv(self.level_file_csv).axes[0]) + 1
+        self.cols: int = len(pd.read_csv(self.level_file_csv).axes[1])
         self.level_data: list = []
         self.create_empty_list()
 
@@ -48,7 +56,7 @@ class LevelDesigner:
 
     def get_level_data(self):
         """Pulls data from csv level file to find x and y position of each element in csv mapped to game."""
-        with open(self.level_file, newline="") as csvfile:
+        with open(self.level_file_csv, newline="") as csvfile:
             reader = csv.reader(csvfile, delimiter=',')
             for x, row in enumerate(reader):
                 for y, tile in enumerate(row):
@@ -63,16 +71,20 @@ class LevelDesigner:
         platform_length = 1
 
         for y, row in enumerate(self.level_data):
-            for x, tile in enumerate(row):
-                if tile in self.tilesheet.keys():
-                    if self.level_data[y][x] == self.level_data[y][x + 1]:
-                        platform_length += 1
-                    else:
-                        if platform_length != 1:
-                            self.make_platform(tile, platform_length, x - (platform_length - 1), y)
-                            platform_length = 1
-                        else:
-                            self.make_platform(tile, platform_length, x, y)
+            if len(set(row)) != 1:
+                for x, tile in enumerate(row):
+                    if tile in self.tilesheet.keys():
+                        if x + 1 < len(row):
+                            if self.level_data[y][x] == self.level_data[y][x + 1]:
+                                platform_length += 1
+                            else:
+                                if platform_length != 1:
+                                    self.make_platform(tile, platform_length, x - (platform_length - 1), y)
+                                    platform_length = 1
+                                else:
+                                    self.make_platform(tile, platform_length, x, y)
+            else:
+                self.make_platform(self.level_data[y][0], len(row), 0, y)
 
     def make_platform(self, tile_type: str, pl: int,
                       x: int, y: int):
