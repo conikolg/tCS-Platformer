@@ -1,13 +1,13 @@
 import csv
+import sys
 from pathlib import Path
 
 import pandas as pd
-import openpyxl
-
 import pygame
+import pymunk
 
-from scripts.scenes.simple_platform import Platform
 from scripts.enemy.basic_enemy import BasicEnemy
+from scripts.scenes.simple_platform import Platform
 
 
 class LevelDesigner:
@@ -62,11 +62,11 @@ class LevelDesigner:
                 for y, tile in enumerate(row):
                     self.level_data[x][y] = tile
 
-    def generate_platforms(self):
+    def generate_platforms(self, world: pymunk.Space):
         """
         Calculates x and y position of platform from level data file.
         Processes data to calculate platform length and tile type.
-        Creates all of the platforms needed in the game of correct tile type and length.
+        Creates all the platforms needed in the game of correct tile type and length.
         """
         platform_length = 1
 
@@ -79,15 +79,15 @@ class LevelDesigner:
                                 platform_length += 1
                             else:
                                 if platform_length != 1:
-                                    self.make_platform(tile, platform_length, x - (platform_length - 1), y)
+                                    self.make_platform(tile, platform_length, x - (platform_length - 1), y, world)
                                     platform_length = 1
                                 else:
-                                    self.make_platform(tile, platform_length, x, y)
+                                    self.make_platform(tile, platform_length, x, y, world)
             else:
-                self.make_platform(self.level_data[y][0], len(row), 0, y)
+                self.make_platform(self.level_data[y][0], len(row), 0, y, world)
 
     def make_platform(self, tile_type: str, pl: int,
-                      x: int, y: int):
+                      x: int, y: int, world: pymunk.Space):
         """
         Creates a platform derived from the simple_platform class from the data
         generated in the level data file.
@@ -96,8 +96,9 @@ class LevelDesigner:
 
         :param tile_type: Tile string from tile sheet to display
         :param pl: Platform length to make rect hit box
-        :param x: Position of platform along the x axis
-        :param y: Position of platform along the y axis
+        :param x: Position of platform along the x-axis
+        :param y: Position of platform along the y-axis
+        :param world: a pymunk Space to which platforms will be added
         """
         if tile_type in self.tilesheet:
             # Create new surface of correct dimensions
@@ -111,12 +112,14 @@ class LevelDesigner:
             # Blit sequence to new surface
             new_surface.blits(blit_sequence=seq)
 
+            # Compute rect of the platform in normal x/y grid TODO: get max level-height dynamically
+            rect = pygame.Rect(x * self.tilesheet[tile_type].get_width(),
+                               1280 - y * self.tilesheet[tile_type].get_height(),
+                               new_surface.get_width(),
+                               new_surface.get_height())
+
             # Add new surface to platforms and create new platform with new surface image
-            self.platforms.append(Platform(rect=pygame.Rect(x * self.tilesheet[tile_type].get_width(),
-                                                            y * self.tilesheet[tile_type].get_height() - 540,
-                                                            new_surface.get_width(),
-                                                            new_surface.get_height()),
-                                           image=new_surface))
+            self.platforms.append(Platform(rect=rect, image=new_surface, world=world))
 
     def spawn_enemy(self, enemy_type: str, platform: Platform):
         self.enemies.append(BasicEnemy(enemy_type, platform))
