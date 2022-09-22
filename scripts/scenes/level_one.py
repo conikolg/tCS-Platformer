@@ -28,7 +28,7 @@ class LevelOneScene(BaseScene):
         self.world.gravity = (0, -1500.0)
         pymunk.pygame_util.positive_y_is_up = True
 
-        self.player = Player("default", rect=pygame.rect.Rect(100, 550, 100, 100), world=self.world)
+        self.player = Player("default", rect=pygame.rect.Rect(100, 550, 50, 100), world=self.world)
         self.ui = UI(player=self.player)
 
         # Attach camera to player
@@ -207,7 +207,7 @@ class LevelOneScene(BaseScene):
 
         # Draw level elements first
         for platform in self.platforms:
-            platform.draw(screen=screen, camera_offset=-self.camera.offset)
+            platform.draw(screen=screen, camera_offset=-self.camera.offset, show_bounding_box=self.show_hitboxes)
 
         # Draw enemies
         self.enemy_group.draw(surface=screen, camera_offset=-self.camera.offset, show_bounding_box=self.show_hitboxes)

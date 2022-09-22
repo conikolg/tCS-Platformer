@@ -52,6 +52,6 @@ class Platform:
         # Draw image
         screen.blit(self.image, dest=on_screen_destination)
 
-        # TODO: Draw hitbox
-        # if show_bounding_box:
-        #     pygame.draw.rect(surface=surface, color=(255, 0, 0), rect=hitbox, width=1)
+        # Draw hitbox
+        if show_bounding_box:
+            pygame.draw.rect(surface=screen, color=(255, 0, 0), rect=on_screen_destination, width=1)

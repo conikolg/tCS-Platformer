@@ -1,6 +1,7 @@
 from collections import defaultdict
 from pathlib import Path
 
+import pygame.mask
 import pymunk
 
 from scripts import body, collision_types
@@ -8,6 +9,7 @@ from scripts.player.bullet import Bullet
 from scripts.player.sword import Sword
 from scripts.ui.healthbar import Healthbar
 from scripts.util import coloring, game_time
+from scripts.util.image_utils import auto_crop
 from scripts.util.sound import *
 
 
@@ -254,20 +256,23 @@ class Player:
 
         # Iterate through animation types
         for animation_type_dir in root_animations_dir.iterdir():
-            # Iterate through contents of animation type folder
-            for frame in animation_type_dir.iterdir():
-                # Load the frame
-                img: pygame.Surface = pygame.image.load(frame).convert_alpha()
-                # Scale it
-                img = pygame.transform.scale(img, size)
+            # Load all frames in the folder
+            frames: list[pygame.Surface] = [pygame.image.load(frame).convert_alpha() for frame in
+                                            animation_type_dir.iterdir()]
+            # Automatically crop and scale them to just the occupied pixel portion
+            frames: list[pygame.Surface] = auto_crop(images=frames, size=size)
+
+            # Recolor
+            for frame in frames:
                 # Shift color values of image
                 # self.shift_color(img=img, color_shift=0)
                 for char, colors in self.outfits.items():
                     for color_name, color_value in colors.items():
-                        coloring.recolor(img, self.outfits["default"][color_name],
+                        coloring.recolor(frame, self.outfits["default"][color_name],
                                          self.outfits[self.char_type][color_name])
-                # Add it to big animation dictionary
-                animations[animation_type_dir.name].append(img)
+
+            # Assign frames to animation
+            animations[animation_type_dir.name] = frames
 
         return animations
 
@@ -295,9 +300,9 @@ class Player:
         # Draw image
         screen.blit(self.image, dest=on_screen_destination)
 
-        # TODO: Draw hitbox
-        # if show_bounding_box:
-        #     pygame.draw.rect(surface=surface, color=(255, 0, 0), rect=hitbox, width=1)
+        # Draw hitbox
+        if show_bounding_box:
+            pygame.draw.rect(surface=screen, color=(255, 0, 0), rect=on_screen_destination, width=1)
 
     # Causes the player to take damage and enter a "flashing" state to indicate temporary invulnerability
     def take_damage(self, amount):

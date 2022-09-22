@@ -2,6 +2,7 @@ import pygame
 import pymunk
 
 from scripts import body, collision_types
+from scripts.util.image_utils import auto_crop
 
 
 class Bullet:
@@ -23,12 +24,13 @@ class Bullet:
         self.body.position = location
 
         # Create physics shape/hitbox
-        self.shape = pymunk.Poly.create_box(body=self.body, size=(100, 100), radius=1)
+        self.shape = pymunk.Poly.create_box(body=self.body, size=(100, 50), radius=1)
         self.shape.collision_type = collision_types.BULLET
 
         # Graphics assets
         self._image: pygame.Surface = pygame.image.load("assets/bullet/bullet.png").convert_alpha()
-        self._image = pygame.transform.scale(self._image, (100, 100))
+        # Automatically crop and scale them to just the occupied pixel portion
+        self._image: pygame.Surface = auto_crop(images=[self._image], size=(100, 50))[0]
 
         # Behavioral attributes
         self.body.velocity = tuple(direction.normalize() * 1250)
@@ -65,6 +67,6 @@ class Bullet:
         # Draw image
         screen.blit(self.image, dest=on_screen_destination)
 
-        # TODO: Draw hitbox
-        # if show_bounding_box:
-        #     pygame.draw.rect(surface=surface, color=(255, 0, 0), rect=hitbox, width=1)
+        # Draw hitbox
+        if show_bounding_box:
+            pygame.draw.rect(surface=screen, color=(255, 0, 0), rect=on_screen_destination, width=1)
