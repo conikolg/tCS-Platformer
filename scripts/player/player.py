@@ -217,7 +217,11 @@ class Player:
     def _shoot(self):
         """ Creates a bullet with correct direction/positioning and add it to local bullet group. """
 
-        new_bullet = Bullet(location=self.body.position, direction=self.direction, damage=50, world=self.world)
+        new_bullet = Bullet(
+            location=self.body.position + tuple(self.direction.normalize() * self.w / 2),
+            direction=self.direction,
+            damage=50,
+            world=self.world)
         self.bullets.append(new_bullet)
 
         # TODO: things when bullet is fired

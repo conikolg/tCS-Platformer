@@ -5,7 +5,7 @@ from scripts import body, collision_types
 
 
 class Bullet:
-    def __init__(self, location: tuple, direction: pygame.math.Vector2, damage: int, world: pymunk.Space):
+    def __init__(self, location: pymunk.Vec2d, direction: pygame.math.Vector2, damage: int, world: pymunk.Space):
         """
         Creates a bullet that spawns in a particular location and travels in a particular direction.
 
