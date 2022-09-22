@@ -4,6 +4,7 @@ import pygame
 import pymunk
 import pymunk.pygame_util
 
+from scripts import collision_types
 from scripts.leveldesigner.level_designer import LevelDesigner
 from scripts.player.player import Player
 from scripts.scenes.base_scene import BaseScene
@@ -61,6 +62,14 @@ class LevelOneScene(BaseScene):
         # UI toggles
         self.show_controls_help: bool = True
         self.show_hitboxes: bool = True
+
+        # Define collisions between player and bullets
+        def player_bullet_collision(arbiter: pymunk.Arbiter, space, data):
+            # TODO: Let player handle the hit
+            # TODO: Let bullet handle the hit
+            return False
+
+        self.world.add_collision_handler(collision_types.PLAYER, collision_types.BULLET).begin = player_bullet_collision
 
         # Reset game clock
         game_time.reset()
@@ -204,9 +213,8 @@ class LevelOneScene(BaseScene):
         self.enemy_group.draw(surface=screen, camera_offset=-self.camera.offset, show_bounding_box=self.show_hitboxes)
 
         # Draw bullets
-        if self.player.bullet_group:
-            for bullet in self.player.bullet_group:
-                bullet.draw(screen, camera_offset=-self.camera.offset, show_bounding_box=self.show_hitboxes)
+        for bullet in self.player.bullets:
+            bullet.draw(screen, camera_offset=-self.camera.offset, show_bounding_box=self.show_hitboxes)
 
         # Draw player and update sprite animation
         self.player.draw(screen=screen, camera_offset=-self.camera.offset, show_bounding_box=self.show_hitboxes)

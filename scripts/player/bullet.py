@@ -1,10 +1,11 @@
 import pygame
+import pymunk
 
-from scripts.util.custom_sprite import CustomSprite
+from scripts import body, collision_types
 
 
-class Bullet(CustomSprite):
-    def __init__(self, location: tuple, direction: pygame.math.Vector2, damage: int):
+class Bullet:
+    def __init__(self, location: tuple, direction: pygame.math.Vector2, damage: int, world: pymunk.Space):
         """
         Creates a bullet that spawns in a particular location and travels in a particular direction.
 
@@ -12,27 +13,58 @@ class Bullet(CustomSprite):
         :param direction: A Vector2 indicating at what angle the bullet should travel.
         """
 
-        super().__init__(hitbox_w_percent=80, hitbox_h_percent=30, hitbox_offset_x=10, hitbox_offset_y=35)
-        self.speed: int = 10
-        self.direction: pygame.math.Vector2 = direction.normalize()
+        super().__init__()
 
+        # Save the world. Needed for spawning bullets
+        self.world: pymunk.Space = world
+
+        # Create physics body for platform and position it
+        self.body = body.Body(body_type=pymunk.Body.KINEMATIC, obj=self)
+        self.body.position = location
+
+        # Create physics shape/hitbox
+        self.shape = pymunk.Poly.create_box(body=self.body, size=(100, 100), radius=1)
+        self.shape.collision_type = collision_types.BULLET
+
+        # Graphics assets
         self._image: pygame.Surface = pygame.image.load("assets/bullet/bullet.png").convert_alpha()
         self._image = pygame.transform.scale(self._image, (100, 100))
-        self.rect: pygame.rect.Rect = self.image.get_rect()
-        self.rect.center = location
+
+        # Behavioral attributes
+        self.body.velocity = tuple(direction.normalize() * 1250)
+
+        # Damage
         self.damage = damage
-        self.init_hitbox()
+
+        # Add to world
+        self.world.add(self.body, self.shape)
 
     def __str__(self):
-        return f"Bullet located at {self.rect.topleft} with speed {self.speed} and {self.damage} damage"
+        return f"Bullet({self.body.position=}, {self.body.velocity=}, {self.damage=})"
 
     # should a bullet disappear going off-screen?
     # technically it still physically exists, allowing us to shoot off-screen enemies or obstacles...
     def update(self, right_bound, left_bound):
-        self.rect.move_ip(self.speed * self.direction.x, self.speed * self.direction.y)
-        if self.rect.right < left_bound or self.rect.left > right_bound:
-            self.kill()
+        if not (left_bound <= self.body.position.x <= right_bound):
+            self.world.remove(self.body, self.shape)
 
     @property
     def image(self):
-        return pygame.transform.flip(self._image, self.direction.x == -1, False)
+        return pygame.transform.flip(self._image, self.body.velocity.x < 0, False)
+
+    def draw(self, screen: pygame.Surface, camera_offset: pygame.math.Vector2 = None, show_bounding_box: bool = False):
+        # Update hitbox based on camera offset
+        if camera_offset is None:
+            camera_offset = pygame.math.Vector2(0, 0)
+
+        # Adjust for pygame screen and camera location
+        on_screen_destination = self.image.get_rect()
+        on_screen_destination.center = (self.body.position.x, screen.get_height() - self.body.position.y)
+        on_screen_destination.move_ip(camera_offset)
+
+        # Draw image
+        screen.blit(self.image, dest=on_screen_destination)
+
+        # TODO: Draw hitbox
+        # if show_bounding_box:
+        #     pygame.draw.rect(surface=surface, color=(255, 0, 0), rect=hitbox, width=1)

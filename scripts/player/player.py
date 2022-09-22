@@ -3,11 +3,11 @@ from pathlib import Path
 
 import pymunk
 
-from scripts import body
+from scripts import body, collision_types
 from scripts.player.bullet import Bullet
 from scripts.player.sword import Sword
 from scripts.ui.healthbar import Healthbar
-from scripts.util import coloring
+from scripts.util import coloring, game_time
 from scripts.util.sound import *
 
 
@@ -21,6 +21,9 @@ class Player:
 
     def __init__(self, char_type: str, rect: pygame.rect.Rect, world: pymunk.Space):
         super().__init__()
+
+        # Save the world. Needed for spawning bullets
+        self.world: pymunk.Space = world
 
         # Define visual attributes
         self.char_type: str = char_type
@@ -56,6 +59,7 @@ class Player:
             # }
         }
         self.animations: dict[str, list] = self.load_animations(size=(rect.w, rect.h))
+        self.direction = pygame.Vector2(1, 0)
 
         # Create physics body with (infinite moment of inertia to disable rotation)
         self.body = body.Body(mass=10, moment=float("inf"), body_type=pymunk.Body.DYNAMIC, obj=self)
@@ -63,11 +67,12 @@ class Player:
 
         # Create physics shape/hitbox
         self.shape = pymunk.Poly.create_box(body=self.body, size=(rect.w, rect.h), radius=1)
+        self.shape.collision_type = collision_types.PLAYER
         self.shape.elasticity = 0.1
         self.shape.friction = 0.9
 
         # Add to world
-        world.add(self.body, self.shape)
+        self.world.add(self.body, self.shape)
 
         # Health
         self.healthbar = Healthbar()
@@ -109,7 +114,7 @@ class Player:
         self.is_sprinting: bool = False
         self.current_animation_frame = ["idle", 0]
 
-        self.bullet_group = pygame.sprite.Group()
+        self.bullets: list = []
         self.sword_sprite = Sword(location=(self.body.position.x + 24, self.body.position.y - 18))
 
         self.set_animation("jump")
@@ -135,22 +140,21 @@ class Player:
         return self.shape.bb.top - self.shape.bb.bottom
 
     def __str__(self):
-        out_str = f"Player sprite located @ {self.rect.topleft}"
         health_percent = round(self.healthbar.health / self.healthbar.maximum_health * 100, 2)
-        out_str += f" with {self.healthbar.health}/{self.healthbar.maximum_health} ({health_percent}%) HP"
-        return out_str
+        return f"Player({self.body.position=}, {self.body.velocity=}, " \
+               f"health={self.healthbar.health}/{self.healthbar.maximum_health} ({health_percent}%))"
 
     def handle_events(self, events: list[pygame.event.Event]):
         for event in events:
             if event.type == pygame.KEYDOWN:
                 if event.key in self.input["movement"]["jump"]:
                     self._jump()
-                # if event.key in self.input["abilities"]["shoot"]:
-                #     # If possible, shoot and begin cooldown for next shot
-                #     if self.can_shoot:
-                #         self._shoot()
-                #         self._toggle_shoot(False)
-                #         game_time.schedule(self._toggle_shoot, self.shoot_cooldown, cb_args=(True,))
+                if event.key in self.input["abilities"]["shoot"]:
+                    # If possible, shoot and begin cooldown for next shot
+                    if self.can_shoot:
+                        self._shoot()
+                        self._toggle_shoot(False)
+                        game_time.schedule(self._toggle_shoot, self.shoot_cooldown, cb_args=(True,))
                 if event.key in self.input["abilities"]["super jump"]:
                     self._super_jump()
                 # if event.key in self.input["movement"]["sprint"]:
@@ -159,12 +163,21 @@ class Player:
     def update(self) -> None:
         keys = pygame.key.get_pressed()
 
+        pressing_key_right: bool = any(keys[key] for key in self.input["movement"]["right"])
+        pressing_key_left: bool = any(keys[key] for key in self.input["movement"]["left"])
+
         # Move left/right
         self.shape.surface_velocity = 0, 0
-        if any(keys[key] for key in self.input["movement"]["right"]):
+        if pressing_key_right:
             self.shape.surface_velocity -= (self.top_walk_speed, 0)
-        if any(keys[key] for key in self.input["movement"]["left"]):
+        if pressing_key_left:
             self.shape.surface_velocity += (self.top_walk_speed, 0)
+
+        # Update direction the player is facing
+        if pressing_key_right and not pressing_key_left:
+            self.direction = pygame.Vector2(1, 0)
+        elif not pressing_key_right and pressing_key_left:
+            self.direction = pygame.Vector2(-1, 0)
 
         # TODO: Update animation state
         # if not self._is_grounded:
@@ -204,17 +217,11 @@ class Player:
     def _shoot(self):
         """ Creates a bullet with correct direction/positioning and add it to local bullet group. """
 
-        # Create bullet with non-outgoing edge positioned at player's center
-        new_bullet = Bullet(location=(self.rect.centerx, self.rect.centery),
-                            direction=pygame.math.Vector2(1, 0) * self.direction.x,
-                            damage=50)
-        if self.direction.x == 1:
-            new_bullet.rect.left = self.rect.centerx
-        else:
-            new_bullet.rect.right = self.rect.centerx
+        new_bullet = Bullet(location=self.body.position, direction=self.direction, damage=50, world=self.world)
+        self.bullets.append(new_bullet)
 
-        self.bullet_group.add(new_bullet)
-        play_sound("laser")
+        # TODO: things when bullet is fired
+        # play_sound("laser")
 
     def _move_sword(self):
         if self.direction.x == 1:
@@ -262,9 +269,8 @@ class Player:
 
     @property
     def image(self):
-        # return pygame.transform.flip(self._image, self.direction.x == -1, False)
-        return pygame.transform.flip(self.animations[self.current_animation_frame[0]][self.current_animation_frame[1]],
-                                     False, False)
+        image: pygame.Surface = self.animations[self.current_animation_frame[0]][self.current_animation_frame[1]]
+        return pygame.transform.flip(image, self.direction.x == -1, False)
 
     def draw(self, screen: pygame.Surface, camera_offset: pygame.math.Vector2 = None, show_bounding_box: bool = False):
         # TODO: invulnerability flashing

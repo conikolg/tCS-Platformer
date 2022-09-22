@@ -1,7 +1,7 @@
 import pygame
 import pymunk
 
-from scripts import body
+from scripts import body, collision_types
 
 
 class Platform:
@@ -22,6 +22,7 @@ class Platform:
 
         # Create physics shape/hitbox
         self.shape = pymunk.Poly.create_box(body=self.body, size=(rect.w, rect.h), radius=1)
+        self.shape.collision_type = collision_types.TERRAIN
         self.shape.elasticity = 0.1
         self.shape.friction = 0.9
 
@@ -34,6 +35,9 @@ class Platform:
 
         # Add platform into the world
         world.add(self.body, self.shape)
+
+    def __str__(self):
+        return f"Platform({self.body.position=}, {self.shape.bb=})"
 
     def draw(self, screen: pygame.Surface, camera_offset: pygame.math.Vector2 = None, show_bounding_box: bool = False):
         # Update hitbox based on camera offset
@@ -51,4 +55,3 @@ class Platform:
         # TODO: Draw hitbox
         # if show_bounding_box:
         #     pygame.draw.rect(surface=surface, color=(255, 0, 0), rect=hitbox, width=1)
-
