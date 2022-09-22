@@ -1,15 +1,17 @@
 from collections import defaultdict
 from pathlib import Path
 
+import pymunk
+
+from scripts import body
 from scripts.player.bullet import Bullet
 from scripts.player.sword import Sword
 from scripts.ui.healthbar import Healthbar
-from scripts.util import game_time, coloring
-from scripts.util.custom_sprite import CustomSprite
+from scripts.util import coloring
 from scripts.util.sound import *
 
 
-class Player(CustomSprite):
+class Player:
     """
     Class for initializing a player and controller.
 
@@ -17,9 +19,10 @@ class Player(CustomSprite):
     :param rect: A rect to display the player image
     """
 
-    def __init__(self, char_type: str, rect: pygame.rect.Rect):
-        super().__init__(hitbox_w_percent=50, hitbox_h_percent=100, hitbox_offset_x=25, hitbox_offset_y=0)
+    def __init__(self, char_type: str, rect: pygame.rect.Rect, world: pymunk.Space):
+        super().__init__()
 
+        # Define visual attributes
         self.char_type: str = char_type
         self.outfits = {
             "default": {
@@ -52,22 +55,29 @@ class Player(CustomSprite):
             #     "hair": (39, 22, 19)
             # }
         }
+        self.animations: dict[str, list] = self.load_animations(size=(rect.w, rect.h))
 
-        self.rect: pygame.rect.Rect = rect
+        # Create physics body with (infinite moment of inertia to disable rotation)
+        self.body = body.Body(mass=10, moment=float("inf"), body_type=pymunk.Body.DYNAMIC, obj=self)
+        self.body.position = rect.center
 
-        self.animations: dict[str, list] = self.load_animations(size=(self.rect.w, self.rect.h))
+        # Create physics shape/hitbox
+        self.shape = pymunk.Poly.create_box(body=self.body, size=(rect.w, rect.h), radius=1)
+        self.shape.elasticity = 0.1
+        self.shape.friction = 0.9
+
+        # Add to world
+        world.add(self.body, self.shape)
+
+        # Health
         self.healthbar = Healthbar()
-        self.velocity = pygame.math.Vector2(0, 0)
-        self.direction = pygame.math.Vector2(1, 0)
-        self.gravity: float = 0.5
 
-        self.jump_speed: float = 12.0
-        self.super_jump_speed: float = 20.0
-        self.walk_speed: float = 5.0
+        # Constants
+        self.jump_speed: float = 800
+        self.super_jump_speed: float = self.jump_speed * 3
+        self.walk_acceleration: float = 50
+        self.top_walk_speed: float = 600
         self.sprint_speed: float = 8.0
-
-        # hitbox should be initialized after animation is loaded so that animation images have the original size
-        super().init_hitbox()
 
         # Nested dict to store all player input key binds
         # Allow us to easily remap keys as features are created
@@ -100,9 +110,9 @@ class Player(CustomSprite):
         self.current_animation_frame = ["idle", 0]
 
         self.bullet_group = pygame.sprite.Group()
-        self.sword_sprite = Sword(location=(self.rect.centerx + 24, self.rect.centery - 18))
+        self.sword_sprite = Sword(location=(self.body.position.x + 24, self.body.position.y - 18))
 
-        self._image = None
+        self.set_animation("jump")
 
         self.vulnerable = True
         self.recovering = False  # if the player is currently "recovering" from being damaged
@@ -116,67 +126,76 @@ class Player(CustomSprite):
         load_sound("laser", "assets/sounds/sfx/laser.wav")
         load_sound("jump", "assets/sounds/sfx/metroid_jump.wav", volume=40)
 
+    @property
+    def w(self) -> float:
+        return self.shape.bb.right - self.shape.bb.left
+
+    @property
+    def h(self) -> float:
+        return self.shape.bb.top - self.shape.bb.bottom
+
     def __str__(self):
         out_str = f"Player sprite located @ {self.rect.topleft}"
         health_percent = round(self.healthbar.health / self.healthbar.maximum_health * 100, 2)
         out_str += f" with {self.healthbar.health}/{self.healthbar.maximum_health} ({health_percent}%) HP"
         return out_str
 
-    @property
-    def is_grounded(self) -> bool:
-        """ Returns True if the player is grounded (not falling), False otherwise. """
-        return self._is_grounded
-
-    @is_grounded.setter
-    def is_grounded(self, grounded: bool):
-        """
-        Makes the player grounded (no longer falling) and sets y_speed to zero.
-
-        :param grounded: A bool - True if the player is grounded on something, False otherwise.
-        :return: None
-        """
-        self._is_grounded = grounded
-        if self._is_grounded:
-            self.velocity.y = 0
-
     def handle_events(self, events: list[pygame.event.Event]):
         for event in events:
             if event.type == pygame.KEYDOWN:
                 if event.key in self.input["movement"]["jump"]:
-                    if self._is_grounded:
-                        self._jump()
-                if event.key in self.input["abilities"]["shoot"]:
-                    # If possible, shoot and begin cooldown for next shot
-                    if self.can_shoot:
-                        self._shoot()
-                        self._toggle_shoot(False)
-                        game_time.schedule(self._toggle_shoot, self.shoot_cooldown, cb_args=(True,))
+                    self._jump()
+                # if event.key in self.input["abilities"]["shoot"]:
+                #     # If possible, shoot and begin cooldown for next shot
+                #     if self.can_shoot:
+                #         self._shoot()
+                #         self._toggle_shoot(False)
+                #         game_time.schedule(self._toggle_shoot, self.shoot_cooldown, cb_args=(True,))
                 if event.key in self.input["abilities"]["super jump"]:
-                    if self._is_grounded:
-                        self._super_jump()
-                if event.key in self.input["movement"]["sprint"]:
-                    self._sprint()
-                """
-                if event.key in [pygame.K_m]:
-                    self._sword_swing()
-                if event.key in [pygame.K_n]:
-                    self._sword_away()
-                """
+                    self._super_jump()
+                # if event.key in self.input["movement"]["sprint"]:
+                #     self._sprint()
+
+    def update(self) -> None:
+        keys = pygame.key.get_pressed()
+
+        # Move left/right
+        self.shape.surface_velocity = 0, 0
+        if any(keys[key] for key in self.input["movement"]["right"]):
+            self.shape.surface_velocity -= (self.top_walk_speed, 0)
+        if any(keys[key] for key in self.input["movement"]["left"]):
+            self.shape.surface_velocity += (self.top_walk_speed, 0)
+
+        # TODO: Update animation state
+        # if not self._is_grounded:
+        #     if self.velocity.y >= 0:
+        #         self.set_animation("jump")
+        #     else:
+        #         self.set_animation("fall")
+        # elif self.velocity.x != 0:
+        #     self.set_animation("run")
+        # else:
+        #     self.set_animation("idle")
+
+        # TODO: Update vulnerability state and flash effect
+        # self.update_vulnerability()
 
     def _jump(self):
-        self.velocity.y = self.jump_speed
-        self._is_grounded = False
-        self.set_animation("jump")
-        play_sound("jump")
+        self.body.apply_impulse_at_local_point((0, self.jump_speed * self.body.mass))
+
+        # TODO: other things when a jump occurs
+        # self.set_animation("jump")
+        # play_sound("jump")
 
     def _sprint(self):
         self.is_sprinting = True
 
     def _super_jump(self):
-        self.velocity.y = self.super_jump_speed
-        self._is_grounded = False
-        self.set_animation("jump")
-        play_sound("jump")
+        self.body.apply_impulse_at_local_point((0, self.super_jump_speed * self.body.mass))
+
+        # TODO: other things when a super jump occurs
+        # self.set_animation("jump")
+        # play_sound("jump")
 
     def _toggle_shoot(self, override: bool = None):
         """ Changes whether the player can or cannot shoot. """
@@ -211,57 +230,6 @@ class Player(CustomSprite):
     def _sword_away(self):
         self.sword_sprite.sword_swing = False
 
-    def update(self) -> None:
-        keys = pygame.key.get_pressed()
-
-        # Move left/right
-        actively_moving = False
-        for key in self.input["movement"]["right"]:
-            if keys[key]:
-                self.velocity.x = self.sprint_speed if self.is_sprinting else self.walk_speed
-                actively_moving = True
-        for key in self.input["movement"]["left"]:
-            if keys[key]:
-                self.velocity.x = -(self.sprint_speed if self.is_sprinting else self.walk_speed)
-                actively_moving = True
-
-        # Apply friction
-        if not actively_moving:
-            self.velocity.x *= 0.75
-            # No longer sprinting?
-            if self.is_sprinting and abs(self.velocity.x) < self.walk_speed:
-                self.is_sprinting = False
-            # Not really moving
-            if abs(self.velocity.x) < 0.5:
-                self.velocity.x = 0
-
-        # Gravity
-        self.velocity.y -= self.gravity
-
-        # Apply movement
-        self.rect.move_ip(self.velocity.x, -self.velocity.y)
-        if self.velocity.x != 0:
-            self.direction.x = self.velocity.x / abs(self.velocity.x)
-        if self.velocity.y != 0:
-            self.direction.y = self.velocity.y / abs(self.velocity.y)
-
-        # Update sword
-        self._move_sword()
-
-        # Update animation state
-        if not self._is_grounded:
-            if self.velocity.y >= 0:
-                self.set_animation("jump")
-            else:
-                self.set_animation("fall")
-        elif self.velocity.x != 0:
-            self.set_animation("run")
-        else:
-            self.set_animation("idle")
-
-        # Update vulnerability state and flash effect
-        self.update_vulnerability()
-
     def set_animation(self, animation: str):
         if self.current_animation_frame[0] == animation:
             return
@@ -294,13 +262,32 @@ class Player(CustomSprite):
 
     @property
     def image(self):
-        return pygame.transform.flip(self._image, self.direction.x == -1, False)
+        # return pygame.transform.flip(self._image, self.direction.x == -1, False)
+        return pygame.transform.flip(self.animations[self.current_animation_frame[0]][self.current_animation_frame[1]],
+                                     False, False)
 
     def draw(self, screen: pygame.Surface, camera_offset: pygame.math.Vector2 = None, show_bounding_box: bool = False):
-        if not self.harm_flash_on:
-            super(Player, self).draw(screen, camera_offset, show_bounding_box)
-        screen.blit(source=self.healthbar.render(self._image.get_width(), 12),
-                    dest=self.rect.move(camera_offset).move(0, -12).move(-self.hitbox_offset_x, self.hitbox_offset_y))
+        # TODO: invulnerability flashing
+        # if not self.harm_flash_on:
+        #     super(Player, self).draw(screen, camera_offset, show_bounding_box)
+        # screen.blit(source=self.healthbar.render(self._image.get_width(), 12),
+        #             dest=self.rect.move(camera_offset).move(0, -12).move(-self.hitbox_offset_x, self.hitbox_offset_y))
+
+        # Update hitbox based on camera offset
+        if camera_offset is None:
+            camera_offset = pygame.math.Vector2(0, 0)
+
+        # Adjust for pygame screen and camera location
+        on_screen_destination = self.image.get_rect()
+        on_screen_destination.center = (self.body.position.x, screen.get_height() - self.body.position.y)
+        on_screen_destination.move_ip(camera_offset)
+
+        # Draw image
+        screen.blit(self.image, dest=on_screen_destination)
+
+        # TODO: Draw hitbox
+        # if show_bounding_box:
+        #     pygame.draw.rect(surface=surface, color=(255, 0, 0), rect=hitbox, width=1)
 
     # Causes the player to take damage and enter a "flashing" state to indicate temporary invulnerability
     def take_damage(self, amount):

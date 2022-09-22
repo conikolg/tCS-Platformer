@@ -27,7 +27,7 @@ class LevelOneScene(BaseScene):
         self.world.gravity = (0, -1500.0)
         pymunk.pygame_util.positive_y_is_up = True
 
-        self.player = Player("default", rect=pygame.rect.Rect(100, 550, 100, 100))
+        self.player = Player("default", rect=pygame.rect.Rect(100, 550, 100, 100), world=self.world)
         self.ui = UI(player=self.player)
 
         # Attach camera to player
@@ -35,9 +35,9 @@ class LevelOneScene(BaseScene):
             behavior=BoundedFollowTarget(
                 target=self.player,
                 horizontal_limits=(0, 6000),
-                vertical_limits=(-720, 720)),
+                vertical_limits=(-7200, 7200)),
             # TODO: compensate for weirdness with bottom being cut-off on Macs
-            constant=pygame.math.Vector2(-640 + self.player.rect.w / 2, -self.player.rect.top))
+            constant=pygame.math.Vector2(-640 + self.player.w / 2, 360 - self.player.h / 2))
 
         # Store all layers in a dict with the delta scroll for each layer
         self.scenery: dict[pygame.Surface, float] = self.load_scenery(level=self.level_id)
@@ -91,12 +91,12 @@ class LevelOneScene(BaseScene):
         Moves the player based on arrow keys or WASD keys pressed.
         """
 
+        # Update player
+        self.player.update()
+
         # Tick time and physics
         game_time.tick()
         self.world.step(1.0 / 60)
-
-        # Update player
-        self.player.update()
 
         # TODO: Prevent player from going out of bounds via pymunk
         # if self.player.rect.left < 0:
@@ -176,7 +176,7 @@ class LevelOneScene(BaseScene):
                 # Calculate this offset by multiplying the delta scroll by the player height and subtract the
                 # difference between the camera offset y times the delta scroll and the player height
                 screen.blit(layer, ((x * self.camera.DISPLAY_W) - self.camera.offset.x * ds,
-                                    (self.player.rect.h * ds) - 640 - self.camera.offset.y * ds - self.player.rect.h))
+                                    (self.player.h * ds) - 640 - self.camera.offset.y * ds - self.player.h))
 
     def render(self, screen: pygame.Surface):
         """
@@ -191,7 +191,6 @@ class LevelOneScene(BaseScene):
 
         # White background
         screen.fill((255, 255, 255))
-
         self.render_scenery(screen=screen)
 
         # Move the camera

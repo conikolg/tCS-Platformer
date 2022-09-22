@@ -4,7 +4,7 @@ import pygame
 
 
 class CameraBehavior(abc.ABC):
-    def __init__(self, target: pygame.sprite.Sprite):
+    def __init__(self, target):
         self.target = target
         self.camera = None
 
@@ -24,8 +24,8 @@ class FollowTarget(CameraBehavior):
         CameraBehavior.__init__(self, target)
 
     def scroll(self):
-        self.camera.offset.x = self.target.rect.x + self.camera.constant.x
-        self.camera.offset.y = self.target.rect.y + self.camera.constant.y
+        self.camera.offset.x = self.target.body.position.x + self.camera.constant.x
+        self.camera.offset.y = -self.target.body.position.y + self.camera.constant.y
 
 
 class BoundedFollowTarget(CameraBehavior):
@@ -45,8 +45,8 @@ class BoundedFollowTarget(CameraBehavior):
 
     # Add dead zone for player x and y?
     def scroll(self):
-        self.camera.offset.x = self.target.rect.x + self.camera.constant.x
-        self.camera.offset.y = self.target.rect.y + self.camera.constant.y
+        self.camera.offset.x = self.target.body.position.x + self.camera.constant.x
+        self.camera.offset.y = -self.target.body.position.y + self.camera.constant.y
 
         self.camera.offset.x = max(self.horizontal_limits[0], self.camera.offset.x)
         self.camera.offset.x = min(self.camera.offset.x, self.horizontal_limits[1] - self.camera.DISPLAY_W)
