@@ -81,9 +81,9 @@ class Player:
 
         # Constants
         self.jump_speed: float = 800
-        self.super_jump_speed: float = self.jump_speed * 3
+        self.super_jump_speed: float = self.jump_speed * 1.6
         self.walk_acceleration: float = 50
-        self.top_walk_speed: float = 600
+        self.top_walk_speed: float = 500
         self.sprint_speed: float = 8.0
 
         # Nested dict to store all player input key binds
@@ -120,6 +120,7 @@ class Player:
         self.sword_sprite = Sword(location=(self.body.position.x + 24, self.body.position.y - 18))
 
         self.set_animation("jump")
+        game_time.schedule(self.update_animation, 0.1, repeating=True)
 
         self.vulnerable = True
         self.recovering = False  # if the player is currently "recovering" from being damaged
@@ -170,10 +171,27 @@ class Player:
 
         # Move left/right
         self.shape.surface_velocity = 0, 0
-        if pressing_key_right:
-            self.shape.surface_velocity -= (self.top_walk_speed, 0)
-        if pressing_key_left:
-            self.shape.surface_velocity += (self.top_walk_speed, 0)
+        # Affect surface velocity if grounded
+        if self._is_grounded:
+            if pressing_key_right:
+                self.shape.surface_velocity -= (self.top_walk_speed, 0)
+            if pressing_key_left:
+                self.shape.surface_velocity += (self.top_walk_speed, 0)
+        # Else affect body directly at lesser strength
+        else:
+            # Move in the air
+            if pressing_key_right:
+                self.body.apply_force_at_local_point((self.top_walk_speed * 10, 0))
+            if pressing_key_left:
+                self.body.apply_force_at_local_point((-self.top_walk_speed * 10, 0))
+
+            # If not attempting to move, apply air drag
+            if not pressing_key_right and not pressing_key_left:
+                self.body.velocity = (self.body.velocity.x * 0.97, self.body.velocity.y)
+            # Else, ensure lack of friction is not exceeding walk limit
+            else:
+                self.body.velocity = (min(self.body.velocity.x, self.top_walk_speed), self.body.velocity.y)
+                self.body.velocity = (max(self.body.velocity.x, -self.top_walk_speed), self.body.velocity.y)
 
         # Update direction the player is facing
         if pressing_key_right and not pressing_key_left:
@@ -181,36 +199,45 @@ class Player:
         elif not pressing_key_right and pressing_key_left:
             self.direction = pygame.Vector2(-1, 0)
 
-        # TODO: Update animation state
-        # if not self._is_grounded:
-        #     if self.velocity.y >= 0:
-        #         self.set_animation("jump")
-        #     else:
-        #         self.set_animation("fall")
-        # elif self.velocity.x != 0:
-        #     self.set_animation("run")
-        # else:
-        #     self.set_animation("idle")
+        # Check if the player is grounded
+        def check_if_grounded(arbiter: pymunk.Arbiter):
+            if arbiter.normal.y == -1:
+                self._is_grounded = True
+
+        self._is_grounded = False
+        self.body.each_arbiter(check_if_grounded)
+        # TODO: Big loss of horizontal speed / kinetic energy on higher falls - fix it
+
+        # Update animation state
+        if not self._is_grounded:
+            if self.body.velocity.y >= 0:
+                self.set_animation("jump")
+            else:
+                self.set_animation("fall")
+        elif abs(self.body.velocity.x) > 1:
+            self.set_animation("run")
+        else:
+            self.set_animation("idle")
 
         # TODO: Update vulnerability state and flash effect
         # self.update_vulnerability()
 
     def _jump(self):
-        self.body.apply_impulse_at_local_point((0, self.jump_speed * self.body.mass))
+        if self._is_grounded:
+            self.body.apply_impulse_at_local_point((0, self.jump_speed * self.body.mass))
 
-        # TODO: other things when a jump occurs
-        # self.set_animation("jump")
-        # play_sound("jump")
+        # Sound effect
+        play_sound("jump")
 
     def _sprint(self):
         self.is_sprinting = True
 
     def _super_jump(self):
-        self.body.apply_impulse_at_local_point((0, self.super_jump_speed * self.body.mass))
+        if self._is_grounded:
+            self.body.apply_impulse_at_local_point((0, self.super_jump_speed * self.body.mass))
 
-        # TODO: other things when a super jump occurs
-        # self.set_animation("jump")
-        # play_sound("jump")
+        # Sound effect
+        play_sound("jump")
 
     def _toggle_shoot(self, override: bool = None):
         """ Changes whether the player can or cannot shoot. """
@@ -248,13 +275,18 @@ class Player:
             return
         self.current_animation_frame = [animation, 0]
 
+    def update_animation(self):
+        self.current_animation_frame[1] += 1
+        if self.current_animation_frame[1] == len(self.animations[self.current_animation_frame[0]]):
+            self.current_animation_frame[1] = 0
+
     def load_animations(self, size: tuple) -> dict[str, list]:
         # Create container for animations
         animations: dict[str, list] = defaultdict(lambda: list())
         # Start at content root for this character type
         root_animations_dir = Path(f"assets/player/animations")
 
-        # Iterate through animation types
+        # Iterate through animation types. TODO: overlay all animations together before cropping/scaling
         for animation_type_dir in root_animations_dir.iterdir():
             # Load all frames in the folder
             frames: list[pygame.Surface] = [pygame.image.load(frame).convert_alpha() for frame in

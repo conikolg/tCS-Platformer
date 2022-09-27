@@ -20,6 +20,9 @@ class LevelOneScene(BaseScene):
     def __init__(self):
         super().__init__()
 
+        # Reset game clock
+        game_time.reset()
+
         # Define identity of this level
         self.level_id = 1
 
@@ -70,9 +73,6 @@ class LevelOneScene(BaseScene):
             return False
 
         self.world.add_collision_handler(collision_types.PLAYER, collision_types.BULLET).begin = player_bullet_collision
-
-        # Reset game clock
-        game_time.reset()
 
     def handle_events(self, events: list[pygame.event.Event]):
         """
