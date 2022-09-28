@@ -42,6 +42,7 @@ class BasicEnemy:
         world.add(self.body, self.shape)
 
         # Enemy attributes
+        self.enabled: bool = True
         self.speed: float = 50.0
         self.direction = pymunk.Vec2d(-1, 0)
         self.healthbar = Healthbar()
@@ -104,6 +105,19 @@ class BasicEnemy:
         if self._can_turn:
             self.body.each_arbiter(turn_if_at_edge)
 
+    def take_damage(self, damage: int):
+        self.healthbar.health -= damage
+        if self.healthbar.health <= 0:
+            self.despawn()
+
+    def despawn(self):
+        self.enabled = False
+        self.world.remove(self.body, self.shape)
+
+    @property
+    def w(self) -> float:
+        return self.shape.bb.right - self.shape.bb.left
+
     @property
     def image(self):
         image: pygame.Surface = self.animations[self.current_animation_frame[0]][self.current_animation_frame[1]]
@@ -121,6 +135,8 @@ class BasicEnemy:
 
         # Draw image
         screen.blit(self.image, dest=on_screen_destination)
+        # Draw healthbar
+        screen.blit(self.healthbar.render(int(self.w)), dest=on_screen_destination.move(0, -12))
 
         # Draw hitbox
         if show_bounding_box:

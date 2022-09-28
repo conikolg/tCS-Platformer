@@ -4,8 +4,10 @@ import pygame
 import pymunk
 import pymunk.pygame_util
 
-from scripts import collision_types
+from scripts import collision_types as coll_types
+from scripts.enemy.basic_enemy import BasicEnemy
 from scripts.leveldesigner.level_designer import LevelDesigner
+from scripts.player.bullet import Bullet
 from scripts.player.player import Player
 from scripts.scenes.base_scene import BaseScene
 from scripts.scenes.game_over import GameOverScene
@@ -73,14 +75,37 @@ class LevelOneScene(BaseScene):
             return False
 
         def enemy_bullet_collision(arbiter: pymunk.Arbiter, space, data):
-            # TODO: Let enemy handle the hit
-            # TODO: Let bullet handle the hit
+            enemy: BasicEnemy = arbiter.shapes[0].body.obj
+            bullet: Bullet = arbiter.shapes[1].body.obj
+
+            # Apply damage
+            enemy.take_damage(bullet.damage)
+
+            # Remove enemy if needed
+            if not enemy.enabled:
+                self.enemies.remove(enemy)
+
+            # Remove bullet if needed
+            if bullet.enabled:
+                bullet.despawn()
+                self.player.bullets.remove(bullet)
 
             # Do not collide
             return False
 
-        self.world.add_collision_handler(collision_types.PLAYER, collision_types.BULLET).begin = player_bullet_collision
-        self.world.add_collision_handler(collision_types.ENEMY, collision_types.BULLET).begin = enemy_bullet_collision
+        def terrain_bullet_collision(arbiter: pymunk.Arbiter, space, data):
+            # Make sure bullet can only be deleted once
+            bullet = arbiter.shapes[1].body.obj
+            if bullet.enabled:
+                bullet.despawn()
+                self.player.bullets.remove(bullet)
+
+            # Do not collide
+            return False
+
+        self.world.add_collision_handler(coll_types.PLAYER, coll_types.BULLET).begin = player_bullet_collision
+        self.world.add_collision_handler(coll_types.ENEMY, coll_types.BULLET).begin = enemy_bullet_collision
+        self.world.add_collision_handler(coll_types.TERRAIN, coll_types.BULLET).begin = terrain_bullet_collision
 
     def handle_events(self, events: list[pygame.event.Event]):
         """

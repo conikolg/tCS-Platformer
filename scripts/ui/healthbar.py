@@ -43,7 +43,7 @@ class Healthbar:
     def maximum_health(self):
         return self._maximum_health
 
-    def render(self, width: int, height: int, outline_width: int = 3) -> pygame.Surface:
+    def render(self, width: int, height: int = 12, outline_width: int = 2) -> pygame.Surface:
         """
         Returns an image of the healthbar, with a black outline and a left-aligned green portion
         representing current remaining health.

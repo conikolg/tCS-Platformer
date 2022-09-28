@@ -35,8 +35,9 @@ class Bullet:
         # Behavioral attributes
         self.body.velocity = tuple(direction.normalized() * 1250)
 
-        # Damage
-        self.damage = damage
+        # Other attributes
+        self.damage: int = damage
+        self.enabled: bool = True
 
         # Add to world
         self.world.add(self.body, self.shape)
@@ -53,6 +54,10 @@ class Bullet:
     @property
     def image(self):
         return pygame.transform.flip(self._image, self.body.velocity.x < 0, False)
+
+    def despawn(self):
+        self.enabled = False
+        self.world.remove(self.body, self.shape)
 
     def draw(self, screen: pygame.Surface, camera_offset: pygame.math.Vector2 = None, show_bounding_box: bool = False):
         # Update hitbox based on camera offset

@@ -331,6 +331,8 @@ class Player:
 
         # Draw image
         screen.blit(self.image, dest=on_screen_destination)
+        # Draw healthbar
+        screen.blit(self.healthbar.render(int(self.w)), dest=on_screen_destination.move(0, -12))
 
         # Draw hitbox
         if show_bounding_box:
