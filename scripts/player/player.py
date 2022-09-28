@@ -223,11 +223,12 @@ class Player:
         # self.update_vulnerability()
 
     def _jump(self):
+        # Ignore if not currently grounded
         if self._is_grounded:
+            # Apply jump force
             self.body.apply_impulse_at_local_point((0, self.jump_speed * self.body.mass))
-
-        # Sound effect
-        play_sound("jump")
+            # Sound effect
+            play_sound("jump")
 
     def _sprint(self):
         self.is_sprinting = True
