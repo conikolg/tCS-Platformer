@@ -61,7 +61,7 @@ class Player:
             # }
         }
         self.animations: dict[str, list] = self.load_animations(size=(rect.w, rect.h))
-        self.direction = pygame.Vector2(1, 0)
+        self.direction = pymunk.Vec2d(1, 0)
 
         # Create physics body with (infinite moment of inertia to disable rotation)
         self.body = body.Body(mass=10, moment=float("inf"), body_type=pymunk.Body.DYNAMIC, obj=self)
@@ -195,9 +195,9 @@ class Player:
 
         # Update direction the player is facing
         if pressing_key_right and not pressing_key_left:
-            self.direction = pygame.Vector2(1, 0)
+            self.direction = pymunk.Vec2d(1, 0)
         elif not pressing_key_right and pressing_key_left:
-            self.direction = pygame.Vector2(-1, 0)
+            self.direction = pymunk.Vec2d(-1, 0)
 
         # Check if the player is grounded
         def check_if_grounded(arbiter: pymunk.Arbiter):
@@ -214,7 +214,7 @@ class Player:
                 self.set_animation("jump")
             else:
                 self.set_animation("fall")
-        elif abs(self.body.velocity.x) > 1:
+        elif abs(self.body.velocity.x) > 2:
             self.set_animation("run")
         else:
             self.set_animation("idle")
@@ -248,7 +248,7 @@ class Player:
         """ Creates a bullet with correct direction/positioning. """
 
         new_bullet = Bullet(
-            location=self.body.position + tuple(self.direction.normalize() * self.w / 2),
+            location=self.body.position + tuple(self.direction.normalized() * self.w / 2),
             direction=self.direction,
             damage=50,
             world=self.world)

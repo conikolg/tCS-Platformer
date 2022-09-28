@@ -1,92 +1,130 @@
+import random
 from collections import defaultdict
+from datetime import timedelta
 from pathlib import Path
 
 import pygame
+import pymunk
 
-from scripts.scenes.simple_platform import Platform
+from scripts import body, collision_types
 from scripts.ui.healthbar import Healthbar
-from scripts.util.custom_sprite import CustomSprite
+from scripts.util import game_time
 
 
-class BasicEnemy(CustomSprite):
-    def __init__(self, enemy_type: str, platform: Platform, horizontal_offset: int = 0,
-                 hitbox_w_percent: int = 100, hitbox_h_percent: int = 100, hitbox_offset_x: int = 0,
-                 hitbox_offset_y: int = 0):
+class BasicEnemy:
+    def __init__(self, enemy_type: str, rect: pygame.rect.Rect, world: pymunk.Space):
         """
         Creates a basic enemy at a certain position that patrols on a platform.
 
-        :param platform: the Platform on which this enemy will walk back and forth
-        :param horizontal_offset: how far from the left edge of the platform the enemy will begin.
+        :param enemy_type: denotes what image/animations to use for this enemy.
+        :param rect: denotes the location and size of the enemy
+        :param world: the greater pymunk simulation space
         """
 
-        super().__init__(hitbox_w_percent, hitbox_h_percent, hitbox_offset_x, hitbox_offset_y)
+        # Save the world. Needed for spawning bullets
+        self.world: pymunk.Space = world
 
-        self.platform: Platform = platform
-
-        self.speed: float = 1.0
-        self.direction: int = 1
-        self.healthbar = Healthbar()
-        self.horizontal_offset = horizontal_offset
-        if enemy_type in ["frog", "slime", "scorpion"]:
-            self.enemy_type = enemy_type
-        else:
-            self.enemy_type = None
-        self.animations: dict[str, list] = self.load_animations(size=(50, 50))
+        # Enemy visuals
+        enemy_types = ["frog", "slime", "scorpion"]
+        self.enemy_type = enemy_type if enemy_type in enemy_types else random.choice(enemy_types)
+        self.animations: dict[str, list] = self.load_animations(size=(rect.w, rect.h))
         self.current_animation_frame = [self.enemy_type, 0]
 
-        # This seems a little unnecessary but init first image in anim and scale
-        # to get rect values before animation dict is generated and updated.
-        self._image: pygame.Surface = pygame.image.load(f"assets/enemy/slime/slime 0.png").convert_alpha()
-        self._image = pygame.transform.scale(self._image, (50, 50))
+        # Create physics body with (infinite moment of inertia to disable rotation)
+        self.body = body.Body(mass=10, moment=float("inf"), body_type=pymunk.Body.DYNAMIC, obj=self)
+        self.body.position = rect.center
 
-        # enemy hitbox defaults to rect that would naturally encompass image file
-        self.rect: pygame.rect.Rect = self._image.get_rect()
-        self.init_hitbox()
+        # Create physics shape/hitbox
+        self.shape = pymunk.Poly.create_box(body=self.body, size=(rect.w, rect.h), radius=1)
+        self.shape.collision_type = collision_types.ENEMY
+        self.shape.elasticity = 0.1
+        self.shape.friction = 0.9
+        world.add(self.body, self.shape)
 
-        # Ensure that the entire enemy is on the platform
-        # Rewrite to not take in platform? Ideally we would spawn an enemy at an x, y pos then assign platform based on
-        # position.
-
-        if self.rect.left < self.platform.rect.left or self.rect.right > self.platform.rect.right:
-            raise Exception("Basic enemies cannot hang off platforms.")
+        # Enemy attributes
+        self.speed: float = 50.0
+        self.direction = pymunk.Vec2d(-1, 0)
+        self.healthbar = Healthbar()
+        self._is_grounded: bool = True
+        self._can_turn: bool = True
+        self._can_turn_timeout: float = timedelta(milliseconds=100).total_seconds()
 
     def __str__(self):
-        out_str = f"BasicEnemy located at {self.rect.topleft}"
         health_percent = round(self.healthbar.health / self.healthbar.maximum_health * 100, 2)
-        out_str += f" with {self.healthbar.health}/{self.healthbar.maximum_health} ({health_percent}%) HP"
-        return out_str
+        return f"BasicEnemy({self.body.position=}, {self.body.velocity=}, " \
+               f"health={self.healthbar.health}/{self.healthbar.maximum_health} ({health_percent}%))"
 
     def update(self) -> None:
-        # Try going right
-        if self.direction == -1:
-            # Is there room on this platform to move?
-            if self.rect.right < self.platform.rect.right:
-                # Move forward
-                self.rect.right += self.speed
-                self.rect.right = min(self.rect.right, self.platform.rect.right)
-            else:
-                # Turn around
-                self.direction = 1
+        def check_if_grounded(arbiter: pymunk.Arbiter):
+            if arbiter.normal.y == -1:
+                self._is_grounded = True
 
-        # Try going left
-        else:
-            # Is there room on this platform to move?
-            if self.rect.left > self.platform.rect.left:
-                # Move forward
-                self.rect.left -= self.speed
-                self.rect.left = max(self.rect.left, self.platform.rect.left)
+        # Check if the enemy is grounded
+        self._is_grounded = False
+        self.body.each_arbiter(check_if_grounded)
+
+        # Move forward if the enemy is grounded on something
+        self.shape.surface_velocity = (0, 0)
+        if self._is_grounded:
+            # Move to the right
+            if self.direction.x > 0:
+                self.shape.surface_velocity -= (self.speed, 0)
+            # Move to the left
             else:
-                # Turn around
-                self.direction = -1
+                self.shape.surface_velocity += (self.speed, 0)
+
+        def turn_if_at_edge(arbiter: pymunk.Arbiter):
+            points: list[pymunk.Vec2d] = self.shape.get_vertices()
+            min_y = min([p.y for p in points])
+            bottom_points: list[pymunk.Vec2d] = sorted([p + self.body.position for p in points if p.y == min_y],
+                                                       key=lambda p: p.x)
+            contact_points: list[pymunk.Vec2d] = sorted([p.point_b for p in arbiter.contact_point_set.points],
+                                                        key=lambda p: p.x)
+
+            # If any contact points are more than 1 unit away from own ground vertices, assume enemy is at an edge
+            at_edge = False
+            for p1 in bottom_points:
+                p2 = min(contact_points, key=lambda p: p1.get_dist_sqrd(p))
+                if p1.get_dist_sqrd(p2) > 1:
+                    at_edge = True
+                    break
+
+            if at_edge:
+                # Turn and disable turning for some time
+                self.direction *= -1
+                self.body.velocity = (0, 0)
+                self._can_turn = False
+
+                def enable_turn():
+                    self._can_turn = True
+
+                game_time.schedule(enable_turn, self._can_turn_timeout)
+
+        # Turn around if reached the edge of current platform
+        if self._can_turn:
+            self.body.each_arbiter(turn_if_at_edge)
 
     @property
     def image(self):
-        return pygame.transform.flip(self._image, self.direction == 1, False)
+        image: pygame.Surface = self.animations[self.current_animation_frame[0]][self.current_animation_frame[1]]
+        return pygame.transform.flip(image, self.direction.x < 0, False)
 
     def draw(self, screen: pygame.Surface, camera_offset: pygame.math.Vector2 = None, show_bounding_box: bool = False):
-        super(BasicEnemy, self).draw(screen, camera_offset, show_bounding_box)
-        screen.blit(source=self.healthbar.render(self.image.get_width(), 8, outline_width=2),
-                    dest=self.rect.move(camera_offset).move(0, -8).move(-self.hitbox_offset_x, -self.hitbox_offset_y))
+        # Update hitbox based on camera offset
+        if camera_offset is None:
+            camera_offset = pygame.math.Vector2(0, 0)
+
+        # Adjust for pygame screen and camera location
+        on_screen_destination = self.image.get_rect()
+        on_screen_destination.center = (self.body.position.x, screen.get_height() - self.body.position.y)
+        on_screen_destination.move_ip(camera_offset)
+
+        # Draw image
+        screen.blit(self.image, dest=on_screen_destination)
+
+        # Draw hitbox
+        if show_bounding_box:
+            pygame.draw.rect(surface=screen, color=(255, 0, 0), rect=on_screen_destination, width=1)
 
     @staticmethod
     def load_animations(size: tuple) -> dict[str, list]:
@@ -107,8 +145,3 @@ class BasicEnemy(CustomSprite):
                 animations[enemy_type_dir.name].append(img)
 
         return animations
-
-    def init_hitbox(self):
-        self.rect.bottom = self.platform.rect.top
-        self.rect.left = self.platform.rect.left + self.horizontal_offset
-        super().init_hitbox()

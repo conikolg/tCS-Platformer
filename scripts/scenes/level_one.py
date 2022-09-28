@@ -12,7 +12,6 @@ from scripts.scenes.game_over import GameOverScene
 from scripts.ui.ui import UI
 from scripts.util import game_time
 from scripts.util.camera import Camera, BoundedFollowTarget
-from scripts.util.custom_group import CustomGroup
 from scripts.util.sound import load_sound, sounds, unmute_sound, mute_sound, stop_sound
 
 
@@ -39,7 +38,7 @@ class LevelOneScene(BaseScene):
             behavior=BoundedFollowTarget(
                 target=self.player,
                 horizontal_limits=(0, 6000),
-                vertical_limits=(-7200, 7200)),
+                vertical_limits=(0, 7200)),
             # TODO: compensate for weirdness with bottom being cut-off on Macs
             constant=pygame.math.Vector2(-640 + self.player.w / 2, 360 - self.player.h / 2))
 
@@ -55,8 +54,7 @@ class LevelOneScene(BaseScene):
         self.platforms: list = self.level_designer.platforms
 
         # Store enemies
-        self.enemy_group: CustomGroup = CustomGroup()
-        self.enemy_group.add(*self.level_designer.enemies)
+        self.enemies: list = self.level_designer.enemies
 
         # Sounds
         self.sound_enabled = None
@@ -70,9 +68,19 @@ class LevelOneScene(BaseScene):
         def player_bullet_collision(arbiter: pymunk.Arbiter, space, data):
             # TODO: Let player handle the hit
             # TODO: Let bullet handle the hit
+
+            # Do not collide
+            return False
+
+        def enemy_bullet_collision(arbiter: pymunk.Arbiter, space, data):
+            # TODO: Let enemy handle the hit
+            # TODO: Let bullet handle the hit
+
+            # Do not collide
             return False
 
         self.world.add_collision_handler(collision_types.PLAYER, collision_types.BULLET).begin = player_bullet_collision
+        self.world.add_collision_handler(collision_types.ENEMY, collision_types.BULLET).begin = enemy_bullet_collision
 
     def handle_events(self, events: list[pygame.event.Event]):
         """
@@ -103,6 +111,10 @@ class LevelOneScene(BaseScene):
         # Update player
         self.player.update()
 
+        # Update enemies
+        for enemy in self.enemies:
+            enemy.update()
+
         # Tick time and physics
         game_time.tick()
         self.world.step(1.0 / 60)
@@ -122,17 +134,6 @@ class LevelOneScene(BaseScene):
         #     collisions = pygame.sprite.spritecollide(self.player, self.enemy_group, dokill=False)
         #     if len(collisions) > 0:
         #         self.player.take_damage(10)
-
-        # TODO: Did the player fall off something? via pymunk
-        # if self.player.is_grounded and self.player.velocity.y < -0.5:
-        #     self.player.is_grounded = False
-
-        # TODO: Update bullets via pymunk
-        # self.player.bullet_group.update(self.player.rect.x + self.camera.DISPLAY_W / 2,
-        #                                 self.player.rect.x - self.camera.DISPLAY_W / 2)
-
-        # TODO: Update enemies via pymunk
-        # self.enemy_group.update()
 
         # Process enemy-bullet collisions
         # NOTE: I (Nathan) am not as familiar with pygame sprite groups
@@ -210,7 +211,8 @@ class LevelOneScene(BaseScene):
             platform.draw(screen=screen, camera_offset=-self.camera.offset, show_bounding_box=self.show_hitboxes)
 
         # Draw enemies
-        self.enemy_group.draw(surface=screen, camera_offset=-self.camera.offset, show_bounding_box=self.show_hitboxes)
+        for enemy in self.enemies:
+            enemy.draw(screen=screen, camera_offset=-self.camera.offset, show_bounding_box=self.show_hitboxes)
 
         # Draw bullets
         for bullet in self.player.bullets:

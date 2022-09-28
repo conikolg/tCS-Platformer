@@ -6,7 +6,7 @@ from scripts.util.image_utils import auto_crop
 
 
 class Bullet:
-    def __init__(self, location: pymunk.Vec2d, direction: pygame.math.Vector2, damage: int, world: pymunk.Space):
+    def __init__(self, location: pymunk.Vec2d, direction: pymunk.Vec2d, damage: int, world: pymunk.Space):
         """
         Creates a bullet that spawns in a particular location and travels in a particular direction.
 
@@ -33,7 +33,7 @@ class Bullet:
         self._image: pygame.Surface = auto_crop(images=[self._image], size=(100, 50))[0]
 
         # Behavioral attributes
-        self.body.velocity = tuple(direction.normalize() * 1250)
+        self.body.velocity = tuple(direction.normalized() * 1250)
 
         # Damage
         self.damage = damage

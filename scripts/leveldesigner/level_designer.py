@@ -1,5 +1,4 @@
 import csv
-import sys
 from pathlib import Path
 
 import pandas as pd
@@ -83,6 +82,12 @@ class LevelDesigner:
                                     platform_length = 1
                                 else:
                                     self.make_platform(tile, platform_length, x, y, world)
+                    elif tile == 'e':
+                        self.enemies.append(BasicEnemy(
+                            enemy_type='',
+                            rect=pygame.Rect(x * 64, 1280 - y * 64, 48, 48),
+                            world=world
+                        ))
             else:
                 self.make_platform(self.level_data[y][0], len(row), 0, y, world)
 
@@ -120,6 +125,3 @@ class LevelDesigner:
 
             # Add new surface to platforms and create new platform with new surface image
             self.platforms.append(Platform(rect=rect, image=new_surface, world=world))
-
-    def spawn_enemy(self, enemy_type: str, platform: Platform):
-        self.enemies.append(BasicEnemy(enemy_type, platform))
