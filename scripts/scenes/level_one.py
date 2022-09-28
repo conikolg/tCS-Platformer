@@ -160,23 +160,6 @@ class LevelOneScene(BaseScene):
         #     if len(collisions) > 0:
         #         self.player.take_damage(10)
 
-        # Process enemy-bullet collisions
-        # NOTE: I (Nathan) am not as familiar with pygame sprite groups
-        #       so not sure if this is the way to go here
-        # also, are there any issues with deleting the bullet/enemy from the list as we iterate over it?
-        # or does .kill() handle this gracefully?
-        # BUG: this is causing damage to all enemies. Why? Is this the proper way to interact with health?
-        # NOTE: this code technically allows a bullet to collide with multiple enemies on one frame
-        # TODO: Bullet collision via pymunk
-        # for bullet in self.player.bullet_group:
-        #     collisions = pygame.sprite.spritecollide(bullet, self.enemy_group, dokill=False)
-        #     for collidedEnemy in collisions:
-        #         collidedEnemy.healthbar.health = collidedEnemy.healthbar.health - bullet.damage
-        #         bullet.kill()
-        #         # check if enemy took enough damage to die
-        #         if collidedEnemy.healthbar.health <= 0:
-        #             collidedEnemy.kill()
-
         # Check if the game should end
         # self.game_over_check()
 
