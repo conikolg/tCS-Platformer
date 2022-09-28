@@ -244,7 +244,7 @@ class Player:
         self.can_shoot = not self.can_shoot if override is None else override
 
     def _shoot(self):
-        """ Creates a bullet with correct direction/positioning and add it to local bullet group. """
+        """ Creates a bullet with correct direction/positioning. """
 
         new_bullet = Bullet(
             location=self.body.position + tuple(self.direction.normalize() * self.w / 2),
@@ -253,29 +253,28 @@ class Player:
             world=self.world)
         self.bullets.append(new_bullet)
 
-        # TODO: things when bullet is fired
-        # play_sound("laser")
+        # Play sound
+        play_sound("laser")
 
     def _move_sword(self):
-        if self.direction.x == 1:
-            self.sword_sprite.sword_direction = 0
-            self.sword_sprite.rect.center = (self.rect.centerx + 33, self.rect.centery - 6)
-        else:
-            self.sword_sprite.sword_direction = 1
-            self.sword_sprite.rect.center = (self.rect.centerx - 33, self.rect.centery - 6)
+        raise Exception("Sword movement needs to be reimplemented!")
 
     def _sword_swing(self):
-        self.sword_sprite.sword_swing = True
+        raise Exception("Sword swing needs to be reimplemented!")
 
     def _sword_away(self):
-        self.sword_sprite.sword_swing = False
+        raise Exception("Sword sheathe needs to be reimplemented!")
 
     def set_animation(self, animation: str):
+        """ Sets the current animation of the player. """
+
         if self.current_animation_frame[0] == animation:
             return
         self.current_animation_frame = [animation, 0]
 
     def update_animation(self):
+        """ Advances the current animation to the next frame, looping back to the beginning if necessary. """
+
         self.current_animation_frame[1] += 1
         if self.current_animation_frame[1] == len(self.animations[self.current_animation_frame[0]]):
             self.current_animation_frame[1] = 0
@@ -336,8 +335,9 @@ class Player:
         if show_bounding_box:
             pygame.draw.rect(surface=screen, color=(255, 0, 0), rect=on_screen_destination, width=1)
 
-    # Causes the player to take damage and enter a "flashing" state to indicate temporary invulnerability
     def take_damage(self, amount):
+        """ Causes the player to take damage and enter a "flashing" state to indicate temporary invulnerability. """
+
         if not self.vulnerable:
             return
         self.healthbar.health = self.healthbar.health - amount
@@ -345,8 +345,8 @@ class Player:
         self.harm_flash_on = True
         self.recovering = True
 
-    # Updates the player's vulnerability state and flash effect, to indicate invulnerability
     def update_vulnerability(self):
+        """ Updates the player's vulnerability state and flash effect, to indicate invulnerability. """
 
         # Flash effect only matters if we are in recovering state
         if not self.recovering:
