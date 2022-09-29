@@ -32,17 +32,16 @@ class LevelOneScene(BaseScene):
         self.world.gravity = (0, -1500.0)
         pymunk.pygame_util.positive_y_is_up = True
 
-        self.player = Player("default", rect=pygame.rect.Rect(100, 550, 50, 100), world=self.world)
+        self.player = Player("default", rect=pygame.rect.Rect(100, 350, 50, 100), world=self.world)
         self.ui = UI(player=self.player)
 
-        # Attach camera to player
+        # Attach camera to player TODO: compensate for weirdness with bottom being cut-off on Macs
         self.camera = Camera(
             behavior=BoundedFollowTarget(
                 target=self.player,
                 horizontal_limits=(0, 6000),
-                vertical_limits=(0, 7200)),
-            # TODO: compensate for weirdness with bottom being cut-off on Macs
-            constant=pygame.math.Vector2(-640 + self.player.w / 2, 360 - self.player.h / 2))
+                vertical_limits=(-80, 640)),  # TODO: rethink this in the context of pymunk
+            constant=pygame.math.Vector2(-640, 360))  # TODO: auto-calculate as half of screen's width/height
 
         # Store all layers in a dict with the delta scroll for each layer
         self.scenery: dict[pygame.Surface, float] = self.load_scenery(level=self.level_id)
@@ -154,17 +153,11 @@ class LevelOneScene(BaseScene):
         game_time.tick()
         self.world.step(1.0 / 60)
 
-        # TODO: Prevent player from going out of bounds via pymunk
-        # if self.player.rect.left < 0:
-        #     self.player.rect.left = 0
-        # right_bound = self.camera.behavior.horizontal_limits[1]
-        # if self.player.rect.right > self.camera.behavior.horizontal_limits[1]:
-        #     self.player.rect.right = right_bound
-        # # Did player fall out of bounds and die?
-        # if self.player.rect.top > self.camera.behavior.vertical_limits[1]:
-        #     self.player.healthbar.health = 0
-
-        if self.player.health <= 0:
+        # Game over if the player falls out the bottom of the world
+        if self.player.body.position.y <= 0:
+            self.fail_level()
+        # Game over if the player has no health remaining
+        elif self.player.health <= 0:
             self.fail_level()
 
     @staticmethod
