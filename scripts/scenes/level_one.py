@@ -66,15 +66,12 @@ class LevelOneScene(BaseScene):
         self.show_controls_help: bool = True
         self.show_hitboxes: bool = True
 
-        # Define collisions between player and bullets
         def player_bullet_collision(arbiter: pymunk.Arbiter, space, data):
-            # TODO: Let player handle the hit
-            # TODO: Let bullet handle the hit
-
-            # Do not collide
+            """ Disable collisions between the player and bullets. """
             return False
 
         def enemy_bullet_collision(arbiter: pymunk.Arbiter, space, data):
+            """ Deals damage to the enemy hit. Despawns the bullet, despawns the enemy if it dies. """
             enemy: BasicEnemy = arbiter.shapes[0].body.obj
             bullet: Bullet = arbiter.shapes[1].body.obj
 
@@ -94,6 +91,7 @@ class LevelOneScene(BaseScene):
             return False
 
         def terrain_bullet_collision(arbiter: pymunk.Arbiter, space, data):
+            """ Despawns the bullet. """
             # Make sure bullet can only be deleted once
             bullet = arbiter.shapes[1].body.obj
             if bullet.enabled:
@@ -103,9 +101,21 @@ class LevelOneScene(BaseScene):
             # Do not collide
             return False
 
+        def player_enemy_collision(arbiter: pymunk.Arbiter, space, data):
+            """ Cause the player to take damage. """
+            player: Player = arbiter.shapes[0].body.obj
+
+            enemy_dmg: int = 10
+            player.health -= enemy_dmg
+
+            return False
+
+        # Collision handlers that run on "begin" step, which is start of collision only
         self.world.add_collision_handler(coll_types.PLAYER, coll_types.BULLET).begin = player_bullet_collision
         self.world.add_collision_handler(coll_types.ENEMY, coll_types.BULLET).begin = enemy_bullet_collision
         self.world.add_collision_handler(coll_types.TERRAIN, coll_types.BULLET).begin = terrain_bullet_collision
+        # Collision handlers that run on "pre-solve" step, which is every time that two objects are touching
+        self.world.add_collision_handler(coll_types.PLAYER, coll_types.ENEMY).pre_solve = player_enemy_collision
 
     def handle_events(self, events: list[pygame.event.Event]):
         """
@@ -154,14 +164,8 @@ class LevelOneScene(BaseScene):
         # if self.player.rect.top > self.camera.behavior.vertical_limits[1]:
         #     self.player.healthbar.health = 0
 
-        # TODO: Process player-enemy collisions via pymunk
-        # if self.player.vulnerable:
-        #     collisions = pygame.sprite.spritecollide(self.player, self.enemy_group, dokill=False)
-        #     if len(collisions) > 0:
-        #         self.player.take_damage(10)
-
-        # Check if the game should end
-        # self.game_over_check()
+        if self.player.health <= 0:
+            self.fail_level()
 
     @staticmethod
     def load_scenery(level: int) -> dict[pygame.Surface, float]:
@@ -198,7 +202,7 @@ class LevelOneScene(BaseScene):
 
     def render(self, screen: pygame.Surface):
         """
-        Clears the screen, then draws a floating platform, the ground, and the player.
+        Clears the screen, draws game elements, enemies, bullets, the player, and then the UI/HUD overlay.
 
         The player should always be centered on the screen because of the camera. The other
         components of the level should appear relative to the player.
@@ -231,27 +235,19 @@ class LevelOneScene(BaseScene):
         self.player.sword_sprite.draw(screen, camera_offset=-self.camera.offset, show_bounding_box=self.show_hitboxes)
 
         # Draw UI last
-        # @Jared - Just track the show/hide status in this file, not player.py. Also, if we have different
-        # components of the UI, you can create a param for each component and set them like this. So maybe
-        # later have a param like show_cooldowns=self.show_cooldowns, show_ammo=self.show_ammo, etc.
         self.ui.draw(screen, show_controls=self.show_controls_help)
 
-    # Updates sound effects according to whether or not sound is enabled for this scene
     def update_sounds(self):
-        if self.sound_enabled:
-            for sound_name in sounds.keys():
+        """ Updates sound effects according to whether or not sound is enabled for this scene. """
+
+        for sound_name in sounds.keys():
+            if self.sound_enabled:
                 unmute_sound(sound_name)
-        else:
-            for sound_name in sounds.keys():
+            else:
                 mute_sound(sound_name)
 
-    # Check if the game should end due to player's health falling below, falling off the level, etc.
-    def game_over_check(self):
-        if self.player.healthbar.health <= 0:
-            self.fail_level()
-
-    # Transition to Game Over scene
     def fail_level(self):
+        """ Transitions to the Game Over screen. """
 
         # Stop title theme
         stop_sound("levelOneTheme")

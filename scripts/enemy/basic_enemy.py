@@ -18,7 +18,7 @@ class BasicEnemy:
 
         :param enemy_type: denotes what image/animations to use for this enemy.
         :param rect: denotes the location and size of the enemy
-        :param world: the greater pymunk simulation space
+        :param world: A pymunk Space, to which the enemy will be added and will interact with other objects
         """
 
         # Save the world. Needed for spawning bullets

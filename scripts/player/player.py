@@ -14,15 +14,14 @@ from scripts.util.sound import *
 
 
 class Player:
-    """
-    Class for initializing a player and controller.
-
-    :param char_type: A str to indicate which type of character is to be displayed
-    :param rect: A rect to display the player image
-    """
-
     def __init__(self, char_type: str, rect: pygame.rect.Rect, world: pymunk.Space):
-        super().__init__()
+        """
+        Class for initializing a player.
+
+        :param char_type: A str to indicate which type of character is to be displayed
+        :param rect: A rect to position and size the player
+        :param world: A pymunk Space, to which the player will be added and will interact with other objects
+        """
 
         # Save the world. Needed for spawning bullets
         self.world: pymunk.Space = world
@@ -77,7 +76,7 @@ class Player:
         self.world.add(self.body, self.shape)
 
         # Health
-        self.healthbar = Healthbar()
+        self._healthbar = Healthbar()
 
         # Constants
         self.jump_speed: float = 800
@@ -143,9 +142,9 @@ class Player:
         return self.shape.bb.top - self.shape.bb.bottom
 
     def __str__(self):
-        health_percent = round(self.healthbar.health / self.healthbar.maximum_health * 100, 2)
+        health_percent = round(self._healthbar.health / self._healthbar.maximum_health * 100, 2)
         return f"Player({self.body.position=}, {self.body.velocity=}, " \
-               f"health={self.healthbar.health}/{self.healthbar.maximum_health} ({health_percent}%))"
+               f"health={self._healthbar.health}/{self._healthbar.maximum_health} ({health_percent}%))"
 
     def handle_events(self, events: list[pygame.event.Event]):
         for event in events:
@@ -219,8 +218,8 @@ class Player:
         else:
             self.set_animation("idle")
 
-        # TODO: Update vulnerability state and flash effect
-        # self.update_vulnerability()
+        # Update vulnerability state and flash effect
+        self.update_vulnerability()
 
     def _jump(self):
         # Ignore if not currently grounded
@@ -314,12 +313,6 @@ class Player:
         return pygame.transform.flip(image, self.direction.x == -1, False)
 
     def draw(self, screen: pygame.Surface, camera_offset: pygame.math.Vector2 = None, show_bounding_box: bool = False):
-        # TODO: invulnerability flashing
-        # if not self.harm_flash_on:
-        #     super(Player, self).draw(screen, camera_offset, show_bounding_box)
-        # screen.blit(source=self.healthbar.render(self._image.get_width(), 12),
-        #             dest=self.rect.move(camera_offset).move(0, -12).move(-self.hitbox_offset_x, self.hitbox_offset_y))
-
         # Update hitbox based on camera offset
         if camera_offset is None:
             camera_offset = pygame.math.Vector2(0, 0)
@@ -329,24 +322,43 @@ class Player:
         on_screen_destination.center = (self.body.position.x, screen.get_height() - self.body.position.y)
         on_screen_destination.move_ip(camera_offset)
 
-        # Draw image
-        screen.blit(self.image, dest=on_screen_destination)
-        # Draw healthbar
-        screen.blit(self.healthbar.render(int(self.w)), dest=on_screen_destination.move(0, -12))
+        # Draw image, if vulnerable and/or during flash-on while invulnerable
+        if not self.harm_flash_on:
+            screen.blit(self.image, dest=on_screen_destination)
+        # Draw healthbar regardless
+        screen.blit(self._healthbar.render(int(self.w)), dest=on_screen_destination.move(0, -12))
 
         # Draw hitbox
         if show_bounding_box:
             pygame.draw.rect(surface=screen, color=(255, 0, 0), rect=on_screen_destination, width=1)
 
-    def take_damage(self, amount):
-        """ Causes the player to take damage and enter a "flashing" state to indicate temporary invulnerability. """
+    @property
+    def health(self):
+        """ The current health of the player. """
+        return self._healthbar.health
 
-        if not self.vulnerable:
+    @health.setter
+    def health(self, new_health):
+        """ Handles any after effects due to health changes. """
+
+        # Do nothing if no change
+        if new_health == self.health:
             return
-        self.healthbar.health = self.healthbar.health - amount
-        self.vulnerable = False
-        self.harm_flash_on = True
-        self.recovering = True
+
+        # Damage taken
+        if new_health < self.health:
+            # Ignore if invulnerable
+            if not self.vulnerable:
+                return
+            # Adjust health and trigger invulnerability grace period
+            self._healthbar.health = new_health
+            self.vulnerable = False
+            self.harm_flash_on = True
+            self.recovering = True
+
+        # Healed
+        else:
+            self._healthbar.health = new_health
 
     def update_vulnerability(self):
         """ Updates the player's vulnerability state and flash effect, to indicate invulnerability. """
