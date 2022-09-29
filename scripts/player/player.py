@@ -233,11 +233,12 @@ class Player:
         self.is_sprinting = True
 
     def _super_jump(self):
+        # Ignore if not currently grounded
         if self._is_grounded:
+            # Apply jump force
             self.body.apply_impulse_at_local_point((0, self.super_jump_speed * self.body.mass))
-
-        # Sound effect
-        play_sound("jump")
+            # Sound effect
+            play_sound("jump")
 
     def _toggle_shoot(self, override: bool = None):
         """ Changes whether the player can or cannot shoot. """
