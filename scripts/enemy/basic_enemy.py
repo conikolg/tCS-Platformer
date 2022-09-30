@@ -29,6 +29,7 @@ class BasicEnemy:
         self.enemy_type = enemy_type if enemy_type in enemy_types else random.choice(enemy_types)
         self.animations: dict[str, list] = self.load_animations(size=(rect.w, rect.h))
         self.current_animation_frame = [self.enemy_type, 0]
+        game_time.schedule(self.update_animation, 0.1, repeating=True)
 
         # Create physics body with (infinite moment of inertia to disable rotation)
         self.body = body.Body(mass=10, moment=float("inf"), body_type=pymunk.Body.DYNAMIC, obj=self)
@@ -122,6 +123,13 @@ class BasicEnemy:
     def image(self):
         image: pygame.Surface = self.animations[self.current_animation_frame[0]][self.current_animation_frame[1]]
         return pygame.transform.flip(image, self.direction.x < 0, False)
+
+    def update_animation(self):
+        """ Advances the current animation to the next frame, looping back to the beginning if necessary. """
+
+        self.current_animation_frame[1] += 1
+        if self.current_animation_frame[1] == len(self.animations[self.current_animation_frame[0]]):
+            self.current_animation_frame[1] = 0
 
     def draw(self, screen: pygame.Surface, camera_offset: pygame.math.Vector2 = None, show_bounding_box: bool = False):
         # Update hitbox based on camera offset
