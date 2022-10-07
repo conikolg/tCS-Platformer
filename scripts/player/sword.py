@@ -1,9 +1,7 @@
 import pygame
 
-from scripts.util.custom_sprite import CustomSprite
 
-
-class Sword(CustomSprite):
+class Sword:
     def __init__(self, location: tuple):
         """
         Creates a bullet that spawns in a particular location and travels in a particular direction.

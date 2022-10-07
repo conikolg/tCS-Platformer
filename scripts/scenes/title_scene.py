@@ -22,15 +22,12 @@ class TitleScene(BaseScene):
             # Stop title theme
             stop_sound("titleTheme")
 
-            # Create level one scene
-            level_one = LevelOneScene()
-
             # Make sure level one's sound setting matches title's sound setting
-            level_one.sound_enabled = self.sound_enabled
-            level_one.update_sounds()
+            self.level_one.sound_enabled = self.sound_enabled
+            self.level_one.update_sounds()
 
             # Transition to level 1      
-            self.scene_manager.go_to(level_one)
+            self.scene_manager.go_to(self.level_one)
 
         self.play_button = Button(
             text="Play",

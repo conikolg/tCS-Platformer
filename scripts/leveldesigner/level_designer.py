@@ -10,7 +10,7 @@ from scripts.scenes.simple_platform import Platform
 
 
 class LevelDesigner:
-    def __init__(self, level: int = 1):
+    def __init__(self, world: pymunk.Space, level: int = 1):
         """
         Collects data from csv files to display objects and obstacles in the level.
 
@@ -18,6 +18,7 @@ class LevelDesigner:
         """
 
         self.level = level
+        self.world = world
 
         # Level layout File resources
         self.level_file_xlsx = pd.read_excel(Path("scripts/leveldesigner/level_data.xlsx"),
@@ -31,6 +32,8 @@ class LevelDesigner:
         self.cols: int = len(pd.read_csv(self.level_file_csv).axes[1])
         self.tile_size: int = 64
         self.level_data: list = [[-1] * self.cols for row in range(self.rows)]
+        self.max_y = self.tile_size * len(self.level_data)
+        self.max_x = self.tile_size * len(self.level_data[0])
 
         # Preparing ground assets
         self.top_ground_img: pygame.Surface = pygame.image.load(
@@ -52,6 +55,9 @@ class LevelDesigner:
             "b": self.top_ground_img
         }
 
+        self.get_level_data()
+        self.generate_platforms()
+
     def get_level_data(self):
         """ Pulls data from csv level file to find x and y position of each element in csv mapped to game. """
 
@@ -61,7 +67,7 @@ class LevelDesigner:
                 for j, tile in enumerate(row):
                     self.level_data[i][j] = tile
 
-    def generate_platforms(self, world: pymunk.Space):
+    def generate_platforms(self):
         """
         Calculates x and y position of platform from level data file.
         Processes data to calculate platform length and tile type.
@@ -79,18 +85,18 @@ class LevelDesigner:
                             platform_length += 1
                         # Otherwise, create a platform of recorded length so far
                         else:
-                            self.make_platform(tile, platform_length, x - (platform_length - 1), y, world)
+                            self.make_platform(tile, platform_length, x - (platform_length - 1), y, self.world)
                             platform_length = 1
                     # Otherwise, create platform here if no next tile exists
                     else:
-                        self.make_platform(tile, platform_length, x - (platform_length - 1), y, world)
+                        self.make_platform(tile, platform_length, x - (platform_length - 1), y, self.world)
 
                 # Otherwise, if the current tile is some sort of ground block
                 elif tile == 'e':
                     self.enemies.append(BasicEnemy(
                         enemy_type='',
                         rect=pygame.Rect(x * self.tile_size, (len(self.level_data) - y) * self.tile_size, 48, 48),
-                        world=world
+                        world=self.world
                     ))
 
     def make_platform(self, tile_type: str, pl: int, x: int, y: int, world: pymunk.Space):

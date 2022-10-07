@@ -32,6 +32,12 @@ class LevelOneScene(BaseScene):
         self.world.gravity = (0, -1500.0)
         pymunk.pygame_util.positive_y_is_up = True
 
+        # Build/populate level
+        self.level_designer = LevelDesigner(world=self.world, level=self.level_id)
+        self.platforms: list = self.level_designer.platforms
+        self.enemies: list = self.level_designer.enemies
+
+        # Create player
         self.player = Player("default", rect=pygame.rect.Rect(100, 350, 50, 100), world=self.world)
         self.ui = UI(player=self.player)
 
@@ -39,23 +45,12 @@ class LevelOneScene(BaseScene):
         self.camera = Camera(
             behavior=BoundedFollowTarget(
                 target=self.player,
-                horizontal_limits=(0, 6000),
-                vertical_limits=(-80, 640)),  # TODO: rethink this in the context of pymunk
-            constant=pygame.math.Vector2(-640, 360))  # TODO: auto-calculate as half of screen's width/height
+                horizontal_limits=(0, self.level_designer.max_x),
+                vertical_limits=(-80, 640))  # TODO: rethink this in the context of pymunk
+        )
 
         # Store all layers in a dict with the delta scroll for each layer
         self.scenery: dict[pygame.Surface, float] = self.load_scenery(level=self.level_id)
-
-        # Populate level
-        self.level_designer = LevelDesigner(level=self.level_id)
-        self.level_designer.get_level_data()
-        self.level_designer.generate_platforms(world=self.world)
-
-        # Store platforms
-        self.platforms: list = self.level_designer.platforms
-
-        # Store enemies
-        self.enemies: list = self.level_designer.enemies
 
         # Sounds
         self.sound_enabled = None
@@ -139,7 +134,7 @@ class LevelOneScene(BaseScene):
 
     def update(self):
         """
-        Moves the player based on arrow keys or WASD keys pressed.
+        Allows everything in the world to have a chance to update. Also checks if player has died.
         """
 
         # Update player
@@ -209,6 +204,7 @@ class LevelOneScene(BaseScene):
         self.render_scenery(screen=screen)
 
         # Move the camera
+        self.camera.constant = pygame.Vector2(-screen.get_width() / 2, screen.get_height() / 2)
         self.camera.scroll()
 
         # Draw level elements first
