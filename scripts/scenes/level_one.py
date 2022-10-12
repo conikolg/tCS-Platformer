@@ -10,6 +10,7 @@ from scripts.leveldesigner.level_designer import LevelDesigner
 from scripts.player.bullet import Bullet
 from scripts.player.player import Player
 from scripts.scenes.base_scene import BaseScene
+from scripts.scenes.exit import Exit
 from scripts.scenes.game_over import GameOverScene
 from scripts.ui.ui import UI
 from scripts.util import game_time
@@ -36,6 +37,7 @@ class LevelOneScene(BaseScene):
         self.level_designer = LevelDesigner(world=self.world, level=self.level_id)
         self.platforms: list = self.level_designer.platforms
         self.enemies: list = self.level_designer.enemies
+        self.exit: Exit = self.level_designer.exit
 
         # Create player
         self.player = Player("default", rect=pygame.rect.Rect(100, 350, 50, 100), world=self.world)
@@ -46,7 +48,7 @@ class LevelOneScene(BaseScene):
             behavior=BoundedFollowTarget(
                 target=self.player,
                 horizontal_limits=(0, self.level_designer.max_x),
-                vertical_limits=(-80, 640))  # TODO: rethink this in the context of pymunk
+                vertical_limits=(-self.level_designer.max_y / 2 + 15, self.level_designer.max_y / 2 + 15))
         )
 
         # Store all layers in a dict with the delta scroll for each layer
@@ -104,12 +106,19 @@ class LevelOneScene(BaseScene):
 
             return False
 
+        def player_exit_collision(arbiter: pymunk.Arbiter, space, data):
+            """ What happens when the player reaches the exit of the map. """
+
+            print("Complete!")
+            return False
+
         # Collision handlers that run on "begin" step, which is start of collision only
         self.world.add_collision_handler(coll_types.PLAYER, coll_types.BULLET).begin = player_bullet_collision
         self.world.add_collision_handler(coll_types.ENEMY, coll_types.BULLET).begin = enemy_bullet_collision
         self.world.add_collision_handler(coll_types.TERRAIN, coll_types.BULLET).begin = terrain_bullet_collision
         # Collision handlers that run on "pre-solve" step, which is every time that two objects are touching
         self.world.add_collision_handler(coll_types.PLAYER, coll_types.ENEMY).pre_solve = player_enemy_collision
+        self.world.add_collision_handler(coll_types.PLAYER, coll_types.EXIT).pre_solve = player_exit_collision
 
     def handle_events(self, events: list[pygame.event.Event]):
         """
@@ -208,6 +217,7 @@ class LevelOneScene(BaseScene):
         self.camera.scroll()
 
         # Draw level elements first
+        self.exit.draw(screen=screen, camera_offset=-self.camera.offset, show_bounding_box=self.show_hitboxes)
         for platform in self.platforms:
             platform.draw(screen=screen, camera_offset=-self.camera.offset, show_bounding_box=self.show_hitboxes)
 

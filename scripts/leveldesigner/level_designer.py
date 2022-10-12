@@ -6,6 +6,7 @@ import pygame
 import pymunk
 
 from scripts.enemy.basic_enemy import BasicEnemy
+from scripts.scenes.exit import Exit
 from scripts.scenes.simple_platform import Platform
 
 
@@ -47,6 +48,7 @@ class LevelDesigner:
         # Completed entities
         self.platforms: list = []
         self.enemies: list = []
+        self.exit: Exit = None
 
         # Enter new letter for each image in sprite sheet
         # Compared to assets/platforms directory.
@@ -55,19 +57,15 @@ class LevelDesigner:
             "b": self.top_ground_img
         }
 
-        self.get_level_data()
-        self.generate_platforms()
-
-    def get_level_data(self):
-        """ Pulls data from csv level file to find x and y position of each element in csv mapped to game. """
-
         with open(self.level_file_csv, newline="") as csvfile:
             reader = csv.reader(csvfile, delimiter=',')
             for i, row in enumerate(reader):
                 for j, tile in enumerate(row):
                     self.level_data[i][j] = tile
 
-    def generate_platforms(self):
+        self.build_level()
+
+    def build_level(self):
         """
         Calculates x and y position of platform from level data file.
         Processes data to calculate platform length and tile type.
@@ -98,6 +96,12 @@ class LevelDesigner:
                         rect=pygame.Rect(x * self.tile_size, (len(self.level_data) - y) * self.tile_size, 48, 48),
                         world=self.world
                     ))
+
+                elif tile == 'p':
+                    self.exit = Exit(
+                        rect=pygame.Rect(x * self.tile_size, (len(self.level_data) - y) * self.tile_size, 128, 128),
+                        world=self.world
+                    )
 
     def make_platform(self, tile_type: str, pl: int, x: int, y: int, world: pymunk.Space):
         """
